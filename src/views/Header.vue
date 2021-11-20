@@ -94,6 +94,7 @@ export default {
 
 .row {
     margin-bottom: 20px;
+    border-bottom: solid gray;
 }
 
 li {
