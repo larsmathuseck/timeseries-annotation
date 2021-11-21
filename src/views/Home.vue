@@ -3,7 +3,7 @@
         <Header title="TF Annotator" />
         <div class="row">
             <div class="col col-2">
-                <LeftSightbar :axes="axes" />
+                <LeftSightbar :axes="axes" :annotationFiles="annotationFiles" />
             </div>
             <div class="col col-8">
                 <graph v-if="showGraph" class="chart" :option="option" />
@@ -31,6 +31,7 @@ export default {
         return {
             showGraph: true,
             axes: [],
+            annotationFiles: [],
         }
     },
     created() {
@@ -47,6 +48,20 @@ export default {
                 id: 3,
                 name: "ACC-Z"
             }
+        ];
+        this.annotationFiles = [
+            {
+                id: 1,
+                name: "annoFile1"
+            },
+            {
+                id: 2,
+                name: "testFile"
+            },
+            {
+                id: 3,
+                name: "bliblu"
+            },
         ]
     },
     methods: {
