@@ -3,7 +3,11 @@
         <Header title="TF Annotator" />
         <div class="row">
             <div class="col col-2">
-                <LeftSightbar :axes="axes" :annotationFiles="annotationFiles" />
+                <LeftSightbar 
+                @add-selected-axis="addSelectedAxis"
+                :axes="axes" 
+                :annotationFiles="annotationFiles" 
+                :selectedAxes="selectedAxes" />
             </div>
             <div class="col col-8">
                 <graph v-if="showGraph" class="chart" :option="option" />
@@ -32,20 +36,18 @@ export default {
             showGraph: true,
             axes: [],
             annotationFiles: [],
+            selectedAxes: [],
         }
     },
     created() {
         this.axes = [
             { 
-                id: 1,
                 name: "ACC-X"
             },
             { 
-                id: 2,
                 name: "ACC-Y"
             },
             { 
-                id: 3,
                 name: "ACC-Z"
             }
         ];
@@ -65,7 +67,21 @@ export default {
         ]
     },
     methods: {
-        
+        addSelectedAxis(event) {
+            const newSelectedAxisName = event.target.value;
+            const newSelectedAxis = {
+                id: this.selectedAxes.length + 1,
+                name: newSelectedAxisName,
+            }
+            const iterator = this.selectedAxes.values();
+
+            for (const axis of iterator) {
+                if (axis.name === newSelectedAxisName) {
+                    return;
+                }
+            }
+            this.selectedAxes.push(newSelectedAxis)
+        },
     },
 };
 </script>
