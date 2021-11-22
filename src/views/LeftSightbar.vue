@@ -12,8 +12,8 @@
     </div>
     <div class="row">
         <p class="description-text" >Selected Axis</p>
-        <div class="axes-box" v-for="selectedAxis in this.selectedAxes" :key="selectedAxis.name" >
-            {{ selectedAxis.name }}
+        <div class="col-auto" v-for="selectedAxis in this.selectedAxes" :key="selectedAxis.name" >
+            <SelectedAxis :selectedAxis="selectedAxis" @delete-selected-axis="$emit('delete-selected-axis', selectedAxis)" />
         </div>
     </div>
     <div class="row">
@@ -33,28 +33,33 @@
 </template>
 
 <script>
+import SelectedAxis from "./SelectedAxis.vue"
+
 export default {
     name: "LeftSightbar",
+    components: {
+        SelectedAxis,
+    },
     props: {
         axes: Array,
         annotationFiles: Array,
         selectedAxes: Array,
-    },
-    data() {
-        return {
-            
-        }
     },
     methods: {
         addSelectedAxis(event) {
             this.$emit("add-selected-axis", event);
         },
     },
-    emits: ["add-selected-axis"],
+    emits: ["add-selected-axis", "delete-selected-axis"],
 }
 </script>
 
 <style scoped>
+.col-auto {
+    padding-left: 2.5px;
+    padding-right: 2.5px;
+}
+
 .description-text {
     text-align: left;
     font-family: Tahoma;

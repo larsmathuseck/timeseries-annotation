@@ -5,6 +5,7 @@
             <div class="col col-2">
                 <LeftSightbar 
                 @add-selected-axis="addSelectedAxis"
+                @delete-selected-axis="deleteSelectedAxis"
                 :axes="axes" 
                 :annotationFiles="annotationFiles" 
                 :selectedAxes="selectedAxes" />
@@ -42,13 +43,13 @@ export default {
     created() {
         this.axes = [
             { 
-                name: "ACC-X"
+                name: "ACC-X",
             },
             { 
-                name: "ACC-Y"
+                name: "ACC-Y",
             },
             { 
-                name: "ACC-Z"
+                name: "ACC-Z",
             }
         ];
         this.annotationFiles = [
@@ -72,6 +73,7 @@ export default {
             const newSelectedAxis = {
                 id: this.selectedAxes.length + 1,
                 name: newSelectedAxisName,
+                color: "green",
             }
             const iterator = this.selectedAxes.values();
 
@@ -80,7 +82,18 @@ export default {
                     return;
                 }
             }
+            console.log(this.selectedAxes)
             this.selectedAxes.push(newSelectedAxis)
+        },
+        deleteSelectedAxis(axis) {
+            console.log("delete: ", axis)
+            if (this.selectedAxes.length <= 1) {
+                return;
+            }
+            const index = this.selectedAxes.indexOf(axis)
+            if (index > -1) {
+                this.selectedAxes.splice(index, 1)
+            }
         },
     },
 };
