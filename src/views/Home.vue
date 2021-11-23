@@ -8,7 +8,8 @@
                 @delete-selected-axis="deleteSelectedAxis"
                 :axes="axes" 
                 :annotationFiles="annotationFiles" 
-                :selectedAxes="selectedAxes" />
+                :selectedAxes="selectedAxes"
+                :colors="colors" />
             </div>
             <div class="col col-8">
                 <graph v-if="showGraph" class="chart" :option="option" />
@@ -38,6 +39,7 @@ export default {
             axes: [],
             annotationFiles: [],
             selectedAxes: [],
+            colors: [],
         }
     },
     created() {
@@ -65,29 +67,28 @@ export default {
                 id: 3,
                 name: "bliblu"
             },
-        ]
+        ];
+        this.colors = ["red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"];
     },
     methods: {
-        addSelectedAxis(event) {
-            const newSelectedAxisName = event.target.value;
-            const newSelectedAxis = {
-                id: this.selectedAxes.length + 1,
-                name: newSelectedAxisName,
-                color: "green",
-            }
+        addSelectedAxis(lastSelectedAxis) {
+            const newSelectedAxisName = lastSelectedAxis.name;
             const iterator = this.selectedAxes.values();
 
-            for (const axis of iterator) {
+            for (const axis of iterator) { // needed if only color change of existing axis
                 if (axis.name === newSelectedAxisName) {
-                    return;
+                    const index = this.selectedAxes.indexOf(axis)
+                    if (index > -1) {
+                        this.selectedAxes.splice(index, 1);
+                    }
                 }
             }
-            console.log(this.selectedAxes)
-            this.selectedAxes.push(newSelectedAxis)
+            this.selectedAxes.push(lastSelectedAxis);
         },
         deleteSelectedAxis(axis) {
             console.log("delete: ", axis)
             if (this.selectedAxes.length <= 1) {
+                alert("At least 1 axis must be selected!")
                 return;
             }
             const index = this.selectedAxes.indexOf(axis)

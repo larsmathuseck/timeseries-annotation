@@ -8,6 +8,9 @@
                     {{ axis.name }}
                 </option>
             </select>
+            <div class="row absolute" v-if="showColorPicker">
+                <ColorPicker :colors="colors" @axis-color-picked="setSelectedAxisColor" />
+            </div>
         </div>
     </div>
     <div class="row">
@@ -34,23 +37,42 @@
 
 <script>
 import SelectedAxis from "./SelectedAxis.vue"
+import ColorPicker from "./Colorpicker.vue"
 
 export default {
     name: "LeftSightbar",
     components: {
         SelectedAxis,
+        ColorPicker,
     },
     props: {
         axes: Array,
         annotationFiles: Array,
         selectedAxes: Array,
+        colors: Array,
+    },
+    data() {
+        return {
+            lastSelectedAxis: Object,
+            showColorPicker: false,
+        }
     },
     methods: {
         addSelectedAxis(event) {
-            this.$emit("add-selected-axis", event);
+            this.lastSelectedAxis = {
+                id: this.selectedAxes.length + 1,
+                name: event.target.value,
+                color: "",
+            }
+            this.showColorPicker = true;
+        },
+        setSelectedAxisColor(color) {
+            this.lastSelectedAxis.color = color
+            this.$emit("add-selected-axis", this.lastSelectedAxis)
+            this.showColorPicker = false;
         },
     },
-    emits: ["add-selected-axis", "delete-selected-axis"],
+    emits: ["add-selected-axis", "delete-selected-axis", "axis-color-picked"],
 }
 </script>
 
@@ -74,6 +96,10 @@ export default {
     font-size: 1rem;
     margin: 2px;
     color: gray;
+}
+
+div.absolute {
+    position: absolute;
 }
 
 
