@@ -33,6 +33,7 @@ export default {
 p {
     font-family: Tahoma;
     font-size: 1rem;
+    font-weight: 10%;
     color: white;
     padding: 5px;
 }

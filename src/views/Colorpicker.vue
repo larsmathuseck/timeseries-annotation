@@ -15,7 +15,6 @@ export default {
     },
     methods: {
         axisColorPicked(color) {
-            console.log("color: ", color)
             this.$emit("axis-color-picked", color)
         }
     }
@@ -31,7 +30,12 @@ export default {
     background-color: #bbb;
     border-radius: 50%;
     display: inline-block;
-    margin: 2.5px;
+    margin: 3px;
+    transition: all .2s ease-in-out;
+}
+
+.dot:hover { 
+    transform: scale(1.25);
 }
 
 .col {

@@ -6,9 +6,12 @@
                 <LeftSightbar 
                 @add-selected-axis="addSelectedAxis"
                 @delete-selected-axis="deleteSelectedAxis"
+                @toggle-active-label="toggleActiveLabel"
                 :axes="axes" 
                 :annotationFiles="annotationFiles" 
                 :selectedAxes="selectedAxes"
+                :labels="labels"
+                :activeLabel="activeLabel"
                 :colors="colors" />
             </div>
             <div class="col col-8">
@@ -37,8 +40,10 @@ export default {
         return {
             showGraph: true,
             axes: [],
-            annotationFiles: [],
             selectedAxes: [],
+            annotationFiles: [],
+            labels: [],
+            activeLabel: Object,
             colors: [],
         }
     },
@@ -68,6 +73,33 @@ export default {
                 name: "bliblu"
             },
         ];
+        this.labels = [
+            {
+                id: 1,
+                name: "openOrClosed",
+                color: "red",
+            },
+            {
+                id: 2,
+                name: "tilted_opening",
+                color: "orange",
+            },
+            {
+                id: 3,
+                name: "tilted",
+                color: "yellow",
+            },
+            {
+                id: 4,
+                name: "tilted_closing",
+                color: "teal",
+            },
+            {
+                id: 5,
+                name: "end",
+                color: "green",
+            },
+        ];
         this.colors = ["red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"];
     },
     methods: {
@@ -95,6 +127,9 @@ export default {
             if (index > -1) {
                 this.selectedAxes.splice(index, 1)
             }
+        },
+        toggleActiveLabel(label) {
+            this.activeLabel = label;
         },
     },
 };

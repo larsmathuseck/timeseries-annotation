@@ -31,24 +31,36 @@
         </div>
     </div>
     <div class="row">
-        <p class="description-text" >Labels</p>
+        <span class="description-text" >
+            Labels
+            <button type="button" class="btn btn-default btn-circle">
+                <i class="fa fa-plus"></i>
+            </button>
+        </span>
+        <div class="label-container" :activeLabel="activeLabel" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
+            <Label :label="label" />
+        </div>
     </div>
 </template>
 
 <script>
 import SelectedAxis from "./SelectedAxis.vue"
 import ColorPicker from "./Colorpicker.vue"
+import Label from "./Label.vue"
 
 export default {
     name: "LeftSightbar",
     components: {
         SelectedAxis,
         ColorPicker,
+        Label,
     },
     props: {
         axes: Array,
         annotationFiles: Array,
         selectedAxes: Array,
+        labels: Array,
+        activeLabel: Object,
         colors: Array,
     },
     data() {
@@ -71,8 +83,11 @@ export default {
             this.$emit("add-selected-axis", this.lastSelectedAxis)
             this.showColorPicker = false;
         },
+        labelOnClick(label) {
+            this.$emit("toggle-active-label", label);
+        }
     },
-    emits: ["add-selected-axis", "delete-selected-axis", "axis-color-picked"],
+    emits: ["add-selected-axis", "delete-selected-axis", "axis-color-picked", "toggle-active-label"],
 }
 </script>
 
@@ -102,5 +117,36 @@ div.absolute {
     position: absolute;
 }
 
+.btn-circle {
+    height: 45px;
+    width: 45px;
+    padding: 6px 0px;
+    border-radius: 22.5px;
+    text-align: center;
+    font-size: 20px;
+    line-height: 1.42857;
+    background-color: #bbb;
+    opacity: 0.7;
+}
+
+.btn-circle:hover { 
+    opacity: 1;
+}
+
+.label-container {
+    margin-left: 12px;
+    padding: 0px;
+    padding-top: 10px;
+}
+
+.label-container:after {
+    content: "";
+    display: block;
+    border-bottom: 1.5px solid rgb(128, 128, 128, 0.5);
+}
+
+.label-container:hover {
+    background-color: rgb(128, 128, 128, 0.1);
+}
 
 </style>
