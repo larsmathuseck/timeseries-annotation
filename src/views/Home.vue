@@ -29,8 +29,8 @@
 <script>
 import graph from "./Graph.vue"
 import Header from "./Header.vue"
-import LeftSightbar from "./LeftSightbar.vue"
-import RightSightbar from "./RightSightbar.vue"
+import LeftSightbar from "../components/LeftSightbar.vue"
+import RightSightbar from "../components/RightSightbar.vue"
 
 export default {  
     name: "Home",

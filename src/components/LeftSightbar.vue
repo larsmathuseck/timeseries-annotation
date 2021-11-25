@@ -21,7 +21,7 @@
     </div>
     <div class="row">
         <p class="description-text" >Annotation Files</p>
-        <p class="description-text-sm">Select file to annotate chart</p>
+        <p class="description-text-sm">Select file to annotate Chart</p>
         <div class="selec" >
             <select class="form-select" v-model="selected">
                 <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" >
@@ -37,6 +37,7 @@
                 <i class="fa fa-plus"></i>
             </button>
         </span>
+        <p class="description-text-sm">Select Labels to annotate Chart</p>
         <div class="label-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
             <Label :label="label" :activeLabel="activeLabel"/>
         </div>
