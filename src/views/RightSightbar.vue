@@ -27,10 +27,7 @@ export default {
         AnnotationLabel,
     },
     props: {
-        annotationLabels: [],
-    },
-    methods: {
-
+        annotationLabels: Array,
     },
     emits: ["delete-annotation-label"],
 }

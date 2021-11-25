@@ -15,7 +15,7 @@
                 :colors="colors" />
             </div>
             <div class="col col-8">
-                <graph v-if="showGraph" class="chart" :option="option" />
+                <graph v-if="showGraph" class="chart" />
             </div>
             <div class="col col-2">
                 <RightSightbar
@@ -138,7 +138,7 @@ export default {
                 timestamp: "12:08:36",
             },
         ]
-        this.colors = ["red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"];
+        this.colors = ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"];
     },
     methods: {
         addSelectedAxis(lastSelectedAxis) {

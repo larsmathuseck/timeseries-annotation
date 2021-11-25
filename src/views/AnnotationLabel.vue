@@ -1,6 +1,5 @@
 <template>
-    <div class="col-auto"
-    :style="{ background: annotationLabel.color }">
+    <div class="col-auto" :style="{ background: annotationLabel.color }">
         <p class="annotationLabel-name">
             {{ annotationNumber }}
             {{ annotationLabel.name }}
@@ -23,7 +22,8 @@ export default {
         deleteAnnotationLabel(annotationLabel) {
             this.$emit("delete-annotation-label", annotationLabel)
         }
-    }
+    },
+    emits: ["delete-annotation-label"]
 }
 </script>
 
