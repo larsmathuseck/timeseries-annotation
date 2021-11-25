@@ -1,6 +1,6 @@
 <template>
-  <input type="file" ref="fileInput" webkitdirectory directory multiple v-on:change="onFileChange">
-  <v-chart v-if="showGraph" class="chart" :option="option" />
+    <!--<input type="file" ref="fileInput" webkitdirectory directory multiple v-on:change="onFileChange">-->
+    <v-chart v-if="showGraph" class="chart" :option="option" />
 </template>
 
 <script>
@@ -8,15 +8,14 @@ import { use } from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
 import { LineChart } from "echarts/charts";
 import {
-  TitleComponent,
-  TooltipComponent,
-  LegendComponent,
-  ToolboxComponent,
-  GridComponent,
-  DataZoomComponent,
+    TitleComponent,
+    TooltipComponent,
+    LegendComponent,
+    ToolboxComponent,
+    GridComponent,
+    DataZoomComponent,
 } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
-import { ref } from "vue";
 
 use([
     CanvasRenderer,
@@ -30,133 +29,110 @@ use([
 ]);
 
 export default {
-  name: "Graph",
-  components: {
-      VChart
-  },
-  data: () => {
-    return {
-      showGraph: true,
-    }
-  },
-  methods: {
-    onFileChange(e){
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = e => console.log(e.target.result);
-      reader.readAsText(file);
-    }
-  },
-  provide: {
-    [THEME_KEY]: "light"
-  },
-  // computed: {
-  //   datapoints: () => {
-  //     let data = [Math.random() * 300];
-
-  //     for (let i = 1; i < 20000; i++) {
-  //       data.push(Math.round((Math.random() - 0.5) * 20 + data[i - 1]));
-  //     }
-  //     return data;
-  //   },
-  //   date: () => {
-  //     let base = +new Date(1968, 9, 3);
-  //     let oneDay = 24 * 3600 * 1000;
-  //     let temp = [];
-
-  //     for (let i = 1; i < 20000; i++) {
-  //       var now = new Date((base += oneDay));
-  //       temp.push([now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'));
-  //     }
-  //     return temp;
-  //   }
-  // },
-  setup () {
-    let base = +new Date(1968, 9, 3);
-    let oneDay = 24 * 3600 * 1000;
-    let date = [];
-
-    let data = [Math.random() * 300];
-
-    for (let i = 1; i < 20000; i++) {
-      var now = new Date((base += oneDay));
-      date.push([now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'));
-      data.push(Math.round((Math.random() - 0.5) * 20 + data[i - 1]));
-    }
-
-    const option = ref({
-      tooltip: {
-        trigger: 'axis',
-        position: function (pt) {
-          return [pt[0], '10%'];
+    name: "Graph",
+    components: {
+        VChart,
+    },
+    data: function () {
+        return {
+        showGraph: true,
+        };
+    },
+    methods: {
+        
+    },
+    provide: {
+        [THEME_KEY]: "light",
+    },
+    computed: {
+        option: function () {
+        let series = [];
+        let graphData = this.$store.state.data;
+        let legende = this.$store.state.legende;
+        for(let i = 0; i < graphData.length; i++){
+            series.push({
+            name: legende[i],
+            type: "line",
+            symbol: "none",
+            sampling: "lttb",
+            itemStyle: {
+                color: "#" + (((1 << 24) * Math.random()) | 0).toString(16),
+            },
+            data: graphData[i],
+            });
         }
-      },
-      title: {
-        left: 'center',
-        text: 'Large Area Chart'
-      },
-      toolbox: {
-        feature: {
-          dataZoom: {
-            yAxisIndex: 'none'
-          },
-          restore: {},
-          saveAsImage: {}
-        }
-      },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: date,
-      },
-      yAxis: {
-        type: 'value',
-        boundaryGap: [0, '100%']
-      },
-      dataZoom: [
-        {
-          type: 'inside',
-          start: 0,
-          end: 10
+
+        return {
+            tooltip: {
+            trigger: "axis",
+            },
+            toolbox: {
+            feature: {
+                dataZoom: {
+                yAxisIndex: "none",
+                },
+            },
+            },
+            legend: {
+            data: this.$store.state.legende
+            },
+            xAxis: {
+            type: "time",
+            data: this.$store.state.timestamps,
+            },
+            yAxis: {
+            type: "value",
+            },
+            dataZoom: [
+            {
+                type: "inside",
+                start: 0,
+                end: 100,
+                filterMode: "filter",
+            },
+            {
+                animation: true,
+                showDataShadow: true,
+                filterMode: "filter",
+                throttle: 100,
+                dataBackground: {
+                lineStyle: {
+                    color: "#" + (((1 << 24) * Math.random()) | 0).toString(16),
+                    width: 2.5,
+                },
+                areaStyle: {
+                    color: "#ffffff00",
+                },
+                },
+                height: 100,
+                bottom: 10,
+                show: true,
+                type: "slider",
+                start: 0,
+                end: 100,
+                handleSize: "70%",
+            },
+            ],
+            color: "#" + (((1 << 24) * Math.random()) | 0).toString(16),
+            height: 500,
+            animation: true,
+            responsive: true,
+            maintainAspectRatio: false,
+            clip: true,
+            sampling: "max",
+            series: series,
+        };
         },
-        {
-          start: 0,
-          end: 10
-        }
-      ],
-      series: [
-        {
-          name: "Data",
-          type: "line",
-          symbol: 'none',
-          sampling: 'lttb',
-          itemStyle: {
-            color: 'rgb(255, 70, 131)'
-          },
-          data: data,
-          // areaStyle: {
-          //   color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          //     {
-          //       offset: 0,
-          //       color: 'rgb(255, 158, 68)'
-          //     },
-          //     {
-          //       offset: 1,
-          //       color: 'rgb(255, 70, 131)'
-          //     }
-          //   ])
-          // },
-        }
-      ]
-    });
-
-    return { option };
-  }
+    },
 };
+
 </script>
 
 <style scoped>
+
 .chart {
-  height: 600px;
+    padding-top: 20px;
+    height: 700px;
 }
+
 </style>

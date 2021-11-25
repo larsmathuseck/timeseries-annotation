@@ -6,7 +6,7 @@
         <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
             <ul class="nav nav-pills">
                 <li class="nav-item">
-                    <input id="fileUpload" type="file" hidden>
+                    <input id="fileUpload" type="file" v-on:change="onFileChange" hidden>
                     <button @click="chooseFiles()" type="button" class="btn btn-light">
                         <i class="fa fa-folder"></i>
                         Import Folder
@@ -80,7 +80,15 @@ export default {
     methods: {
         chooseFiles() {
             document.getElementById("fileUpload").click()
-        }
+        },
+        onFileChange(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = () => {
+                this.$store.commit("loadData", reader.result);
+            };
+            reader.readAsText(file);
+        },
     },
 }
 </script>
@@ -94,6 +102,7 @@ export default {
 
 .row {
     margin-bottom: 20px;
+    margin-top: 10px;
     border-bottom: solid gray;
 }
 
