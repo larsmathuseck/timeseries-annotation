@@ -8,9 +8,7 @@
                     {{ axis.name }}
                 </option>
             </select>
-            <div class="row absolute" v-if="showColorPicker">
-                <ColorPicker :colors="colors" @axis-color-picked="setSelectedAxisColor" />
-            </div>
+            <ColorPicker :colorForAxis="true" @axis-color-picked="setSelectedAxisColor" v-show="showColorPicker"/>
         </div>
     </div>
     <div class="row">
@@ -33,12 +31,13 @@
     <div class="row">
         <span class="description-text" >
             Labels
-            <button type="button" class="btn btn-default btn-circle">
+            <button type="button" class="btn btn-default btn-circle" @click="toggleShowAddLabel">
                 <i class="fa fa-plus"></i>
             </button>
         </span>
+        <AddLabel @labelCreated="onLabelCreated" :labels="labels" v-show="showAddLabel"/>
         <p class="description-text-sm">Select Labels to annotate Chart</p>
-        <div class="label-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
+        <div class="label-container" v-for="label in this.labels" :key="label.name" @click="labelOnClick(label)" >
             <Label :label="label" :activeLabel="activeLabel"/>
         </div>
     </div>
@@ -47,13 +46,16 @@
 <script>
 import SelectedAxis from "./SelectedAxis.vue"
 import ColorPicker from "./Colorpicker.vue"
+import AddLabel from "./AddLabel.vue"
 import Label from "./Label.vue"
+
 
 export default {
     name: "LeftSightbar",
     components: {
         SelectedAxis,
         ColorPicker,
+        AddLabel,
         Label,
     },
     props: {
@@ -69,11 +71,11 @@ export default {
             lastSelectedAxis: Object,
             showColorPicker: false,
             selected: Object,
+            showAddLabel: false,
         }
     },
     methods: {
         addSelectedAxis() {
-            console.log(this.selected)
             this.lastSelectedAxis = {
                 id: this.selectedAxes.length + 1,
                 name: this.selected.name,
@@ -88,9 +90,16 @@ export default {
         },
         labelOnClick(label) {
             this.$emit("toggle-active-label", label);
+        },
+        toggleShowAddLabel() {
+            this.showAddLabel = !this.showAddLabel;
+        },
+        onLabelCreated(label) {
+            this.$emit('labelCreated', label)
+            this.toggleShowAddLabel();
         }
     },
-    emits: ["add-selected-axis", "delete-selected-axis", "axis-color-picked", "toggle-active-label"],
+    emits: ["add-selected-axis", "delete-selected-axis", "axis-color-picked", "toggle-active-label", "labelCreated"],
 }
 </script>
 

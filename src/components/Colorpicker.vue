@@ -1,8 +1,8 @@
 <template>
-    <div class="col">
-        <span class="dot" v-for="color in colors" :key="color" :style="{ background: color }" @click="axisColorPicked(color)">
-        </span>
-        
+    <div class="row absolute" >
+        <div class="col">
+            <span class="dot" v-for="color in colors" :key="color" :style="{ background: color }" @click="colorPicked(color)" />
+        </div>
     </div>
 </template>
 
@@ -11,11 +11,20 @@
 export default {
     name: "Colorpicker",
     props: {
-        colors: Array,
+        colorForAxis: Boolean,
+    },
+    data() {
+        return {
+            colors: ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
+        }
     },
     methods: {
-        axisColorPicked(color) {
-            this.$emit("axis-color-picked", color)
+        colorPicked(color) {
+            if (this.colorForAxis) {
+                this.$emit("axis-color-picked", color)
+            } else {
+                this.$emit("labelColorPicked", color)
+            }
         }
     }
     

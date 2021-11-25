@@ -7,12 +7,12 @@
                 @add-selected-axis="addSelectedAxis"
                 @delete-selected-axis="deleteSelectedAxis"
                 @toggle-active-label="toggleActiveLabel"
+                @labelCreated="addLabel"
                 :axes="axes" 
                 :annotationFiles="annotationFiles" 
                 :selectedAxes="selectedAxes"
                 :labels="labels"
-                :activeLabel="activeLabel"
-                :colors="colors" />
+                :activeLabel="activeLabel" />
             </div>
             <div class="col col-8">
                 <graph v-if="showGraph" class="chart" />
@@ -49,7 +49,6 @@ export default {
             labels: [],
             activeLabel: Object,
             annotationLabels: [],
-            colors: [],
         }
     },
     created() {
@@ -138,7 +137,6 @@ export default {
                 timestamp: "12:08:36",
             },
         ]
-        this.colors = ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"];
     },
     methods: {
         addSelectedAxis(lastSelectedAxis) {
@@ -156,7 +154,6 @@ export default {
             this.selectedAxes.push(lastSelectedAxis);
         },
         deleteSelectedAxis(axis) {
-            console.log("delete: ", axis)
             if (this.selectedAxes.length <= 1) {
                 alert("At least 1 axis must be selected!")
                 return;
@@ -165,6 +162,9 @@ export default {
             if (index > -1) {
                 this.selectedAxes.splice(index, 1)
             }
+        },
+        addLabel(label) {
+            this.labels.push(label);
         },
         toggleActiveLabel(label) {
             this.activeLabel = label;
