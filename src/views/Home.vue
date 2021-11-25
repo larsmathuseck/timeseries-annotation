@@ -1,5 +1,5 @@
 <template>
-  <graph v-if="showGraph" class="chart" :option="option" />
+  <graph v-if="showGraph"/>
 </template>
 
 <script>
