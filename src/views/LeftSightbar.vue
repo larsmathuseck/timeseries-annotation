@@ -97,22 +97,6 @@ export default {
     padding-right: 2.5px;
 }
 
-.description-text {
-    text-align: left;
-    font-family: Tahoma;
-    font-weight: Bold;
-    font-size: 1.5rem;
-    margin: 2px;
-}
-
-.description-text-sm {
-    text-align: left;
-    font-family: Tahoma;
-    font-size: 1rem;
-    margin: 2px;
-    color: gray;
-}
-
 div.absolute {
     position: absolute;
 }
@@ -144,4 +128,22 @@ div.absolute {
     background-color: rgb(128, 128, 128, 0.1);
 }
 
+</style>
+
+<style>
+.description-text {
+    text-align: left;
+    font-family: Tahoma;
+    font-weight: Bold;
+    font-size: 1.5rem;
+    margin: 2px;
+}
+
+.description-text-sm {
+    text-align: left;
+    font-family: Tahoma;
+    font-size: 1rem;
+    margin: 2px;
+    color: gray;
+}
 </style>

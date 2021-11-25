@@ -18,7 +18,9 @@
                 <graph v-if="showGraph" class="chart" :option="option" />
             </div>
             <div class="col col-2">
-                right
+                <RightSightbar
+                @delete-annotation-label="deleteAnnotationLabel"
+                :annotationLabels="annotationLabels"/>
             </div>
         </div>
     </div>
@@ -28,6 +30,7 @@
 import graph from "./Graph.vue"
 import Header from "./Header.vue"
 import LeftSightbar from "./LeftSightbar.vue"
+import RightSightbar from "./RightSightbar.vue"
 
 export default {  
     name: "Home",
@@ -35,6 +38,7 @@ export default {
         graph,
         Header,
         LeftSightbar,
+        RightSightbar,
     },
     data() {
         return {
@@ -44,6 +48,7 @@ export default {
             annotationFiles: [],
             labels: [],
             activeLabel: Object,
+            annotationLabels: [],
             colors: [],
         }
     },
@@ -101,6 +106,38 @@ export default {
             },
         ];
         this.activeLabel = this.labels[0];
+        this.annotationLabels = [
+            {
+                id: 1,
+                name: "openOrClosed",
+                color: "red",
+                timestamp: "12:08:28",
+            },
+            {
+                id: 2,
+                name: "tilted_opening",
+                color: "orange",
+                timestamp: "12:08:32",
+            },
+            {
+                id: 3,
+                name: "tilted",
+                color: "yellow",
+                timestamp: "12:08:32",
+            },
+            {
+                id: 4,
+                name: "tilted_closing",
+                color: "green",
+                timestamp: "12:08:35",
+            },
+            {
+                id: 5,
+                name: "openOrClosed",
+                color: "red",
+                timestamp: "12:08:36",
+            },
+        ]
         this.colors = ["red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"];
     },
     methods: {
@@ -131,6 +168,12 @@ export default {
         },
         toggleActiveLabel(label) {
             this.activeLabel = label;
+        },
+        deleteAnnotationLabel(annotationLabel) {
+            const index = this.annotationLabels.indexOf(annotationLabel);
+            if (index > -1) {
+                this.annotationLabels.splice(index, 1);
+            }
         },
     },
 };
