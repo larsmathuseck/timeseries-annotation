@@ -37,8 +37,8 @@
                 <i class="fa fa-plus"></i>
             </button>
         </span>
-        <div class="label-container" :activeLabel="activeLabel" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
-            <Label :label="label" />
+        <div class="label-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
+            <Label :label="label" :activeLabel="activeLabel"/>
         </div>
     </div>
 </template>
@@ -135,13 +135,8 @@ div.absolute {
 
 .label-container {
     margin-left: 12px;
-    padding: 0px;
-    padding-top: 10px;
-}
-
-.label-container:after {
-    content: "";
-    display: block;
+    padding: 12px;
+    padding-left: 0px;
     border-bottom: 1.5px solid rgb(128, 128, 128, 0.5);
 }
 

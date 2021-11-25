@@ -100,6 +100,7 @@ export default {
                 color: "green",
             },
         ];
+        this.activeLabel = this.labels[0];
         this.colors = ["red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"];
     },
     methods: {
