@@ -1,6 +1,5 @@
 <template>
   <!--<input type="file" ref="fileInput" webkitdirectory directory multiple v-on:change="onFileChange">-->
-  <input type="file" ref="fileInput" v-on:change="onFileChange" />
   <v-chart v-if="showGraph" class="chart" :option="option" />
 </template>
 
@@ -40,14 +39,7 @@ export default {
     };
   },
   methods: {
-    onFileChange(e) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.$store.commit("loadData", reader.result);
-      };
-      reader.readAsText(file);
-    },
+    
   },
   provide: {
     [THEME_KEY]: "light",
