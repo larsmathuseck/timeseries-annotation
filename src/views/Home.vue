@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import graph from "./Graph.vue"
+import graph from "../components/Graph.vue"
 import Header from "./Header.vue"
 import LeftSightbar from "../components/LeftSightbar.vue"
 import RightSightbar from "../components/RightSightbar.vue"
