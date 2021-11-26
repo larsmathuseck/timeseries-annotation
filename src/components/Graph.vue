@@ -54,7 +54,7 @@ export default {
             name: legende[i],
             type: "line",
             symbol: "none",
-            sampling: "lttb",
+            showSymbol: false,
             itemStyle: {
                 color: "#" + (((1 << 24) * Math.random()) | 0).toString(16),
             },
@@ -64,24 +64,25 @@ export default {
 
         return {
             tooltip: {
-            trigger: "axis",
+                trigger: "axis",
+                formatter: '{b0}',
             },
             toolbox: {
-            feature: {
-                dataZoom: {
-                yAxisIndex: "none",
+                feature: {
+                    dataZoom: {
+                    yAxisIndex: "none",
                 },
             },
             },
             legend: {
-            data: this.$store.state.legende
+                data: this.$store.state.legende
             },
             xAxis: {
-            type: "time",
-            data: this.$store.state.timestamps,
+                type: "time",
+                data: this.$store.state.timestamps,
             },
             yAxis: {
-            type: "value",
+                type: "value",
             },
             dataZoom: [
             {
@@ -131,7 +132,6 @@ export default {
 <style scoped>
 
 .chart {
-    padding-top: 20px;
     height: 700px;
 }
 
