@@ -14,7 +14,6 @@
                 @delete-annotation-label="$emit('delete-annotation-label',annotationLabel)" />
             </div>
         </div>
-        
     </div>
 </template>
 
