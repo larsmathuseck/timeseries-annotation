@@ -38,7 +38,7 @@
         <AddLabel @labelCreated="onLabelCreated" :labels="labels" v-show="showAddLabel"/>
         <p class="description-text-sm">Select Labels to annotate Chart</p>
         <div class="label-container" v-for="label in this.labels" :key="label.name" @click="labelOnClick(label)" >
-            <Label :label="label" :activeLabel="activeLabel"/>
+            <Label :label="label" />
         </div>
     </div>
 </template>
@@ -61,13 +61,11 @@ export default {
     props: {
         axes: Array,
         annotationFiles: Array,
-        selectedAxes: Array,
-        labels: Array,
-        activeLabel: Object,
-        colors: Array,
     },
     data() {
         return {
+            selectedAxes: this.$store.state.selectedAxes,
+            labels: this.$store.state.labels,
             lastSelectedAxis: Object,
             showColorPicker: false,
             selected: Object,
@@ -85,17 +83,19 @@ export default {
         },
         setSelectedAxisColor(color) {
             this.lastSelectedAxis.color = color
-            this.$emit("add-selected-axis", this.lastSelectedAxis)
+            console.log("commit: ", this.lastSelectedAxis)
+            this.$store.commit("addSelectedAxis", this.lastSelectedAxis);
             this.showColorPicker = false;
         },
         labelOnClick(label) {
-            this.$emit("toggle-active-label", label);
+            console.log("commit activeLabel: ", label)
+            this.$store.commit("toggleActiveLabel", label);
         },
         toggleShowAddLabel() {
             this.showAddLabel = !this.showAddLabel;
         },
         onLabelCreated(label) {
-            this.$emit('labelCreated', label)
+            this.$store.commit('addLabel', label)
             this.toggleShowAddLabel();
         }
     },

@@ -15,10 +15,11 @@ export default {
     name: "Label",
     props: {
         label: Object,
-        activeLabel: Object,
     },
-    methods: {
-
+    data() {
+        return {
+            activeLabel: this.$store.state.activeLabel,
+        }
     }
 }
 </script>

@@ -16,7 +16,7 @@ export default {
     },
     methods: {
         deleteSelectedAxis(axis) {
-            this.$emit("delete-selected-axis", axis);
+            this.$store.commit("deleteSelectedAxis", axis);
         }
     },
 }
