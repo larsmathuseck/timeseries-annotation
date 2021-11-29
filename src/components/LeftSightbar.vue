@@ -16,7 +16,7 @@
     <div class="row">
         <p class="description-text" >Selected Axis</p>
         <div class="col-auto" v-for="selectedAxis in this.selectedAxes" :key="selectedAxis.name" >
-            <SelectedAxis :selectedAxis="selectedAxis" @delete-selected-axis="$emit('delete-selected-axis', selectedAxis)" />
+            <SelectedAxis :selectedAxis="selectedAxis" />
         </div>
     </div>
     <div class="row">

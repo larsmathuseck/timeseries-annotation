@@ -116,7 +116,7 @@ export default createStore({
                 alert("At least 1 axis must be selected!")
                 return;
             }
-            const index = state.selectedAxes.indexOf(axis)
+            const index = state.selectedAxes.indexOf(axis.id)
             if (index > -1) {
                 state.selectedAxes.splice(index, 1)
             }
