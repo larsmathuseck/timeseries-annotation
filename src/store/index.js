@@ -107,8 +107,11 @@ export default createStore({
                 state.timestamps = timestamps;
                 state.selectedAxes.push(dataJson[0].id);
             }
-
-            deleteSelectedAxis(state, axis) {
+        },
+        addSelectedAxes: (state, axis) => {
+            state.selectedAxes.push(axis.id);
+        },
+        deleteSelectedAxis(state, axis) {
             if (state.selectedAxes.length <= 1) {
                 alert("At least 1 axis must be selected!")
                 return;
@@ -129,13 +132,6 @@ export default createStore({
             if (index > -1) {
                 state.annotationLabels.splice(index, 1);
             }
-        },
-        },
-        
-
-        },
-        addSelectedAxes: (state, axis) => {
-            state.selectedAxes.push(axis.id);
         },
     },
     getters: {

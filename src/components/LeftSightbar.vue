@@ -65,7 +65,6 @@ export default {
     },
     data() {
         return {
-            selectedAxes: this.$store.state.selectedAxes,
             lastSelectedAxis: Object,
             showColorPicker: false,
             showAddLabel: false,
