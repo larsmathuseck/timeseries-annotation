@@ -57,6 +57,7 @@ export default {
             this.$emit("labelCreated", label)
             this.labelName = ""
             this.labelColor = ""
+            this.showColorPicker = false;
         },
     }
 }

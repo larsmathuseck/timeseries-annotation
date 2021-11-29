@@ -16,9 +16,9 @@ export default {
     props: {
         label: Object,
     },
-    data() {
-        return {
-            activeLabel: this.$store.state.activeLabel,
+    computed: {
+        activeLabel: function() {
+            return this.$store.state.activeLabel;
         }
     }
 }

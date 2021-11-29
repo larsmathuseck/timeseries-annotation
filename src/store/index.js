@@ -135,9 +135,7 @@ export default createStore({
             state.labels.push(label);
         },
         toggleActiveLabel(state, label) {
-            console.log("at commit toggleActiveLabel: ", label)
             state.activeLabel = label;
-            console.log(state.activeLabel)
         },
         deleteAnnotationLabel(state, annotationLabel) {
             const index = state.annotationLabels.indexOf(annotationLabel);

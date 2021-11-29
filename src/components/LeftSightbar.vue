@@ -8,7 +8,9 @@
                     {{ axis.name }}
                 </option>
             </select>
-            <ColorPicker :colorForAxis="true" @axis-color-picked="setSelectedAxisColor" v-show="showColorPicker"/>
+            <div class="colorpicker-container">
+                <ColorPicker :colorForAxis="true" @axis-color-picked="setSelectedAxisColor" v-show="showColorPicker"/>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -65,11 +67,15 @@ export default {
     data() {
         return {
             selectedAxes: this.$store.state.selectedAxes,
-            labels: this.$store.state.labels,
             lastSelectedAxis: Object,
             showColorPicker: false,
             selected: Object,
             showAddLabel: false,
+        }
+    },
+    computed: {
+        labels: function() {
+            return this.$store.state.labels;
         }
     },
     methods: {
@@ -88,7 +94,6 @@ export default {
             this.showColorPicker = false;
         },
         labelOnClick(label) {
-            console.log("commit activeLabel: ", label)
             this.$store.commit("toggleActiveLabel", label);
         },
         toggleShowAddLabel() {
@@ -104,6 +109,14 @@ export default {
 </script>
 
 <style scoped>
+.colorpicker-container {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+}
+
 .col-auto {
     padding-left: 2.5px;
     padding-right: 2.5px;

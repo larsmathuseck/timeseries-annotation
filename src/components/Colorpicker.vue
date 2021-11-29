@@ -50,5 +50,6 @@ export default {
 .col {
     background-color: #f5f5f5;
     background-clip: content-box;
+    z-index: 10;
 }
 </style>

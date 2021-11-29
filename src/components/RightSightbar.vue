@@ -22,9 +22,9 @@ export default {
     components: {
         AnnotationLabel,
     },
-    data() {
-        return {
-            annotationLabels: this.$store.state.annotationLabels,
+    computed: {
+        annotationLabels: function() {
+            return this.$store.state.annotationLabels;
         }
     },
 }
