@@ -5,7 +5,69 @@ export default createStore({
     state: {
         data: [],
         timestamps: [],
-        selectedAxes: []
+        selectedAxes: [],
+        //labels: [],
+        labels: [
+            {
+                id: 1,
+                name: "openOrClosed",
+                color: "red",
+            },
+            {
+                id: 2,
+                name: "tilted_opening",
+                color: "orange",
+            },
+            {
+                id: 3,
+                name: "tilted",
+                color: "yellow",
+            },
+            {
+                id: 4,
+                name: "tilted_closing",
+                color: "teal",
+            },
+            {
+                id: 5,
+                name: "end",
+                color: "green",
+            },
+        ],
+        activeLabel: Object,
+        //annotationLabels: [],
+        annotationLabels: [
+            {
+                id: 1,
+                name: "openOrClosed",
+                color: "red",
+                timestamp: "12:08:28",
+            },
+            {
+                id: 2,
+                name: "tilted_opening",
+                color: "orange",
+                timestamp: "12:08:32",
+            },
+            {
+                id: 3,
+                name: "tilted",
+                color: "yellow",
+                timestamp: "12:08:32",
+            },
+            {
+                id: 4,
+                name: "tilted_closing",
+                color: "green",
+                timestamp: "12:08:35",
+            },
+            {
+                id: 5,
+                name: "openOrClosed",
+                color: "red",
+                timestamp: "12:08:36",
+            },
+        ],
     },
     mutations: {
         loadData: (state, csvData) => {
@@ -49,6 +111,28 @@ export default createStore({
         addSelectedAxes: (state, axis) => {
             state.selectedAxes.push(axis.id);
         },
+        deleteSelectedAxis(state, axis) {
+            if (state.selectedAxes.length <= 1) {
+                alert("At least 1 axis must be selected!")
+                return;
+            }
+            const index = state.selectedAxes.indexOf(axis.id)
+            if (index > -1) {
+                state.selectedAxes.splice(index, 1)
+            }
+        },
+        addLabel(state, label) {
+            state.labels.push(label);
+        },
+        toggleActiveLabel(state, label) {
+            state.activeLabel = label;
+        },
+        deleteAnnotationLabel(state, annotationLabel) {
+            const index = state.annotationLabels.indexOf(annotationLabel);
+            if (index > -1) {
+                state.annotationLabels.splice(index, 1);
+            }
+        },
     },
     getters: {
         getData: state => {
@@ -57,5 +141,5 @@ export default createStore({
     },
     modules: {
 
-    }
+    },
 })

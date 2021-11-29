@@ -8,13 +8,15 @@
                     {{ axis.name }}
                 </option>
             </select>
-            <ColorPicker :colorForAxis="true" @axis-color-picked="setSelectedAxisColor" v-show="showColorPicker"/>
+            <div class="colorpicker-container">
+                <ColorPicker :colorForAxis="true" @axis-color-picked="setSelectedAxisColor" v-show="showColorPicker"/>
+            </div>
         </div>
     </div>
     <div class="row">
         <p class="description-text" >Selected Axis</p>
         <div class="col-auto" v-for="selectedAxis in this.selectedAxes" :key="selectedAxis.name" >
-            <SelectedAxis :selectedAxis="selectedAxis" @delete-selected-axis="$emit('delete-selected-axis', selectedAxis)" />
+            <SelectedAxis :selectedAxis="selectedAxis" />
         </div>
     </div>
     <div class="row">
@@ -35,10 +37,10 @@
                 <i class="fa fa-plus"></i>
             </button>
         </span>
-        <AddLabel @labelCreated="onLabelCreated" :labels="labels" v-show="showAddLabel"/>
+        <AddLabel @labelCreated="onLabelCreated" v-show="showAddLabel"/>
         <p class="description-text-sm">Select Labels to annotate Chart</p>
         <div class="label-container" v-for="label in this.labels" :key="label.name" @click="labelOnClick(label)" >
-            <Label :label="label" :activeLabel="activeLabel"/>
+            <Label :label="label" />
         </div>
     </div>
 </template>
@@ -60,8 +62,6 @@ export default {
     },
     props: {
         annotationFiles: Array,
-        labels: Array,
-        activeLabel: Object,
     },
     data() {
         return {
@@ -83,6 +83,9 @@ export default {
                 }
             });
             return selected;
+        },
+        labels: function() {
+            return this.$store.state.labels;
         }
     },
     methods: {
@@ -95,13 +98,13 @@ export default {
             this.showColorPicker = false;
         },
         labelOnClick(label) {
-            this.$emit("toggle-active-label", label);
+            this.$store.commit("toggleActiveLabel", label);
         },
         toggleShowAddLabel() {
             this.showAddLabel = !this.showAddLabel;
         },
         onLabelCreated(label) {
-            this.$emit('labelCreated', label)
+            this.$store.commit('addLabel', label)
             this.toggleShowAddLabel();
         }
     },
@@ -110,6 +113,14 @@ export default {
 </script>
 
 <style scoped>
+.colorpicker-container {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+}
+
 .col-auto {
     padding-left: 2.5px;
     padding-right: 2.5px;

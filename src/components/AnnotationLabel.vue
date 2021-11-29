@@ -20,7 +20,7 @@ export default {
     },
     methods: {
         deleteAnnotationLabel(annotationLabel) {
-            this.$emit("delete-annotation-label", annotationLabel)
+            this.$store.commit("deleteAnnotationLabel", annotationLabel)
         }
     },
     emits: ["delete-annotation-label"]

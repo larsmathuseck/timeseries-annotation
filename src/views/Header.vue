@@ -31,47 +31,6 @@
 
 
 <script>
-/**
-<div class="col col-lg-2">
-            <input id="fileUpload" type="file" hidden>
-                <button @click="chooseFiles()" type="button" class="btn btn-light">
-                    <i class="fa fa-folder"></i>
-                    Import Folder
-                </button>
-        </div>
-        <div class="col col-lg-2">
-            Save
-        </div>
-        <div class="col col-lg-2">
-            Tutorial
-        </div>
-
-
-    <header class="d-flex flex-wrap justify-content-left border-bottom">
-        <h1>{{ title }}</h1>
-        <ul class="nav nav-pills">
-            <li class="nav-item">
-                <input id="fileUpload" type="file" hidden>
-                <button @click="chooseFiles()" type="button" class="btn btn-light">
-                    <i class="fa fa-folder"></i>
-                    Import Folder
-                </button>
-            </li>
-            <li class="nav-item">
-                <button type="button" class="btn btn-light">
-                    <i class="fa fa-download"></i>
-                    Save File
-                </button>
-            </li>
-            <li class="nav-item">
-                <button type="button" class="btn btn-light">
-                    <i class="fa fa-file"></i>
-                    Tutorial
-                </button>
-            </li>
-        </ul>
-    </header>
-*/
 export default {
     name: "Header",
     props: {

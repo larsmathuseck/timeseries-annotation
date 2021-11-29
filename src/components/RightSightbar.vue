@@ -8,10 +8,7 @@
         </p>
         <div id="scroll-container" class="mh-50">
             <div class="annotation-container" v-for="annotationLabel in annotationLabels" :key="annotationLabel.id">
-                <AnnotationLabel 
-                :annotationNumber="annotationLabels[annotationLabel]"
-                :annotationLabel="annotationLabel"
-                @delete-annotation-label="$emit('delete-annotation-label',annotationLabel)" />
+                <AnnotationLabel :annotationLabel="annotationLabel" />
             </div>
         </div>
     </div>
@@ -25,10 +22,11 @@ export default {
     components: {
         AnnotationLabel,
     },
-    props: {
-        annotationLabels: Array,
+    computed: {
+        annotationLabels: function() {
+            return this.$store.state.annotationLabels;
+        }
     },
-    emits: ["delete-annotation-label"],
 }
 </script>
 

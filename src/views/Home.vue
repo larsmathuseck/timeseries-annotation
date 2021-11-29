@@ -3,21 +3,14 @@
         <Header title="TF Annotator" />
         <div class="row">
             <div class="col col-2">
-                <LeftSightbar 
-                    @delete-selected-axis="deleteSelectedAxis"
-                    @toggle-active-label="toggleActiveLabel"
-                    @labelCreated="addLabel" 
-                    :annotationFiles="annotationFiles" 
-                    :labels="labels"
-                    :activeLabel="activeLabel" />
+                <LeftSightbar
+                :annotationFiles="annotationFiles" />
             </div>
             <div class="col col-8">
                 <graph v-if="showGraph" class="chart" />
             </div>
             <div class="col col-2">
-                <RightSightbar
-                @delete-annotation-label="deleteAnnotationLabel"
-                :annotationLabels="annotationLabels"/>
+                <RightSightbar />
             </div>
         </div>
     </div>
@@ -41,9 +34,6 @@ export default {
         return {
             showGraph: true,
             annotationFiles: [],
-            labels: [],
-            activeLabel: Object,
-            annotationLabels: [],
         }
     },
     created() {
@@ -61,90 +51,6 @@ export default {
                 name: "bliblu"
             },
         ];
-        this.labels = [
-            {
-                id: 1,
-                name: "openOrClosed",
-                color: "red",
-            },
-            {
-                id: 2,
-                name: "tilted_opening",
-                color: "orange",
-            },
-            {
-                id: 3,
-                name: "tilted",
-                color: "yellow",
-            },
-            {
-                id: 4,
-                name: "tilted_closing",
-                color: "teal",
-            },
-            {
-                id: 5,
-                name: "end",
-                color: "green",
-            },
-        ];
-        this.activeLabel = this.labels[0];
-        this.annotationLabels = [
-            {
-                id: 1,
-                name: "openOrClosed",
-                color: "red",
-                timestamp: "12:08:28",
-            },
-            {
-                id: 2,
-                name: "tilted_opening",
-                color: "orange",
-                timestamp: "12:08:32",
-            },
-            {
-                id: 3,
-                name: "tilted",
-                color: "yellow",
-                timestamp: "12:08:32",
-            },
-            {
-                id: 4,
-                name: "tilted_closing",
-                color: "green",
-                timestamp: "12:08:35",
-            },
-            {
-                id: 5,
-                name: "openOrClosed",
-                color: "red",
-                timestamp: "12:08:36",
-            },
-        ]
-    },
-    methods: {
-        deleteSelectedAxis(axis) {
-            if (this.selectedAxes.length <= 1) {
-                alert("At least 1 axis must be selected!")
-                return;
-            }
-            const index = this.selectedAxes.indexOf(axis)
-            if (index > -1) {
-                this.selectedAxes.splice(index, 1)
-            }
-        },
-        addLabel(label) {
-            this.labels.push(label);
-        },
-        toggleActiveLabel(label) {
-            this.activeLabel = label;
-        },
-        deleteAnnotationLabel(annotationLabel) {
-            const index = this.annotationLabels.indexOf(annotationLabel);
-            if (index > -1) {
-                this.annotationLabels.splice(index, 1);
-            }
-        },
     },
 };
 </script>
