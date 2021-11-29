@@ -35,7 +35,7 @@
                 <i class="fa fa-plus"></i>
             </button>
         </span>
-        <AddLabel @labelCreated="onLabelCreated" :labels="labels" v-show="showAddLabel"/>
+        <AddLabel @labelCreated="onLabelCreated" v-show="showAddLabel"/>
         <p class="description-text-sm">Select Labels to annotate Chart</p>
         <div class="label-container" v-for="label in this.labels" :key="label.name" @click="labelOnClick(label)" >
             <Label :label="label" />

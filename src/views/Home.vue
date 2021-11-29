@@ -5,8 +5,7 @@
             <div class="col col-2">
                 <LeftSightbar
                 :axes="axes"
-                :annotationFiles="annotationFiles"
-                />
+                :annotationFiles="annotationFiles" />
             </div>
             <div class="col col-8">
                 <graph v-if="showGraph" class="chart" />
@@ -37,8 +36,6 @@ export default {
             showGraph: true,
             axes: [],
             annotationFiles: [],
-            labels: [],
-            activeLabel: Object,
         }
     },
     created() {
@@ -67,37 +64,6 @@ export default {
                 name: "bliblu"
             },
         ];
-        this.labels = [
-            {
-                id: 1,
-                name: "openOrClosed",
-                color: "red",
-            },
-            {
-                id: 2,
-                name: "tilted_opening",
-                color: "orange",
-            },
-            {
-                id: 3,
-                name: "tilted",
-                color: "yellow",
-            },
-            {
-                id: 4,
-                name: "tilted_closing",
-                color: "teal",
-            },
-            {
-                id: 5,
-                name: "end",
-                color: "green",
-            },
-        ];
-        this.activeLabel = this.labels[0];
-    },
-    methods: {
-        
     },
 };
 </script>

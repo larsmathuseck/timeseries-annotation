@@ -33,14 +33,14 @@
     "eslintConfig": {
         "root": true,
         "env": {
-        "node": true
+            "node": true
         },
         "extends": [
-        "plugin:vue/vue3-essential",
-        "eslint:recommended"
+            "plugin:vue/vue3-essential",
+            "eslint:recommended"
         ],
         "parserOptions": {
-        "ecmaVersion": 2020
+            "ecmaVersion": 2020
         },
         "rules": {}
     },

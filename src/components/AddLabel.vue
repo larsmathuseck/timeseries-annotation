@@ -36,9 +36,6 @@ export default {
     components: { 
         ColorPicker,
     },
-    props: {
-        labels: Array,
-    },
     data() {
         return {
             labelName: "",
@@ -53,7 +50,7 @@ export default {
         onSubmit(e) {
             e.preventDefault()
             const label = {
-                id: this.labels.length + 1,
+                id: this.$store.state.labels.length + 1,
                 name: this.labelName,
                 color: this.labelColor,
             }

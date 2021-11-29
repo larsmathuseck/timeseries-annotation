@@ -7,7 +7,34 @@ export default createStore({
         timestamps: [],
         legende: [],
         selectedAxes: [],
-        labels: [],
+        //labels: [],
+        labels: [
+            {
+                id: 1,
+                name: "openOrClosed",
+                color: "red",
+            },
+            {
+                id: 2,
+                name: "tilted_opening",
+                color: "orange",
+            },
+            {
+                id: 3,
+                name: "tilted",
+                color: "yellow",
+            },
+            {
+                id: 4,
+                name: "tilted_closing",
+                color: "teal",
+            },
+            {
+                id: 5,
+                name: "end",
+                color: "green",
+            },
+        ],
         activeLabel: Object,
         //annotationLabels: [],
         annotationLabels: [
@@ -126,33 +153,4 @@ export default createStore({
     modules: {
 
     },
-    created() {
-        this.state.labels = [
-            {
-                id: 1,
-                name: "openOrClosed",
-                color: "red",
-            },
-            {
-                id: 2,
-                name: "tilted_opening",
-                color: "orange",
-            },
-            {
-                id: 3,
-                name: "tilted",
-                color: "yellow",
-            },
-            {
-                id: 4,
-                name: "tilted_closing",
-                color: "teal",
-            },
-            {
-                id: 5,
-                name: "end",
-                color: "green",
-            },
-        ];
-    }
 })
