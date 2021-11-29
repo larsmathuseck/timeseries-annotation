@@ -4,15 +4,12 @@
         <div class="row">
             <div class="col col-2">
                 <LeftSightbar 
-                @add-selected-axis="addSelectedAxis"
-                @delete-selected-axis="deleteSelectedAxis"
-                @toggle-active-label="toggleActiveLabel"
-                @labelCreated="addLabel"
-                :axes="axes" 
-                :annotationFiles="annotationFiles" 
-                :selectedAxes="selectedAxes"
-                :labels="labels"
-                :activeLabel="activeLabel" />
+                    @delete-selected-axis="deleteSelectedAxis"
+                    @toggle-active-label="toggleActiveLabel"
+                    @labelCreated="addLabel" 
+                    :annotationFiles="annotationFiles" 
+                    :labels="labels"
+                    :activeLabel="activeLabel" />
             </div>
             <div class="col col-8">
                 <graph v-if="showGraph" class="chart" />
@@ -43,8 +40,6 @@ export default {
     data() {
         return {
             showGraph: true,
-            axes: [],
-            selectedAxes: [],
             annotationFiles: [],
             labels: [],
             activeLabel: Object,
@@ -52,17 +47,6 @@ export default {
         }
     },
     created() {
-        this.axes = [
-            { 
-                name: "ACC-X",
-            },
-            { 
-                name: "ACC-Y",
-            },
-            { 
-                name: "ACC-Z",
-            }
-        ];
         this.annotationFiles = [
             {
                 id: 1,
@@ -139,20 +123,6 @@ export default {
         ]
     },
     methods: {
-        addSelectedAxis(lastSelectedAxis) {
-            const newSelectedAxisName = lastSelectedAxis.name;
-            const iterator = this.selectedAxes.values();
-
-            for (const axis of iterator) { // needed if only color change of existing axis
-                if (axis.name === newSelectedAxisName) {
-                    const index = this.selectedAxes.indexOf(axis)
-                    if (index > -1) {
-                        this.selectedAxes.splice(index, 1);
-                    }
-                }
-            }
-            this.selectedAxes.push(lastSelectedAxis);
-        },
         deleteSelectedAxis(axis) {
             if (this.selectedAxes.length <= 1) {
                 alert("At least 1 axis must be selected!")
