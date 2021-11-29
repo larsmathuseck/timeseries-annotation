@@ -47,41 +47,43 @@ export default {
     computed: {
         option: function () {
         let series = [];
-        let graphData = this.$store.state.data;
-        let legende = this.$store.state.legende;
-        for(let i = 0; i < graphData.length; i++){
+        let graphData = this.$store.getters.getData;
+        let legende = [];
+        for(let key in graphData){
+            legende.push(graphData[key].name);
             series.push({
-            name: legende[i],
-            type: "line",
-            symbol: "none",
-            sampling: "lttb",
-            itemStyle: {
-                color: "#" + (((1 << 24) * Math.random()) | 0).toString(16),
-            },
-            data: graphData[i],
+                name: graphData[key].name,
+                type: "line",
+                symbol: "none",
+                showSymbol: false,
+                itemStyle: {
+                    color: graphData[key].color,
+                },
+                data: graphData[key].dataPoints,
             });
         }
 
         return {
             tooltip: {
-            trigger: "axis",
+                trigger: "axis",
+                formatter: '{b0}',
             },
             toolbox: {
-            feature: {
-                dataZoom: {
-                yAxisIndex: "none",
+                feature: {
+                    dataZoom: {
+                    yAxisIndex: "none",
                 },
             },
             },
             legend: {
-            data: this.$store.state.legende
+                data: legende
             },
             xAxis: {
-            type: "time",
-            data: this.$store.state.timestamps,
+                type: "time",
+                data: this.$store.state.timestamps,
             },
             yAxis: {
-            type: "value",
+                type: "value",
             },
             dataZoom: [
             {
@@ -131,7 +133,6 @@ export default {
 <style scoped>
 
 .chart {
-    padding-top: 20px;
     height: 700px;
 }
 

@@ -4,7 +4,6 @@
         <div class="row">
             <div class="col col-2">
                 <LeftSightbar
-                :axes="axes"
                 :annotationFiles="annotationFiles" />
             </div>
             <div class="col col-8">
@@ -34,22 +33,10 @@ export default {
     data() {
         return {
             showGraph: true,
-            axes: [],
             annotationFiles: [],
         }
     },
     created() {
-        this.axes = [
-            { 
-                name: "ACC-X",
-            },
-            { 
-                name: "ACC-Y",
-            },
-            { 
-                name: "ACC-Z",
-            }
-        ];
         this.annotationFiles = [
             {
                 id: 1,

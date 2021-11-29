@@ -2,9 +2,9 @@
     <div class="row">
         <p @click="test" class="description-text" >Add Y-Axis</p>
         <p class="description-text-sm">Add Y-axis to show</p>
-        <div class="selec" >
-            <select v-model="selected" class="form-select" @change="addSelectedAxis($event)">
-                <option v-for="axis in axes" :key="axis.name" v-bind:value="axis">
+        <div class="select" >
+            <select v-model="lastSelectedAxis" class="form-select" @change="addSelectedAxis()">
+                <option v-for="axis in axes" :key="axis.id" v-bind:value="axis">
                     {{ axis.name }}
                 </option>
             </select>
@@ -23,7 +23,7 @@
         <p class="description-text" >Annotation Files</p>
         <p class="description-text-sm">Select file to annotate Chart</p>
         <div class="selec" >
-            <select class="form-select" v-model="selected">
+            <select class="form-select">
                 <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" >
                     {{ annotationFile.name }}
                 </option>
@@ -61,7 +61,6 @@ export default {
         Label,
     },
     props: {
-        axes: Array,
         annotationFiles: Array,
     },
     data() {
@@ -69,28 +68,34 @@ export default {
             selectedAxes: this.$store.state.selectedAxes,
             lastSelectedAxis: Object,
             showColorPicker: false,
-            selected: Object,
             showAddLabel: false,
         }
     },
     computed: {
+        axes: function() {
+            return this.$store.state.data;
+        },
+        selectedAxes: function() {
+            let selectedIds = this.$store.state.selectedAxes;
+            let selected = [];
+            this.axes.forEach(axis => {
+                if(selectedIds.includes(axis.id)){
+                    selected.push(axis);
+                }
+            });
+            return selected;
+        },
         labels: function() {
             return this.$store.state.labels;
         }
     },
     methods: {
         addSelectedAxis() {
-            this.lastSelectedAxis = {
-                id: this.selectedAxes.length + 1,
-                name: this.selected.name,
-                color: "",
-            }
             this.showColorPicker = true;
         },
         setSelectedAxisColor(color) {
             this.lastSelectedAxis.color = color
-            console.log("commit: ", this.lastSelectedAxis)
-            this.$store.commit("addSelectedAxis", this.lastSelectedAxis);
+            this.$store.commit("addSelectedAxes", this.lastSelectedAxis);
             this.showColorPicker = false;
         },
         labelOnClick(label) {
@@ -104,7 +109,7 @@ export default {
             this.toggleShowAddLabel();
         }
     },
-    emits: ["add-selected-axis", "delete-selected-axis", "axis-color-picked", "toggle-active-label", "labelCreated"],
+    emits: ["delete-selected-axis", "axis-color-picked", "toggle-active-label", "labelCreated"],
 }
 </script>
 
