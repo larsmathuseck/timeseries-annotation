@@ -6,34 +6,41 @@ export default createStore({
         data: [],
         timestamps: [],
         selectedAxes: [],
-        //labels: [],
-        labels: [
+        annotations: [
             {
+                id: 1,
+                label: 1,
+                timestamp: "2019-07-12 12:08:27.872"
+            }
+        ],
+        //labels: [],
+        labels: {
+            1: {
                 id: 1,
                 name: "openOrClosed",
                 color: "red",
             },
-            {
+            2: {
                 id: 2,
                 name: "tilted_opening",
                 color: "orange",
             },
-            {
+            3: {
                 id: 3,
                 name: "tilted",
                 color: "yellow",
             },
-            {
+            4: {
                 id: 4,
                 name: "tilted_closing",
                 color: "teal",
             },
-            {
+            5: {
                 id: 5,
                 name: "end",
                 color: "green",
             },
-        ],
+        },
         activeLabel: Object,
         //annotationLabels: [],
         annotationLabels: [
@@ -137,6 +144,20 @@ export default createStore({
     getters: {
         getData: state => {
             return state.data.filter(key => state.selectedAxes.includes(key.id));
+        },
+        getAnnotaions: state => {
+            let data = [];
+            let annotations = state.annotations;
+            let labels = state.labels;
+            for(let key in annotations){
+                data.push({
+                    id: annotations[key].id,
+                    timestamp: annotations[key].timestamp,
+                    name: labels[annotations[key].label].name,
+                    color: labels[annotations[key].label].color,
+                })
+            }
+            return data;
         }
     },
     modules: {
