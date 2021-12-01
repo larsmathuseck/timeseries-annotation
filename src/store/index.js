@@ -129,7 +129,8 @@ export default createStore({
             }
         },
         addLabel(state, label) {
-            state.labels.push(label);
+            const labelNumber = label.id
+            state.labels[labelNumber] = label
         },
         toggleActiveLabel(state, label) {
             state.activeLabel = label;

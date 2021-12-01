@@ -49,8 +49,10 @@ export default {
         },
         onSubmit(e) {
             e.preventDefault()
+            const labels = this.$store.state.labels;
+            const labelsLength = Object.keys(labels).length;
             const label = {
-                id: this.$store.state.labels.length + 1,
+                id: labelsLength + 1,
                 name: this.labelName,
                 color: this.labelColor,
             }
