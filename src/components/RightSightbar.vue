@@ -1,11 +1,11 @@
 <template>
     <div class="row">
-        <p class="description-text">
+        <label class="description-text">
             Annotations
-        </p>
-        <p class="description-text-sm">
+        </label>
+        <label class="description-text-sm">
             List of Annotations
-        </p>
+        </label>
         <div id="scroll-container" class="mh-50">
             <div class="annotation-container" v-for="annotationLabel in annotationLabels" :key="annotationLabel.id">
                 <AnnotationLabel :annotationLabel="annotationLabel" />

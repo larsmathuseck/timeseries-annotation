@@ -1,9 +1,9 @@
 <template>
     <div class="row">
-        <p @click="test" class="description-text" >Add Y-Axis</p>
-        <p class="description-text-sm">Add Y-axis to show</p>
+        <label @click="test" class="description-text" >Add Y-Axis</label>
+        <label class="description-text-sm">Add Y-axis to show</label>
         <div class="select" >
-            <select v-model="lastSelectedAxis" class="form-select" @change="addSelectedAxis()">
+            <select v-model="lastSelectedAxis" class="form-select" @click="addSelectedAxis()">
                 <option v-for="axis in axes" :key="axis.id" v-bind:value="axis">
                     {{ axis.name }}
                 </option>
@@ -14,14 +14,16 @@
         </div>
     </div>
     <div class="row">
-        <p class="description-text" >Selected Axis</p>
-        <div class="col-auto" v-for="selectedAxis in this.selectedAxes" :key="selectedAxis.name" >
-            <SelectedAxis :selectedAxis="selectedAxis" />
+        <label class="description-text" >Selected Axis</label>
+        <div class="row selectedAxis-row">
+            <div class="col-auto" v-for="selectedAxis in this.selectedAxes" :key="selectedAxis.name" >
+                <SelectedAxis :selectedAxis="selectedAxis" />
+            </div>
         </div>
     </div>
     <div class="row">
-        <p class="description-text" >Annotation Files</p>
-        <p class="description-text-sm">Select file to annotate Chart</p>
+        <label class="description-text" >Annotation Files</label>
+        <label class="description-text-sm">Select file to annotate Chart</label>
         <div class="selec" >
             <select class="form-select">
                 <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" >
@@ -32,13 +34,13 @@
     </div>
     <div class="row">
         <span class="description-text" >
-            Labels
+            <label>Labels</label>
             <button type="button" class="btn btn-default btn-circle" @click="toggleShowAddLabel">
                 <i class="fa fa-plus"></i>
             </button>
         </span>
         <AddLabel @labelCreated="onLabelCreated" v-show="showAddLabel"/>
-        <p class="description-text-sm">Select Labels to annotate Chart</p>
+        <label class="description-text-sm">Select Labels to annotate Chart</label>
         <div class="label-container" v-for="label in this.labels" :key="label.name" @click="labelOnClick(label)" >
             <Label :label="label" />
         </div>
@@ -113,6 +115,11 @@ export default {
 </script>
 
 <style scoped>
+.selectedAxis-row {
+    margin-left: 12px;
+    padding-left: 0px;
+}
+
 .colorpicker-container {
     position: relative;
     display: flex;
@@ -140,6 +147,7 @@ div.absolute {
     line-height: 1.42857;
     background-color: #bbb;
     opacity: 0.7;
+    margin-left: 15px;
 }
 
 .btn-circle:hover { 

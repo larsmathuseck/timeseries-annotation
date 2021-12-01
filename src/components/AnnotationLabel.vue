@@ -1,14 +1,14 @@
 <template>
     <div class="col-auto" :style="{ background: annotationLabel.color }">
-        <p class="annotationLabel-name">
+        <label class="annotationLabel-name">
             {{ annotationNumber }}
             {{ annotationLabel.name }}
         <i @click="deleteAnnotationLabel(annotationLabel)" class="fa fa-times"></i>
-        </p>
+        </label>
     </div>
-    <p class="annotationLabel-timestamp">
+    <label class="annotationLabel-timestamp">
         {{ annotationLabel.timestamp }}
-    </p>
+    </label>
 </template>
 
 <script>
@@ -48,7 +48,10 @@ export default {
 
 .annotationLabel-timestamp {
     text-align: right;
+    display: block;
     color: rgb(128, 128, 128, 0.5);
+    margin-top: 0;
+    margin-bottom: 1rem;
 }
 
 i {

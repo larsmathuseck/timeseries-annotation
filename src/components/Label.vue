@@ -1,13 +1,13 @@
 <template>
     <div class="col-auto"
     :style="{ background: label.color }">
-        <p>
+        <label>
             {{ label.name }}
-        </p>
+        </label>
     </div>
-    <p class="label-active" v-show="label.id === activeLabel.id">
+    <label class="label-active" v-show="label.id === activeLabel.id">
         Active
-    </p>
+    </label>
 </template>
 
 <script>
@@ -35,7 +35,7 @@ export default {
     align-items: center;
 }
 
-p {
+label {
     font-family: Tahoma;
     font-size: 1rem;
     font-weight: bold;
