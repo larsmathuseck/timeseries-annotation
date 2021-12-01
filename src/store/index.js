@@ -107,20 +107,26 @@ export default createStore({
         },
         deleteSelectedAxis(state, axis) {
             if (state.selectedAxes.length <= 1) {
-                alert("At least 1 axis must be selected!")
+                alert("At least 1 axis must be selected!");
                 return;
             }
-            const index = state.selectedAxes.indexOf(axis.id)
+            const index = state.selectedAxes.indexOf(axis.id);
             if (index > -1) {
-                state.selectedAxes.splice(index, 1)
+                state.selectedAxes.splice(index, 1);
             }
         },
         addLabel(state, label) {
-            const labelNumber = label.id
-            state.labels[labelNumber] = label
+            const labelNumber = label.id;
+            state.labels[labelNumber] = label;
         },
         toggleActiveLabel(state, label) {
             state.activeLabel = label;
+        },
+        deleteLabel(state, label) {
+            let labels = state.labels;
+            const key = Object.keys(labels).find(key => labels[key] === label);
+            this.commit("deleteAnnotationsWithLabel", key);
+            delete labels[key];
         },
         deleteAnnotation(state, annotation) {
             const index = state.annotations.indexOf(annotation);
@@ -128,6 +134,15 @@ export default createStore({
                 state.annotations.splice(index, 1);
             }
         },
+        deleteAnnotationsWithLabel(state, labelKey) {
+            let annotations = state.annotations;
+            for (let key in annotations) {
+                if (annotations[key].label == labelKey) {
+                    this.commit("deleteAnnotation", annotations[key])
+                }
+            }
+
+        }
     },
     getters: {
         getData: state => {

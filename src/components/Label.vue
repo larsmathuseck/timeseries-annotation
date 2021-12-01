@@ -3,6 +3,7 @@
     :style="{ background: label.color }">
         <label>
             {{ label.name }}
+        <i @click="deleteLabel(label)" class="fa fa-times"></i>
         </label>
     </div>
     <label class="label-active" v-show="label.id === activeLabel.id">
@@ -19,6 +20,11 @@ export default {
     computed: {
         activeLabel: function() {
             return this.$store.state.activeLabel;
+        }
+    },
+    methods: {
+        deleteLabel: function(label) {
+            this.$store.commit("deleteLabel", label)
         }
     }
 }
@@ -46,6 +52,7 @@ label {
 
 .label-active {
     text-align: right;
+    display: block;
     color: rgb(128, 128, 128, 0.5);
 }
 </style>

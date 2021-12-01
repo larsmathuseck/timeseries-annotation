@@ -183,4 +183,13 @@ div.absolute {
     margin: 2px;
     color: gray;
 }
+
+.fa-times {
+    opacity: 0.5;
+}
+
+.fa-times:hover {
+    opacity: 1;
+    cursor: pointer;
+}
 </style>

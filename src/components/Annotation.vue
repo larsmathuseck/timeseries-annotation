@@ -55,12 +55,4 @@ i {
     margin-left: 5px;
 }
 
-.fa-times {
-    opacity: 0.5;
-}
-
-.fa-times:hover {
-    opacity: 1;
-    cursor: pointer;
-}
 </style>
