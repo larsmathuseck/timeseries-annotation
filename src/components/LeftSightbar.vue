@@ -3,12 +3,13 @@
         <p @click="test" class="description-text" >Add Y-Axis</p>
         <p class="description-text-sm">Add Y-axis to show</p>
         <div class="select" >
-            <select v-model="lastSelectedAxis" class="form-select" @change="addSelectedAxis()">
+            <select v-model="lastSelectedAxis" class="form-select" @click="addSelectedAxis($events)">
                 <option v-for="axis in axes" :key="axis.id" v-bind:value="axis">
                     {{ axis.name }}
                 </option>
             </select>
             <div class="colorpicker-container">
+                <input type="hidden" @focusout="this.showColorPicker = false"/>
                 <ColorPicker :colorForAxis="true" @axis-color-picked="setSelectedAxisColor" v-show="showColorPicker"/>
             </div>
         </div>
@@ -89,7 +90,8 @@ export default {
         }
     },
     methods: {
-        addSelectedAxis() {
+        addSelectedAxis(event) {
+            console.log(event);
             this.showColorPicker = true;
         },
         setSelectedAxisColor(color) {

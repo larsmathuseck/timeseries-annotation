@@ -11,6 +11,16 @@ export default createStore({
                 id: 1,
                 label: 1,
                 timestamp: "2019-07-12 12:08:27.872"
+            },
+            {
+                id: 2,
+                label: 2,
+                timestamp: "2019-07-12 12:09:27.872"
+            },
+            {
+                id: 3,
+                label: 2,
+                timestamp: "2019-07-12 12:09:10.872"
             }
         ],
         //labels: [],
