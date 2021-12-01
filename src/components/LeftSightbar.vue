@@ -41,7 +41,7 @@
         </span>
         <AddLabel @labelCreated="onLabelCreated" v-show="showAddLabel"/>
         <label class="description-text-sm">Select Labels to annotate Chart</label>
-        <div class="label-container" v-for="label in this.labels" :key="label.name" @click="labelOnClick(label)" >
+        <div class="label-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
             <Label :label="label" />
         </div>
     </div>

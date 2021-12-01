@@ -1,29 +1,26 @@
 <template>
-    <div class="col-auto" :style="{ background: annotationLabel.color }">
-        <label class="annotationLabel-name">
-            {{ annotationNumber }}
-            {{ annotationLabel.name }}
-        <i @click="deleteAnnotationLabel(annotationLabel)" class="fa fa-times"></i>
+    <div class="col-auto" :style="{ background: annotation.color }">
+        <label class="annotation-name">
+            {{ annotation.name }}
+        <i @click="deleteAnnotation(annotation)" class="fa fa-times"></i>
         </label>
     </div>
-    <label class="annotationLabel-timestamp">
-        {{ annotationLabel.timestamp }}
+    <label class="annotation-timestamp">
+        {{ annotation.timestamp }}
     </label>
 </template>
 
 <script>
 export default {
-    name: "AnnotationLabel",
+    name: "Annotation",
     props: {
-        annotationLabel: Object,
-        annotationNumber: Number,
+        annotation: Object,
     },
     methods: {
-        deleteAnnotationLabel(annotationLabel) {
-            this.$store.commit("deleteAnnotationLabel", annotationLabel)
+        deleteAnnotation(annotation) {
+            this.$store.commit("deleteAnnotation", annotation.annotationObject)
         }
     },
-    emits: ["delete-annotation-label"]
 }
 </script>
 
@@ -38,7 +35,7 @@ export default {
     padding: 5px 10px 5px 10px;
 }
 
-.annotationLabel-name {
+.annotation-name {
     font-family: Tahoma;
     font-size: 1rem;
     font-weight: bold;
@@ -46,7 +43,7 @@ export default {
     margin: 0px;
 }
 
-.annotationLabel-timestamp {
+.annotation-timestamp {
     text-align: right;
     display: block;
     color: rgb(128, 128, 128, 0.5);

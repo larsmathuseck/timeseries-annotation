@@ -11,7 +11,27 @@ export default createStore({
                 id: 1,
                 label: 1,
                 timestamp: "2019-07-12 12:08:27.872"
-            }
+            },
+            {
+                id: 2,
+                label: 2,
+                timestamp: "2019-07-12 12:08:27.872"
+            },
+            {
+                id: 3,
+                label: 3,
+                timestamp: "2019-07-12 12:08:27.872"
+            },
+            {
+                id: 4,
+                label: 4,
+                timestamp: "2019-07-12 12:08:27.872"
+            },
+            {
+                id: 5,
+                label: 1,
+                timestamp: "2019-07-12 12:08:27.872"
+            },
         ],
         //labels: [],
         labels: {
@@ -42,39 +62,6 @@ export default createStore({
             },
         },
         activeLabel: Object,
-        //annotationLabels: [],
-        annotationLabels: [
-            {
-                id: 1,
-                name: "openOrClosed",
-                color: "red",
-                timestamp: "12:08:28",
-            },
-            {
-                id: 2,
-                name: "tilted_opening",
-                color: "orange",
-                timestamp: "12:08:32",
-            },
-            {
-                id: 3,
-                name: "tilted",
-                color: "yellow",
-                timestamp: "12:08:32",
-            },
-            {
-                id: 4,
-                name: "tilted_closing",
-                color: "green",
-                timestamp: "12:08:35",
-            },
-            {
-                id: 5,
-                name: "openOrClosed",
-                color: "red",
-                timestamp: "12:08:36",
-            },
-        ],
     },
     mutations: {
         loadData: (state, csvData) => {
@@ -135,10 +122,10 @@ export default createStore({
         toggleActiveLabel(state, label) {
             state.activeLabel = label;
         },
-        deleteAnnotationLabel(state, annotationLabel) {
-            const index = state.annotationLabels.indexOf(annotationLabel);
+        deleteAnnotation(state, annotation) {
+            const index = state.annotations.indexOf(annotation);
             if (index > -1) {
-                state.annotationLabels.splice(index, 1);
+                state.annotations.splice(index, 1);
             }
         },
     },
@@ -156,6 +143,7 @@ export default createStore({
                     timestamp: annotations[key].timestamp,
                     name: labels[annotations[key].label].name,
                     color: labels[annotations[key].label].color,
+                    annotationObject: annotations[key],
                 })
             }
             return data;

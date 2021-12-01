@@ -7,24 +7,24 @@
             List of Annotations
         </label>
         <div id="scroll-container" class="mh-50">
-            <div class="annotation-container" v-for="annotationLabel in annotationLabels" :key="annotationLabel.id">
-                <AnnotationLabel :annotationLabel="annotationLabel" />
+            <div class="annotation-container" v-for="annotation in annotations" :key="annotation.id">
+                <Annotation :annotation="annotation" />
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import AnnotationLabel from "./AnnotationLabel.vue"
+import Annotation from "./Annotation.vue"
 
 export default {
     name: "RightSightbar",
     components: {
-        AnnotationLabel,
+        Annotation,
     },
     computed: {
-        annotationLabels: function() {
-            return this.$store.state.annotationLabels;
+        annotations: function() {
+            return this.$store.getters.getAnnotaions;
         }
     },
 }
