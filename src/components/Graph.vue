@@ -134,7 +134,7 @@ export default {
                 },
                 xAxis: {
                     type: "time",
-                    data: this.$store.state.timestamps,
+                    data: this.$store.getters.timestamps,
                 },
                 yAxis: {
                     type: "value",

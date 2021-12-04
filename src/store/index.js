@@ -4,8 +4,7 @@ import { parse } from "@vanillaes/csv";
 export default createStore({
     state: {
         data: [],
-        timestamps: [],
-        selectedAxes: [],
+        currentSelectedData: 0,
         annotations: [
             {
                 id: 1,
@@ -87,8 +86,8 @@ export default createStore({
         ],
     },
     mutations: {
-        loadData: (state, csvData) => {
-            let data = parse(csvData);
+        addData: (state, payload) => {
+            let data = parse(payload.result);
             let legende = data.shift();
             let timestamps = [];
             let dataJson = [];
@@ -120,22 +119,27 @@ export default createStore({
                         dataJson[column].dataPoints.push([timestamps[row], data[row][column]]);   
                     }
                 }
-                state.data = dataJson;
-                state.timestamps = timestamps;
-                state.selectedAxes.push(dataJson[0].id);
+                state.data.push({
+                    id: state.data.length,
+                    name: payload.name,
+                    dataPoints: dataJson,
+                    timestamps: timestamps,
+                    selectedAxes: [dataJson[0].id],
+                });
             }
         },
         addSelectedAxes: (state, axis) => {
-            state.selectedAxes.push(axis.id);
+            state.data[state.currentSelectedData].selectedAxes.push(axis.id);
         },
         deleteSelectedAxis(state, axis) {
-            if (state.selectedAxes.length <= 1) {
+            let selectedAxes = state.data[state.currentSelectedData].selectedAxes;
+            if (selectedAxes.length <= 1) {
                 alert("At least 1 axis must be selected!")
                 return;
             }
-            const index = state.selectedAxes.indexOf(axis.id)
+            const index = selectedAxes.indexOf(axis.id)
             if (index > -1) {
-                state.selectedAxes.splice(index, 1)
+                selectedAxes.splice(index, 1)
             }
         },
         addLabel(state, label) {
@@ -150,10 +154,16 @@ export default createStore({
                 state.annotationLabels.splice(index, 1);
             }
         },
+        selectDataFile(state, dataFileId){
+            state.currentSelectedData = dataFileId;
+        }
     },
     getters: {
         getData: state => {
-            return state.data.filter(key => state.selectedAxes.includes(key.id));
+            if(state.data.length > 0){
+                return state.data[state.currentSelectedData].dataPoints.filter(key => state.data[state.currentSelectedData].selectedAxes.includes(key.id));
+            }
+            return [];
         },
         getAnnotaions: state => {
             let data = [];
@@ -168,6 +178,24 @@ export default createStore({
                 })
             }
             return data;
+        },
+        getAxes: state => {
+            if(state.data.length > 0){
+                return state.data[state.currentSelectedData].dataPoints;
+            }
+            return [];
+        },
+        timestamps: state => {
+            if(state.data.length > 0){
+                return state.data[state.currentSelectedData].timestamps;
+            }
+            return [];
+        },
+        selectedAxes: state => {
+            if(state.data.length > 0){
+                return state.data[state.currentSelectedData].selectedAxes;
+            }
+            return [];
         }
     },
     modules: {

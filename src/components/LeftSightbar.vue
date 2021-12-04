@@ -1,5 +1,16 @@
 <template>
     <div class="row">
+        <p @click="test" class="description-text" >Select Data File</p>
+        <p class="description-text-sm">Select data file to use</p>
+        <div class="select" >
+            <select v-model="lastSelectedData" class="form-select" @change="selectDataFile()">
+                <option v-for="row in data" :key="row.id" v-bind:value="row.id">
+                    {{ row.name }}
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
         <p @click="test" class="description-text" >Add Y-Axis</p>
         <p class="description-text-sm">Add Y-axis to show</p>
         <div class="select" >
@@ -67,16 +78,20 @@ export default {
     data() {
         return {
             lastSelectedAxis: Object,
+            lastSelectedData: this.$store.state.currentSelectedData,
             showColorPicker: false,
             showAddLabel: false,
         }
     },
     computed: {
-        axes: function() {
+        data: function() {
             return this.$store.state.data;
         },
+        axes: function() {
+            return this.$store.getters.getAxes;
+        },
         selectedAxes: function() {
-            let selectedIds = this.$store.state.selectedAxes;
+            let selectedIds = this.$store.getters.selectedAxes;
             let selected = [];
             this.axes.forEach(axis => {
                 if(selectedIds.includes(axis.id)){
@@ -90,8 +105,7 @@ export default {
         }
     },
     methods: {
-        addSelectedAxis(event) {
-            console.log(event);
+        addSelectedAxis() {
             this.showColorPicker = true;
         },
         setSelectedAxisColor(color) {
@@ -108,6 +122,9 @@ export default {
         onLabelCreated(label) {
             this.$store.commit('addLabel', label)
             this.toggleShowAddLabel();
+        },
+        selectDataFile() {
+            this.$store.commit("selectDataFile", this.lastSelectedData);
         }
     },
     emits: ["delete-selected-axis", "axis-color-picked", "toggle-active-label", "labelCreated"],
