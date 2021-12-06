@@ -5,52 +5,10 @@ export default createStore({
     state: {
         data: [],
         currentSelectedData: 0,
-        annotations: [
-            {
-                id: 1,
-                label: 1,
-                timestamp: "2019-07-12 12:08:27.872"
-            },
-            {
-                id: 2,
-                label: 2,
-                timestamp: "2019-07-12 12:09:27.872"
-            },
-            {
-                id: 3,
-                label: 2,
-                timestamp: "2019-07-12 12:09:10.872"
-            }
-        ],
-        //labels: [],
-        labels: {
-            1: {
-                id: 1,
-                name: "openOrClosed",
-                color: "red",
-            },
-            2: {
-                id: 2,
-                name: "tilted_opening",
-                color: "orange",
-            },
-            3: {
-                id: 3,
-                name: "tilted",
-                color: "yellow",
-            },
-            4: {
-                id: 4,
-                name: "tilted_closing",
-                color: "teal",
-            },
-            5: {
-                id: 5,
-                name: "end",
-                color: "green",
-            },
-        },
+        annotations: [],
+        currAnn: 0,
         activeLabel: Object,
+        colors: ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
         //annotationLabels: [],
         annotationLabels: [
             {
@@ -103,7 +61,7 @@ export default createStore({
                         id: i,
                         name: legende[i],
                         dataPoints: [],
-                        color: "#000000",
+                        color: state.colors[Math.floor(Math.random() * state.colors.length)],
                     });
                 }
             }
@@ -128,6 +86,55 @@ export default createStore({
                 });
             }
         },
+        addAnnotationData: (state, payload) => {
+            let data = parse(payload.result);
+            let legende = data.shift();
+            let labels = {};
+            let newestLabelId = 0;
+            let dataArray = [];
+
+            // Get Timestamp and Label location
+            let timestampLocation = -1;
+            let labelLocation = -1;
+            for(let i = 0; i < legende.length; i++){
+                if(legende[i].toLowerCase() == "timestamp"){
+                    timestampLocation = i;
+                }
+                else if(legende[i].toLowerCase() == "label"){
+                    labelLocation = i;
+                }
+            }
+
+            for(let i = 0; i < data.length; i++){
+                let label = null;
+                for(let key in labels){
+                    if(labels[key].name === data[i][labelLocation]){
+                        label = labels[key];
+                    }
+                }
+                if(label == null){
+                    label = {
+                        id: newestLabelId,
+                        name: data[i][labelLocation],
+                        color: state.colors[Math.floor(Math.random() * state.colors.length)],
+                    }
+                    labels[`${newestLabelId}`] = label;
+                    newestLabelId += 1;
+                }
+                dataArray.push({
+                    id: i,
+                    label: label.id,
+                    timestamp: data[i][timestampLocation],
+                });
+            }
+
+            state.annotations.push({
+                id: state.annotations.length,
+                name: payload.name,
+                data: dataArray,
+                labels: labels,
+            });
+        },
         addSelectedAxes: (state, axis) => {
             state.data[state.currentSelectedData].selectedAxes.push(axis.id);
         },
@@ -143,7 +150,7 @@ export default createStore({
             }
         },
         addLabel(state, label) {
-            state.labels.push(label);
+            state.annotations[state.currAnn].labels.push(label);
         },
         toggleActiveLabel(state, label) {
             state.activeLabel = label;
@@ -156,6 +163,9 @@ export default createStore({
         },
         selectDataFile(state, dataFileId){
             state.currentSelectedData = dataFileId;
+        },
+        selectAnnotationFile(state, annotationFileId){
+            state.currAnn = annotationFileId;
         }
     },
     getters: {
@@ -167,14 +177,14 @@ export default createStore({
         },
         getAnnotaions: state => {
             let data = [];
-            let annotations = state.annotations;
-            let labels = state.labels;
-            for(let key in annotations){
+            let annotations = state.annotations[state.currAnn];
+            let labels = annotations?.labels;
+            for(let key in annotations?.data){
                 data.push({
-                    id: annotations[key].id,
-                    timestamp: annotations[key].timestamp,
-                    name: labels[annotations[key].label].name,
-                    color: labels[annotations[key].label].color,
+                    id: annotations.data[key].id,
+                    timestamp: annotations.data[key].timestamp,
+                    name: labels[annotations.data[key].label].name,
+                    color: labels[annotations.data[key].label].color,
                 })
             }
             return data;
@@ -196,6 +206,9 @@ export default createStore({
                 return state.data[state.currentSelectedData].selectedAxes;
             }
             return [];
+        },
+        getLabels: state => {
+            return state.annotations[state.currAnn]?.labels;
         }
     },
     modules: {

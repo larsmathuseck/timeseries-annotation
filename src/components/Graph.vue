@@ -122,13 +122,13 @@ export default {
                     trigger: "axis",
                     formatter: '{b0}',
                 },
-                toolbox: {
-                    feature: {
-                        dataZoom: {
-                            yAxisIndex: "none",
-                        },
-                    },
-                },
+                // toolbox: {
+                //     feature: {
+                //         dataZoom: {
+                //             yAxisIndex: "none",
+                //         },
+                //     },
+                // },
                 legend: {
                     data: legende
                 },

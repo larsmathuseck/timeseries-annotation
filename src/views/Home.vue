@@ -3,8 +3,7 @@
         <Header title="TF Annotator" />
         <div class="row">
             <div class="col col-2">
-                <LeftSightbar
-                :annotationFiles="annotationFiles" />
+                <LeftSightbar/>
             </div>
             <div class="col col-8">
                 <graph v-if="showGraph" class="chart" />

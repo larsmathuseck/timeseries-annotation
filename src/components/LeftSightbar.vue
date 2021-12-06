@@ -34,9 +34,9 @@
     <div class="row">
         <p class="description-text" >Annotation Files</p>
         <p class="description-text-sm">Select file to annotate Chart</p>
-        <div class="selec" >
-            <select class="form-select">
-                <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" >
+        <div class="select" >
+            <select v-model="lastSelectedAnnotation" class="form-select" @change="selectAnnotationFile()">
+                <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" v-bind:value="annotationFile.id">
                     {{ annotationFile.name }}
                 </option>
             </select>
@@ -72,13 +72,11 @@ export default {
         AddLabel,
         Label,
     },
-    props: {
-        annotationFiles: Array,
-    },
     data() {
         return {
             lastSelectedAxis: Object,
             lastSelectedData: this.$store.state.currentSelectedData,
+            lastSelectedAnnotation: this.$store.state.currAnn,
             showColorPicker: false,
             showAddLabel: false,
         }
@@ -101,8 +99,11 @@ export default {
             return selected;
         },
         labels: function() {
-            return this.$store.state.labels;
-        }
+            return this.$store.getters.getLabels;
+        },
+        annotationFiles: function() {
+            return this.$store.state.annotations;
+        },
     },
     methods: {
         addSelectedAxis() {
@@ -125,6 +126,9 @@ export default {
         },
         selectDataFile() {
             this.$store.commit("selectDataFile", this.lastSelectedData);
+        },
+        selectAnnotationFile() {
+            this.$store.commit("selectAnnotationFile", this.lastSelectedAnnotation);
         }
     },
     emits: ["delete-selected-axis", "axis-color-picked", "toggle-active-label", "labelCreated"],

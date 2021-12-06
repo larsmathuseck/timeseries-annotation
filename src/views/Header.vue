@@ -52,7 +52,7 @@ export default {
                             this.$store.commit("addData", {result: reader.result, name: file.name});
                         }
                         else if(file.name.includes("annotation") || file.name.includes("labels")){
-                            //console.log(reader.result);
+                            this.$store.commit("addAnnotationData", {result: reader.result, name: file.name});
                         }
                     }
                 }
