@@ -56,8 +56,9 @@ export default {
             e.preventDefault()
             const labels = this.$store.state.labels;
             const labelsLength = Object.keys(labels).length;
+            const lastLabel = labels[labelsLength]
             const label = {
-                id: labelsLength + 1,
+                id: lastLabel.id + 1,
                 name: this.labelName,
                 color: this.labelColor,
             }

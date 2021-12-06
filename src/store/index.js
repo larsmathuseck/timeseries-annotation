@@ -116,8 +116,7 @@ export default createStore({
             }
         },
         addLabel(state, label) {
-            console.log(Object.keys(state.labels).length)
-            const labelNumber = Object.keys(state.labels).length;
+            const labelNumber = label.id
             state.labels[labelNumber+1] = label;
         },
         toggleActiveLabel(state, label) {
