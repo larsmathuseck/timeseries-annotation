@@ -1,17 +1,13 @@
 <template>
-    <div class="modal fade" ref="exampleModal" tabindex="-1" aria-hidden="false" @focusout="test">
-        <div class="modal-dialog">
+    <div class="modal fade" ref="exampleModal" tabindex="-1" aria-hidden="false">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                    <button type="button" class="btn-close" @click="modal.hide()" aria-label="Close"></button>
+                    <h5 class="modal-title" id="exampleModalLabel">Add Label</h5>
+                    <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                krass
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @click="modal.hide()">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <AddLabel @labelCreated="onLabelCreated"/>
                 </div>
             </div>
         </div>
@@ -19,12 +15,16 @@
 </template>
 
 <script>
+import AddLabel from "./AddLabel.vue"
 import { Modal } from 'bootstrap'
 
 export default {
     name: "LabelModal",
+    components: {
+        AddLabel,
+    },
     props: {
-        modalVisible: Boolean,
+        toggleModalVisibility: Boolean,
     },
     data() {
         return {
@@ -32,12 +32,21 @@ export default {
         }
     },
     methods: {
-        test: function() {
-            console.log("hier")
-        }
+        closeModal: function() {
+            this.modal.hide();
+        },
+        onLabelCreated(label) {
+            this.$store.commit('addLabel', label);
+            this.modal.hide();
+        },
     },
     watch: {
-        modalVisible: function() {
+        toggleModalVisibility: function() {
+            /*if (this.modalVisible === true) {
+                this.modal.show();
+            } else if(this.modalVisible === false) {
+                this.modal.hide();
+            }*/
             this.modal.show();
         }
     },
@@ -47,3 +56,9 @@ export default {
     },
 }
 </script>
+
+<style scoped>
+.modal-body {
+    padding: 0px;
+}
+</style>

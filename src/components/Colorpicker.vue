@@ -1,5 +1,5 @@
 <template>
-    <div class="row absolute" >
+    <div class="row absolute">
         <div class="col">
             <span class="dot" v-for="color in colors" :key="color" :style="{ background: color }" @click="colorPicked(color)" />
         </div>

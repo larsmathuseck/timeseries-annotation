@@ -9,21 +9,26 @@
         <div class="row">
             <div class="col-auto text-start">
                 <label for="validationLabelColor" class="form-label description-text-sm">Label Color:</label>
-                <div class="input-group">
-                    <input type="text" v-model="labelColor" class="form-control" id="validationLabelColor" required>
-                    <div class="input-group-append">
+                <div class="row">
+                    <div class="col-auto" id="colorInputContainer">
+                        <input type="text" v-model="labelColor" class="form-control" id="validationLabelColor" required>
+                    </div>
+                    <div class="col-auto" id="submitButtonContainer">
                         <button id="colorButton" class="btn rounded" type="button" @click="showColorPicker = !showColorPicker">
                             <i class="fa fa-tint" />
                         </button>
                     </div>
-                    <ColorPicker @labelColorPicked="colorPicked" :colorForAxis="false" v-show="showColorPicker"/>
                 </div>
             </div>
         </div>
-        <div id="buttonRow" class="row">
-            <div class="col text-center">
-                <button id="submitButton" class="btn btn-primary" type="submit">Add Label</button>
+        <div class="row">
+            <div class="col">
+                <ColorPicker @labelColorPicked="colorPicked" :colorForAxis="false" v-show="showColorPicker"/> 
             </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="closeModal">Close</button>
+            <button id="submitButton" class="btn btn-primary" type="submit">Save</button>
         </div>
     </form>
 </template>
@@ -66,12 +71,8 @@ export default {
 </script>
 
 <style scoped>
-
 .form-container {
-    padding: 10px;
-    margin: 12px;
-    border: 1.5px solid rgb(128, 128, 128, 0.5);
-    border-radius: 30px;
+    padding: 16px;
 }
 
 #buttonRow {
@@ -89,10 +90,30 @@ export default {
     opacity: 1;
 }
 
+#colorInputContainer {
+    padding-right: 0px;
+}
+
+#submitButtonContainer {
+    padding-left: 0px;
+}
+
 
 .fa {
     height: 10px;
     width: 10px;
     color: white;
+}
+
+.colorpicker-container {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+}
+
+.modal-footer {
+    margin-top: 25px;
 }
 </style>

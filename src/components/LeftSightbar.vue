@@ -39,22 +39,19 @@
                 <i class="fa fa-plus"></i>
             </button>
         </span>
-        <AddLabel @labelCreated="onLabelCreated" v-show="showAddLabel"/>
         <label class="description-text-sm">Select Labels to annotate Chart</label>
         <div class="label-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
             <Label :label="label" />
         </div>
     </div>
-    <LabelModal :modalVisible="modalVisible" />
+    <LabelModal :toggleModalVisibility="toggleModalVisibility" @closeModal="closeModal" />
 </template>
 
 <script>
 import SelectedAxis from "./SelectedAxis.vue"
 import ColorPicker from "./Colorpicker.vue"
-import AddLabel from "./AddLabel.vue"
 import Label from "./Label.vue"
 import LabelModal from "./LabelModal.vue"
-//import { Modal } from 'bootstrap'
 
 
 export default {
@@ -62,7 +59,6 @@ export default {
     components: {
         SelectedAxis,
         ColorPicker,
-        AddLabel,
         Label,
         LabelModal,
     },
@@ -74,7 +70,7 @@ export default {
             lastSelectedAxis: Object,
             showColorPicker: false,
             showAddLabel: false,
-            modalVisible: false,
+            toggleModalVisibility: false,
         }
     },
     computed: {
@@ -109,20 +105,14 @@ export default {
         labelOnClick(label) {
             this.$store.commit("toggleActiveLabel", label);
         },
-        toggleShowAddLabel() {
-            this.showAddLabel = !this.showAddLabel;
-        },
-        onLabelCreated(label) {
-            this.$store.commit('addLabel', label)
-            this.toggleShowAddLabel();
-        },
         showModal() {
-            this.modalVisible = true;
-        }
+            this.toggleModalVisibility = !this.toggleModalVisibility;
+        },
+        closeModal() {
+            console.log("close modal")
+            this.modalVisible = false;
+        },
     },
-    /*mounted() {
-        this.modal = new Modal(this.$refs.exampleModal)
-    },*/
     emits: ["delete-selected-axis", "axis-color-picked", "toggle-active-label", "labelCreated"],
 }
 </script>
