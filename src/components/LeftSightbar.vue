@@ -3,7 +3,7 @@
         <label @click="test" class="description-text" >Add Y-Axis</label>
         <label class="description-text-sm">Add Y-axis to show</label>
         <div class="select" >
-            <select v-model="lastSelectedAxis" class="form-select" @click="addSelectedAxis()">
+            <select v-model="lastSelectedAxis" class="form-select" @click="addSelectedAxis($event)">
                 <option v-for="axis in axes" :key="axis.id" v-bind:value="axis">
                     {{ axis.name }}
                 </option>
@@ -35,7 +35,7 @@
     <div class="row">
         <span class="description-text" >
             <label>Labels</label>
-            <button type="button" class="btn btn-default btn-circle" @click="toggleShowAddLabel">
+            <button type="button" class="btn btn-default btn-circle" @click="showModal">
                 <i class="fa fa-plus"></i>
             </button>
         </span>
@@ -45,29 +45,7 @@
             <Label :label="label" />
         </div>
     </div>
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" @click="modal.show()">
-        Launch demo modal
-    </button>
-
-    <!-- Modal -->
-    <div class="modal fade" ref="exampleModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                    <button type="button" class="btn-close" @click="modal.hide()" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                ...
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @click="modal.hide()">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <LabelModal :modalVisible="modalVisible" />
 </template>
 
 <script>
@@ -75,7 +53,8 @@ import SelectedAxis from "./SelectedAxis.vue"
 import ColorPicker from "./Colorpicker.vue"
 import AddLabel from "./AddLabel.vue"
 import Label from "./Label.vue"
-import { Modal } from 'bootstrap'
+import LabelModal from "./LabelModal.vue"
+//import { Modal } from 'bootstrap'
 
 
 export default {
@@ -85,6 +64,7 @@ export default {
         ColorPicker,
         AddLabel,
         Label,
+        LabelModal,
     },
     props: {
         annotationFiles: Array,
@@ -94,7 +74,7 @@ export default {
             lastSelectedAxis: Object,
             showColorPicker: false,
             showAddLabel: false,
-            modal: null,
+            modalVisible: false,
         }
     },
     computed: {
@@ -116,8 +96,10 @@ export default {
         }
     },
     methods: {
-        addSelectedAxis() {
-            this.showColorPicker = true;
+        addSelectedAxis(event) {
+            if (event.target.value !== "" ) {
+                this.showColorPicker = true;
+            }
         },
         setSelectedAxisColor(color) {
             this.lastSelectedAxis.color = color
@@ -133,11 +115,14 @@ export default {
         onLabelCreated(label) {
             this.$store.commit('addLabel', label)
             this.toggleShowAddLabel();
+        },
+        showModal() {
+            this.modalVisible = true;
         }
     },
-    mounted() {
+    /*mounted() {
         this.modal = new Modal(this.$refs.exampleModal)
-    },
+    },*/
     emits: ["delete-selected-axis", "axis-color-picked", "toggle-active-label", "labelCreated"],
 }
 </script>
