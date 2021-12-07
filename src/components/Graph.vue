@@ -1,6 +1,7 @@
 <template>
-    <!--<input type="file" ref="fileInput" webkitdirectory directory multiple v-on:change="onFileChange">-->
-    <v-chart v-if="showGraph" class="chart" :option="option" />
+    <div @click="chartClicked">
+        <v-chart ref="charts" v-if="showGraph" class="chart" :option="option" @datazoom="zoom" />
+    </div>
 </template>
 
 <script>
@@ -14,6 +15,8 @@ import {
     ToolboxComponent,
     GridComponent,
     DataZoomComponent,
+    MarkLineComponent,
+    MarkPointComponent,
 } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
 
@@ -26,6 +29,8 @@ use([
     ToolboxComponent,
     DataZoomComponent,
     GridComponent,
+    MarkLineComponent,
+    MarkPointComponent,
 ]);
 
 export default {
@@ -35,98 +40,166 @@ export default {
     },
     data: function () {
         return {
-        showGraph: true,
+            showGraph: true,
+            dataZoomStart: 0,
+            dataZoomEnd: 100,
+            tempDataZoomStart: 0,
+            tempDataZoomEnd: 100,
         };
-    },
-    methods: {
-        
     },
     provide: {
         [THEME_KEY]: "light",
     },
+    methods: {
+        chartClicked: function (event) {
+            let pointInPixel = [event.offsetX, event.offsetY];
+            if (this.$refs.charts.containPixel("grid", pointInPixel)) {
+                let pointInGrid = this.$refs.charts.convertFromPixel("grid", pointInPixel);
+                this.$store.commit("addAnnotationPoint", Math.round(pointInGrid[0]));
+            }
+        },
+        zoom: function (event) {
+            if (event.start !== undefined && event.end !== undefined) {
+                this.tempDataZoomStart = event.start;
+                this.tempDataZoomEnd = event.end;
+            } else if (event.batch !== undefined) {
+                this.tempDataZoomStart = event.batch[0].start;
+                this.tempDataZoomEnd = event.batch[0].end;
+            }
+        }
+    },
     computed: {
         option: function () {
-        let series = [];
-        let graphData = this.$store.getters.getData;
-        let legende = [];
-        for(let key in graphData){
-            legende.push(graphData[key].name);
-            series.push({
-                name: graphData[key].name,
-                type: "line",
-                symbol: "none",
-                showSymbol: false,
-                itemStyle: {
-                    color: graphData[key].color,
-                },
-                data: graphData[key].dataPoints,
+            let series = [];
+            let graphData = this.$store.getters.getData;
+            let legende = [];
+            let annotations = this.$store.getters.getAnnotations;
+            let ann = annotations.map((x, i) => {
+                return {
+                    symbol: "pin",
+                    itemStyle: {
+                    color: x.color
+                    },
+                    name: (i + 1).toString() + " " + x.name,
+                    xAxis: new Date(x.timestamp),
+                    y: "15%"
+                };
             });
-        }
-
-        return {
-            tooltip: {
-                trigger: "axis",
-                formatter: '{b0}',
-            },
-            toolbox: {
-                feature: {
-                    dataZoom: {
-                    yAxisIndex: "none",
-                },
-            },
-            },
-            legend: {
-                data: legende
-            },
-            xAxis: {
-                type: "time",
-                data: this.$store.state.timestamps,
-            },
-            yAxis: {
-                type: "value",
-            },
-            dataZoom: [
-            {
-                type: "inside",
-                start: 0,
-                end: 100,
-                filterMode: "filter",
-            },
-            {
+            let ml = annotations.map(x => {
+                return {
+                    itemStyle: {
+                        color: x.color
+                    },
+                    xAxis: new Date(x.timestamp),
+                };
+            });
+            for(let key in graphData){
+                legende.push(graphData[key].name);
+                series.push({
+                    name: graphData[key].name,
+                    type: "line",
+                    showSymbol: false,
+                    emphasis: {
+                        scale: false,
+                    },
+                    itemStyle: {
+                        color: graphData[key].color,
+                        width: 1.5,
+                    },
+                    markPoint: {
+                        animation: true,
+                        symbol: "pin",
+                        label: {
+                            show: true,
+                            padding: 5,
+                            distance: 5,
+                            formatter: (value) => {
+                                return value.name.split(" ")[0];
+                            },
+                            color: "white"
+                        },
+                        data: ann,
+                    },
+                    markLine: {
+                        animation: true,
+                        silent: true,
+                        symbol: "none",
+                        label: { show: false},
+                        data: ml,
+                    },
+                    data: graphData[key].dataPoints,
+                });
+            }
+            return {
+                height: 500,
                 animation: true,
-                showDataShadow: true,
-                filterMode: "filter",
-                throttle: 100,
-                dataBackground: {
-                lineStyle: {
-                    color: "#" + (((1 << 24) * Math.random()) | 0).toString(16),
-                    width: 2.5,
+                responsive: true,
+                maintainAspectRatio: false,
+                clip: true,
+                sampling: "max",
+                series: series,
+                tooltip: {
+                    trigger: "axis",
+                    formatter: '{b0}',
                 },
-                areaStyle: {
-                    color: "#ffffff00",
+                // toolbox: {
+                //     feature: {
+                //         dataZoom: {
+                //             yAxisIndex: "none",
+                //         },
+                //     },
+                // },
+                legend: {
+                    data: legende
                 },
+                xAxis: {
+                    type: "time",
+                    data: this.$store.getters.timestamps,
                 },
-                height: 100,
-                bottom: 10,
-                show: true,
-                type: "slider",
-                start: 0,
-                end: 100,
-                handleSize: "70%",
-            },
-            ],
-            color: "#" + (((1 << 24) * Math.random()) | 0).toString(16),
-            height: 500,
-            animation: true,
-            responsive: true,
-            maintainAspectRatio: false,
-            clip: true,
-            sampling: "max",
-            series: series,
-        };
+                yAxis: {
+                    type: "value",
+                },
+                dataZoom: [
+                    {
+                        type: "inside",
+                        start: this.dataZoomStart,
+                        end: this.dataZoomEnd,
+                        filterMode: "filter",
+                    },
+                    {
+                        animation: true,
+                        showDataShadow: true,
+                        filterMode: "filter",
+                        throttle: 100,
+                        dataBackground: {
+                        lineStyle: {
+                            color: "green",
+                            width: 1.5,
+                        },
+                        areaStyle: {
+                            color: "#ffffff00",
+                        },
+                        },
+                        height: 100,
+                        bottom: 10,
+                        show: true,
+                        type: "slider",
+                        start: this.dataZoomStart,
+                        end: this.dataZoomEnd,
+                        handleSize: "70%",
+                    },
+                ],
+            };
         },
     },
-};
+    watch:{
+        option: function(){
+            this.$refs.charts.clear();
+            this.dataZoomStart = this.tempDataZoomStart;
+            this.dataZoomEnd = this.tempDataZoomEnd;
+        }
+    }
+}
 
 </script>
 

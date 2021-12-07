@@ -1,14 +1,26 @@
 <template>
     <div class="row">
-        <label @click="test" class="description-text" >Add Y-Axis</label>
-        <label class="description-text-sm">Add Y-axis to show</label>
+        <p @click="test" class="description-text" >Select Data File</p>
+        <p class="description-text-sm">Select data file to use</p>
         <div class="select" >
-            <select v-model="lastSelectedAxis" class="form-select" @click="addSelectedAxis($event)">
+            <select v-model="lastSelectedData" class="form-select" @change="selectDataFile()">
+                <option v-for="row in data" :key="row.id" v-bind:value="row.id">
+                    {{ row.name }}
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <p @click="test" class="description-text" >Add Y-Axis</p>
+        <p class="description-text-sm">Add Y-axis to show</p>
+        <div class="select" >
+            <select v-model="lastSelectedAxis" class="form-select" @click="addSelectedAxis($events)">
                 <option v-for="axis in axes" :key="axis.id" v-bind:value="axis">
                     {{ axis.name }}
                 </option>
             </select>
             <div class="colorpicker-container">
+                <input type="hidden" @focusout="this.showColorPicker = false"/>
                 <ColorPicker :colorForAxis="true" @axis-color-picked="setSelectedAxisColor" v-show="showColorPicker"/>
             </div>
         </div>
@@ -22,11 +34,11 @@
         </div>
     </div>
     <div class="row">
-        <label class="description-text" >Annotation Files</label>
-        <label class="description-text-sm">Select file to annotate Chart</label>
-        <div class="selec" >
-            <select class="form-select">
-                <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" >
+        <p class="description-text" >Annotation Files</p>
+        <p class="description-text-sm">Select file to annotate Chart</p>
+        <div class="select" >
+            <select v-model="lastSelectedAnnotation" class="form-select" @change="selectAnnotationFile()">
+                <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" v-bind:value="annotationFile.id">
                     {{ annotationFile.name }}
                 </option>
             </select>
@@ -62,12 +74,11 @@ export default {
         Label,
         LabelModal,
     },
-    props: {
-        annotationFiles: Array,
-    },
     data() {
         return {
             lastSelectedAxis: Object,
+            lastSelectedData: this.$store.state.currentSelectedData,
+            lastSelectedAnnotation: this.$store.state.currAnn,
             showColorPicker: false,
             showAddLabel: false,
             toggleModalVisibility: false,
@@ -75,11 +86,14 @@ export default {
         }
     },
     computed: {
-        axes: function() {
+        data: function() {
             return this.$store.state.data;
         },
+        axes: function() {
+            return this.$store.getters.getAxes;
+        },
         selectedAxes: function() {
-            let selectedIds = this.$store.state.selectedAxes;
+            let selectedIds = this.$store.getters.selectedAxes;
             let selected = [];
             this.axes.forEach(axis => {
                 if(selectedIds.includes(axis.id)){
@@ -89,8 +103,11 @@ export default {
             return selected;
         },
         labels: function() {
-            return this.$store.state.labels;
-        }
+            return this.$store.getters.getLabels;
+        },
+        annotationFiles: function() {
+            return this.$store.state.annotations;
+        },
     },
     methods: {
         addSelectedAxis(event) {
@@ -117,6 +134,16 @@ export default {
         closeModal() {
             this.modalVisible = false;
         },
+        onLabelCreated(label) {
+            this.$store.commit('addLabel', label)
+            this.toggleShowAddLabel();
+        },
+        selectDataFile() {
+            this.$store.commit("selectDataFile", this.lastSelectedData);
+        },
+        selectAnnotationFile() {
+            this.$store.commit("selectAnnotationFile", this.lastSelectedAnnotation);
+        }
     },
     emits: ["delete-selected-axis", "axis-color-picked", "toggle-active-label", "labelCreated", "editLabel"],
 }

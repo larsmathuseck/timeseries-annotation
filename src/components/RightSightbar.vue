@@ -23,8 +23,8 @@ export default {
         Annotation,
     },
     computed: {
-        annotations: function() {
-            return this.$store.getters.getAnnotaions;
+        annotationLabels: function() {
+            return this.$store.getters.getAnnotations;
         }
     },
 }
