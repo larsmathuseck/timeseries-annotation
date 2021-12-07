@@ -40,11 +40,11 @@
             </button>
         </span>
         <label class="description-text-sm">Select Labels to annotate Chart</label>
-        <div class="label-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
-            <Label :label="label" />
+        <div class="row label-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
+            <Label :label="label" @editLabel="editLabel" />
         </div>
     </div>
-    <LabelModal :toggleModalVisibility="toggleModalVisibility" @closeModal="closeModal" />
+    <LabelModal :toggleModalVisibility="toggleModalVisibility" :labelToEdit="labelToEdit" @closeModal="closeModal" />
 </template>
 
 <script>
@@ -71,6 +71,7 @@ export default {
             showColorPicker: false,
             showAddLabel: false,
             toggleModalVisibility: false,
+            labelToEdit: null,
         }
     },
     computed: {
@@ -105,15 +106,19 @@ export default {
         labelOnClick(label) {
             this.$store.commit("toggleActiveLabel", label);
         },
+        editLabel(label) {
+            this.labelToEdit = label;
+            this.toggleModalVisibility = !this.toggleModalVisibility;
+        },
         showModal() {
+            this.labelToEdit = null;
             this.toggleModalVisibility = !this.toggleModalVisibility;
         },
         closeModal() {
-            console.log("close modal")
             this.modalVisible = false;
         },
     },
-    emits: ["delete-selected-axis", "axis-color-picked", "toggle-active-label", "labelCreated"],
+    emits: ["delete-selected-axis", "axis-color-picked", "toggle-active-label", "labelCreated", "editLabel"],
 }
 </script>
 
@@ -162,6 +167,8 @@ div.absolute {
     padding: 12px;
     padding-left: 0px;
     border-bottom: 1.5px solid rgb(128, 128, 128, 0.5);
+    text-align: left;
+    
 }
 
 .label-container:hover {
@@ -192,6 +199,15 @@ div.absolute {
 }
 
 .fa-times:hover {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.fa-edit {
+    opacity: 0.5;
+}
+
+.fa-edit:hover {
     opacity: 1;
     cursor: pointer;
 }

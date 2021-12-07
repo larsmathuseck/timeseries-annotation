@@ -7,7 +7,7 @@
                     <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <AddLabel @labelCreated="onLabelCreated"/>
+                    <AddLabel :labelToEdit="labelToEdit" @labelCreated="onLabelCreated" @labelEdited="labelEdited" @closeModal="closeModal" />
                 </div>
             </div>
         </div>
@@ -25,6 +25,7 @@ export default {
     },
     props: {
         toggleModalVisibility: Boolean,
+        labelToEdit: Object,
     },
     data() {
         return {
@@ -39,16 +40,15 @@ export default {
             this.$store.commit('addLabel', label);
             this.modal.hide();
         },
+        labelEdited(label) {
+            this.$store.commit('editLabel', label);
+            this.modal.hide();
+        }
     },
     watch: {
         toggleModalVisibility: function() {
-            /*if (this.modalVisible === true) {
-                this.modal.show();
-            } else if(this.modalVisible === false) {
-                this.modal.hide();
-            }*/
             this.modal.show();
-        }
+        },
     },
 
     mounted() {

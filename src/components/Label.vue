@@ -3,12 +3,21 @@
     :style="{ background: label.color }">
         <label>
             {{ label.name }}
-        <i @click="deleteLabel(label)" class="fa fa-times"></i>
         </label>
     </div>
-    <label class="label-active" v-show="label.id === activeLabel.id">
-        Active
-    </label>
+    <div id="label-active-container" class="col-auto me-auto">
+        <label class="label-active" v-show="label.id === activeLabel.id">
+            Active
+        </label>
+    </div>
+    <div class="col-auto">
+        <button>
+            <i class="fa fa-edit" @click="editLabel(label)" />
+        </button>   
+        <button>
+            <i class="fa fa-times" @click="deleteLabel(label)" />
+        </button>
+    </div>
 </template>
 
 <script>
@@ -24,21 +33,25 @@ export default {
     },
     methods: {
         deleteLabel: function(label) {
-            this.$store.commit("deleteLabel", label)
+            this.$store.commit("deleteLabel", label);
+        },
+        editLabel: function(label) {
+            this.$emit("editLabel", label);
         }
-    }
+    },
+    emits: ["editLabel"],
 }
 </script>
 
 <style scoped>
 .col-auto {
-    border-radius: 10px;
-    height: fit-content;
+    text-align: center;
     width: fit-content;
+    height: fit-content;
+    border-radius: 10px;
     margin: 0px;
-    margin-left: 0px;
-    float:left; 
-    align-items: center;
+    padding: 0px;
+    display: inline-block;
 }
 
 label {
@@ -54,5 +67,19 @@ label {
     text-align: right;
     display: block;
     color: rgb(128, 128, 128, 0.5);
+}
+
+#label-active-container {
+    text-align: right;
+}
+
+button {
+    text-align: center;
+    background-color: rgb(255, 255, 255, 0);
+    border-color: rgb(255, 255, 255, 0);
+}
+
+.fa {
+    margin-top: 8px;
 }
 </style>

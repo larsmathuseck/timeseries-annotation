@@ -27,7 +27,7 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="closeModal">Close</button>
+            <button type="button" class="btn btn-secondary" @click="$emit('closeModal')">Close</button>
             <button id="submitButton" class="btn btn-primary" type="submit">Save</button>
         </div>
     </form>
@@ -40,6 +40,9 @@ export default {
     name: "AddLabel",
     components: { 
         ColorPicker,
+    },
+    props: {
+        labelToEdit: Object,
     },
     data() {
         return {
@@ -54,19 +57,44 @@ export default {
         },
         onSubmit(e) {
             e.preventDefault()
-            const labels = this.$store.state.labels;
-            const labelsLength = Object.keys(labels).length;
-            const lastLabel = labels[labelsLength]
-            const label = {
-                id: lastLabel.id + 1,
-                name: this.labelName,
-                color: this.labelColor,
+            if (this.labelToEdit === null) {
+                const labels = this.$store.state.labels;
+                const labelKeys = Object.keys(labels);
+                const lastKey = labelKeys.at(-1);
+                const lastLabel = labels[lastKey];
+                let newId = 0
+                if (Object.values(labels).length != 0) {
+                    newId = lastLabel.id +1;
+                }
+                const label = {
+                    id: newId,
+                    name: this.labelName,
+                    color: this.labelColor,
+                }
+                this.$emit("labelCreated", label)
+            } else {
+                const label = {
+                    id: this.labelToEdit.id,
+                    name: this.labelName,
+                    color: this.labelColor,
+                }
+                this.$emit("labelEdited", label)
             }
-            this.$emit("labelCreated", label)
             this.labelName = ""
             this.labelColor = ""
             this.showColorPicker = false;
         },
+    },
+    watch: {
+        labelToEdit: function() {
+            if (this.labelToEdit !== null) {
+                this.labelName = this.labelToEdit.name;
+                this.labelColor = this.labelToEdit.color;
+            } else {
+                this.labelName = "";
+                this.labelColor = "";
+            }
+        }
     }
 }
 </script>

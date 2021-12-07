@@ -116,8 +116,12 @@ export default createStore({
             }
         },
         addLabel(state, label) {
-            const labelNumber = label.id
-            state.labels[labelNumber+1] = label;
+            const labelNumber = label.id;
+            state.labels[labelNumber] = label;
+        },
+        editLabel(state, label) {
+            const labelNumber = label.id;
+            state.labels[labelNumber] = label;
         },
         toggleActiveLabel(state, label) {
             state.activeLabel = label;
@@ -127,8 +131,6 @@ export default createStore({
             const key = Object.keys(labels).find(key => labels[key] === label);
             this.commit("deleteAnnotationsWithLabel", key);
             delete labels[key];
-            console.log("delete label:", label)
-            console.log(state.labels)
         },
         deleteAnnotation(state, annotation) {
             const index = state.annotations.indexOf(annotation);
@@ -137,14 +139,12 @@ export default createStore({
             }
         },
         deleteAnnotationsWithLabel(state, labelKey) {
-            console.log("deleting all annos with: ", labelKey)
             let annotations = state.annotations;
             for (let key in annotations) {
                 if (annotations[key].label == labelKey) {
                     this.commit("deleteAnnotation", annotations[key])
                 }
             }
-            console.log(state.annotations)
         }
     },
     getters: {
