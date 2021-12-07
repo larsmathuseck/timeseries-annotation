@@ -5,7 +5,7 @@
             {{ label.name }}
         </p>
     </div>
-    <p class="label-active" v-show="label.id === activeLabel.id">
+    <p class="label-active" v-show="label.id === activeLabel?.id">
         Active
     </p>
 </template>

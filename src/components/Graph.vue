@@ -1,6 +1,7 @@
 <template>
-    <!--<input type="file" ref="fileInput" webkitdirectory directory multiple v-on:change="onFileChange">-->
-    <v-chart ref="charts" v-if="showGraph" class="chart" :option="option" />
+    <div @click="chartClicked">
+        <v-chart ref="charts" v-if="showGraph" class="chart" :option="option" @datazoom="zoom" />
+    </div>
 </template>
 
 <script>
@@ -40,13 +41,32 @@ export default {
     data: function () {
         return {
             showGraph: true,
+            dataZoomStart: 0,
+            dataZoomEnd: 100,
+            tempDataZoomStart: 0,
+            tempDataZoomEnd: 100,
         };
-    },
-    methods: {
-        
     },
     provide: {
         [THEME_KEY]: "light",
+    },
+    methods: {
+        chartClicked: function (event) {
+            let pointInPixel = [event.offsetX, event.offsetY];
+            if (this.$refs.charts.containPixel("grid", pointInPixel)) {
+                let pointInGrid = this.$refs.charts.convertFromPixel("grid", pointInPixel);
+                this.$store.commit("addAnnotationPoint", Math.round(pointInGrid[0]));
+            }
+        },
+        zoom: function (event) {
+            if (event.start !== undefined && event.end !== undefined) {
+                this.tempDataZoomStart = event.start;
+                this.tempDataZoomEnd = event.end;
+            } else if (event.batch !== undefined) {
+                this.tempDataZoomStart = event.batch[0].start;
+                this.tempDataZoomEnd = event.batch[0].end;
+            }
+        }
     },
     computed: {
         option: function () {
@@ -142,8 +162,8 @@ export default {
                 dataZoom: [
                     {
                         type: "inside",
-                        start: 0,
-                        end: 100,
+                        start: this.dataZoomStart,
+                        end: this.dataZoomEnd,
                         filterMode: "filter",
                     },
                     {
@@ -164,8 +184,8 @@ export default {
                         bottom: 10,
                         show: true,
                         type: "slider",
-                        start: 0,
-                        end: 100,
+                        start: this.dataZoomStart,
+                        end: this.dataZoomEnd,
                         handleSize: "70%",
                     },
                 ],
@@ -175,6 +195,8 @@ export default {
     watch:{
         option: function(){
             this.$refs.charts.clear();
+            this.dataZoomStart = this.tempDataZoomStart;
+            this.dataZoomEnd = this.tempDataZoomEnd;
         }
     }
 }

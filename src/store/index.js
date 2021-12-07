@@ -7,7 +7,7 @@ export default createStore({
         currentSelectedData: 0,
         annotations: [],
         currAnn: 0,
-        activeLabel: Object,
+        activeLabel: null,
         colors: ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
     },
     mutations: {
@@ -101,6 +101,23 @@ export default createStore({
                 data: dataArray,
                 labels: labels,
             });
+        },
+        addAnnotationPoint: (state, timestamp) => {
+            if(state.activeLabel != null){
+                let time = new Date(timestamp);
+                let annotations = state.annotations[state.currAnn].data;
+                let newAnn = {
+                    id: annotations[annotations.length-1].id +1,
+                    label: state.activeLabel.id,
+                    timestamp: time,
+                }
+                for(let i = 0; i < annotations.length; i++){
+                    if(new Date(annotations[i].timestamp) > time){
+                        annotations.splice(i, 0, newAnn);
+                        break;
+                    }
+                }
+            }
         },
         addSelectedAxes: (state, axis) => {
             state.data[state.currentSelectedData].selectedAxes.push(axis.id);
