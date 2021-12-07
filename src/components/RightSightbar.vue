@@ -24,7 +24,7 @@ export default {
     },
     computed: {
         annotationLabels: function() {
-            return this.$store.state.annotationLabels;
+            return this.$store.getters.getAnnotations;
         }
     },
 }

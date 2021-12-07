@@ -45,7 +45,7 @@ export default {
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
                 const reader = new FileReader();
                 const file = fileList[i];
-                if(file.name[0] != '.' && file.type.includes("csv")){
+                if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
                     reader.readAsText(file);
                     reader.onload = () => {
                         if(file.name.includes("data")){

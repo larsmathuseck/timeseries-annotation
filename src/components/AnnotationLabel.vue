@@ -23,7 +23,6 @@ export default {
             this.$store.commit("deleteAnnotationLabel", annotationLabel)
         }
     },
-    emits: ["delete-annotation-label"]
 }
 </script>
 

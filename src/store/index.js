@@ -9,39 +9,6 @@ export default createStore({
         currAnn: 0,
         activeLabel: Object,
         colors: ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
-        //annotationLabels: [],
-        annotationLabels: [
-            {
-                id: 1,
-                name: "openOrClosed",
-                color: "red",
-                timestamp: "12:08:28",
-            },
-            {
-                id: 2,
-                name: "tilted_opening",
-                color: "orange",
-                timestamp: "12:08:32",
-            },
-            {
-                id: 3,
-                name: "tilted",
-                color: "yellow",
-                timestamp: "12:08:32",
-            },
-            {
-                id: 4,
-                name: "tilted_closing",
-                color: "green",
-                timestamp: "12:08:35",
-            },
-            {
-                id: 5,
-                name: "openOrClosed",
-                color: "red",
-                timestamp: "12:08:36",
-            },
-        ],
     },
     mutations: {
         addData: (state, payload) => {
@@ -156,9 +123,16 @@ export default createStore({
             state.activeLabel = label;
         },
         deleteAnnotationLabel(state, annotationLabel) {
-            const index = state.annotationLabels.indexOf(annotationLabel);
+            let index = -1;
+            let annotations = state.annotations[state.currAnn].data;
+            for(let i = 0; i < annotations.length; i++){
+                if(annotations[i].label === annotationLabel.label){
+                    index = i;
+                    break;
+                }
+            }
             if (index > -1) {
-                state.annotationLabels.splice(index, 1);
+                state.annotations[state.currAnn].data.splice(index, 1);
             }
         },
         selectDataFile(state, dataFileId){
@@ -175,13 +149,14 @@ export default createStore({
             }
             return [];
         },
-        getAnnotaions: state => {
+        getAnnotations: state => {
             let data = [];
             let annotations = state.annotations[state.currAnn];
             let labels = annotations?.labels;
             for(let key in annotations?.data){
                 data.push({
                     id: annotations.data[key].id,
+                    label: annotations.data[key].label,
                     timestamp: annotations.data[key].timestamp,
                     name: labels[annotations.data[key].label].name,
                     color: labels[annotations.data[key].label].color,

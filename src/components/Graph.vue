@@ -53,7 +53,7 @@ export default {
             let series = [];
             let graphData = this.$store.getters.getData;
             let legende = [];
-            let annotations = this.$store.getters.getAnnotaions;
+            let annotations = this.$store.getters.getAnnotations;
             let ann = annotations.map((x, i) => {
                 return {
                     symbol: "pin",
