@@ -95,7 +95,8 @@ export default {
                 this.labelColor = "";
             }
         }
-    }
+    },
+    emits: ["colorPicked"],
 }
 </script>
 

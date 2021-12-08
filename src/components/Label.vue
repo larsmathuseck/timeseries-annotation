@@ -39,7 +39,6 @@ export default {
             this.$emit("editLabel", label);
         }
     },
-    emits: ["editLabel"],
 }
 </script>
 

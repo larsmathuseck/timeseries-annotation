@@ -46,6 +46,7 @@ export default {
                 const reader = new FileReader();
                 const file = fileList[i];
                 if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
+                    console.log(file)
                     reader.readAsText(file);
                     reader.onload = () => {
                         if(file.name.includes("data")){

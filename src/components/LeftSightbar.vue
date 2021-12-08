@@ -11,10 +11,10 @@
         </div>
     </div>
     <div class="row">
-        <p @click="test" class="description-text" >Add Y-Axis</p>
+        <p class="description-text" >Add Y-Axis</p>
         <p class="description-text-sm">Add Y-axis to show</p>
         <div class="select" >
-            <select v-model="lastSelectedAxis" class="form-select" @click="addSelectedAxis($events)">
+            <select v-model="lastSelectedAxis" class="form-select" @click="addSelectedAxis($event)">
                 <option v-for="axis in axes" :key="axis.id" v-bind:value="axis">
                     {{ axis.name }}
                 </option>
@@ -111,7 +111,8 @@ export default {
     },
     methods: {
         addSelectedAxis(event) {
-            if (event.target.value !== "" ) {
+            console.log(event)
+            if (event.target.value !== "") {
                 this.showColorPicker = true;
             }
         },
@@ -145,7 +146,7 @@ export default {
             this.$store.commit("selectAnnotationFile", this.lastSelectedAnnotation);
         }
     },
-    emits: ["delete-selected-axis", "axis-color-picked", "toggle-active-label", "labelCreated", "editLabel"],
+    emits: ["axis-color-picked", "editLabel"],
 }
 </script>
 

@@ -52,6 +52,7 @@ export default createStore({
                     selectedAxes: [dataJson[0].id],
                 });
             }
+            console.log("state.data: ", state.data)
         },
         addAnnotationData: (state, payload) => {
             let data = parse(payload.result);
@@ -101,6 +102,7 @@ export default createStore({
                 data: dataArray,
                 labels: labels,
             });
+            console.log("state.annotations: ", state.annotations)
         },
         addAnnotationPoint: (state, timestamp) => {
             if(state.activeLabel != null){
