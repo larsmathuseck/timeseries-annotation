@@ -151,24 +151,18 @@ export default createStore({
             delete labels[key];
         },
         deleteAnnotation(state, annotation) {
-            let annotations = state.annotations[state.currAnn].data;
-            let key = Object.keys(annotations).find(key => annotations[key] === annotation)
-            if (key != undefined) {
-                delete state.annotations[state.currAnn].data[key]
-            }
-            /** 
             let index = -1;
             let annotations = state.annotations[state.currAnn].data;
-            for(let i = 0; i < annotations.length; i++) {
-                if(annotations[i].label === annotation.label){
+            for(let i = 0; i < annotations.length; i++){
+                if(annotations[i] === annotation){
                     index = i;
                     break;
                 }
             }
             if (index > -1) {
+                console.log("delete anno: ", annotation)
                 state.annotations[state.currAnn].data.splice(index, 1);
             }
-            */
         },
         selectDataFile(state, dataFileId){
             state.currentSelectedData = dataFileId;
@@ -176,11 +170,12 @@ export default createStore({
         selectAnnotationFile(state, annotationFileId){
             state.currAnn = annotationFileId;
         },
-        deleteAnnotationsWithLabel(state, labelKey) {
+        deleteAnnotationsWithLabel(state, labelNumber) {
             let annotations = state.annotations[state.currAnn].data;
-            for (let key in annotations) {
-                if (annotations[key].label == labelKey) {
-                    this.commit("deleteAnnotation", annotations[key])
+            for (let index in annotations) {
+                if (annotations[index].label == labelNumber) {
+                    console.log("anno found: ", annotations[index])
+                    this.commit("deleteAnnotation", annotations[index])
                 }
             }
         }
