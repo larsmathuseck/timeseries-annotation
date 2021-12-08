@@ -26,8 +26,8 @@ export default {
                 this.$emit("labelColorPicked", color)
             }
         }
-    }
-    
+    },
+    emits: ["axis-color-picked", "labelColorPicked"],
 }
 </script>
 

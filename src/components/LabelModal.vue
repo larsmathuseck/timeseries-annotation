@@ -54,7 +54,6 @@ export default {
     mounted() {
         this.modal = new Modal(this.$refs.exampleModal)
     },
-    emits: ["onLabelCreated", "labelEdited", "closeModal"],
 }
 </script>
 

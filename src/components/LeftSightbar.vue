@@ -146,7 +146,6 @@ export default {
             this.$store.commit("selectAnnotationFile", this.lastSelectedAnnotation);
         }
     },
-    emits: ["axis-color-picked", "editLabel"],
 }
 </script>
 

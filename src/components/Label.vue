@@ -6,7 +6,7 @@
         </label>
     </div>
     <div id="label-active-container" class="col-auto me-auto">
-        <label class="label-active" v-show="label.id === activeLabel.id">
+        <label class="label-active" v-show="activeLabel != null && label.id === activeLabel.id">
             Active
         </label>
     </div>
@@ -39,6 +39,7 @@ export default {
             this.$emit("editLabel", label);
         }
     },
+    emits: ["editLabel"],
 }
 </script>
 

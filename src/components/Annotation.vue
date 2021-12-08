@@ -18,6 +18,7 @@ export default {
     },
     methods: {
         deleteAnnotation(annotation) {
+            console.log("before commit: ", annotation)
             this.$store.commit("deleteAnnotation", annotation.annotationObject)
         }
     },

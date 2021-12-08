@@ -58,7 +58,7 @@ export default {
         onSubmit(e) {
             e.preventDefault()
             if (this.labelToEdit === null) {
-                const labels = this.$store.state.labels;
+                const labels = this.$store.getters.getLabels;
                 const labelKeys = Object.keys(labels);
                 const lastKey = labelKeys.at(-1);
                 const lastLabel = labels[lastKey];
@@ -96,7 +96,7 @@ export default {
             }
         }
     },
-    emits: ["colorPicked"],
+    emits: ["closeModal", "labelCreated", "labelEdited"],
 }
 </script>
 

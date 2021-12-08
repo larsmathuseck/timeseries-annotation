@@ -52,7 +52,6 @@ export default createStore({
                     selectedAxes: [dataJson[0].id],
                 });
             }
-            console.log("state.data: ", state.data)
         },
         addAnnotationData: (state, payload) => {
             let data = parse(payload.result);
@@ -102,7 +101,6 @@ export default createStore({
                 data: dataArray,
                 labels: labels,
             });
-            console.log("state.annotations: ", state.annotations)
         },
         addAnnotationPoint: (state, timestamp) => {
             if(state.activeLabel != null){
@@ -136,26 +134,33 @@ export default createStore({
             }
         },
         addLabel(state, label) {
-            state.annotations[state.currAnn].labels.push(label);
+            const labelNumber = label.id;
+            state.annotations[state.currAnn].labels[labelNumber] = label;
         },
         editLabel(state, label) {
             const labelNumber = label.id;
-            state.labels[labelNumber] = label;
+            state.annotations[state.currAnn].labels[labelNumber] = label;
         },
         toggleActiveLabel(state, label) {
             state.activeLabel = label;
         },
         deleteLabel(state, label) {
-            let labels = state.labels;
+            let labels = state.annotations[state.currAnn].labels;
             const key = Object.keys(labels).find(key => labels[key] === label);
             this.commit("deleteAnnotationsWithLabel", key);
             delete labels[key];
         },
-        deleteAnnotationLabel(state, annotationLabel) {
+        deleteAnnotation(state, annotation) {
+            let annotations = state.annotations[state.currAnn].data;
+            let key = Object.keys(annotations).find(key => annotations[key] === annotation)
+            if (key != undefined) {
+                delete state.annotations[state.currAnn].data[key]
+            }
+            /** 
             let index = -1;
             let annotations = state.annotations[state.currAnn].data;
-            for(let i = 0; i < annotations.length; i++){
-                if(annotations[i].label === annotationLabel.label){
+            for(let i = 0; i < annotations.length; i++) {
+                if(annotations[i].label === annotation.label){
                     index = i;
                     break;
                 }
@@ -163,6 +168,7 @@ export default createStore({
             if (index > -1) {
                 state.annotations[state.currAnn].data.splice(index, 1);
             }
+            */
         },
         selectDataFile(state, dataFileId){
             state.currentSelectedData = dataFileId;
@@ -171,7 +177,7 @@ export default createStore({
             state.currAnn = annotationFileId;
         },
         deleteAnnotationsWithLabel(state, labelKey) {
-            let annotations = state.annotations;
+            let annotations = state.annotations[state.currAnn].data;
             for (let key in annotations) {
                 if (annotations[key].label == labelKey) {
                     this.commit("deleteAnnotation", annotations[key])
@@ -197,6 +203,7 @@ export default createStore({
                     timestamp: annotations.data[key].timestamp,
                     name: labels[annotations.data[key].label].name,
                     color: labels[annotations.data[key].label].color,
+                    annotationObject: annotations.data[key],
                 })
             }
             return data;
