@@ -11,25 +11,11 @@
         </div>
     </div>
     <div class="row">
-        <p class="description-text" >Add Y-Axis</p>
-        <p class="description-text-sm">Add Y-axis to show</p>
-        <div class="select" >
-            <select v-model="lastSelectedAxis" class="form-select" @click="addSelectedAxis($event)">
-                <option v-for="axis in axes" :key="axis.id" v-bind:value="axis">
-                    {{ axis.name }}
-                </option>
-            </select>
+        <p class="description-text" >Choose Y-Axis</p>
+        <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
+            <Axis :axis="axis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
             <div class="colorpicker-container">
-                <input type="hidden" @focusout="this.showColorPicker = false"/>
-                <ColorPicker :colorForAxis="true" @axis-color-picked="setSelectedAxisColor" v-show="showColorPicker"/>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <label class="description-text" >Selected Axis</label>
-        <div class="row selectedAxis-row">
-            <div class="col-auto" v-for="selectedAxis in this.selectedAxes" :key="selectedAxis.name" >
-                <SelectedAxis :selectedAxis="selectedAxis" />
+                <ColorPicker v-show="showColorPicker" />
             </div>
         </div>
     </div>
@@ -60,7 +46,7 @@
 </template>
 
 <script>
-import SelectedAxis from "./SelectedAxis.vue"
+import Axis from "./Axis.vue"
 import ColorPicker from "./Colorpicker.vue"
 import Label from "./Label.vue"
 import LabelModal from "./LabelModal.vue"
@@ -69,7 +55,7 @@ import LabelModal from "./LabelModal.vue"
 export default {
     name: "LeftSightbar",
     components: {
-        SelectedAxis,
+        Axis,
         ColorPicker,
         Label,
         LabelModal,
@@ -93,6 +79,9 @@ export default {
             return this.$store.getters.getAxes;
         },
         selectedAxes: function() {
+            return this.$store.getters.selectedAxes;
+        },
+        /*selectedAxes: function() {
             let selectedIds = this.$store.getters.selectedAxes;
             let selected = [];
             this.axes.forEach(axis => {
@@ -101,7 +90,7 @@ export default {
                 }
             });
             return selected;
-        },
+        },*/
         labels: function() {
             return this.$store.getters.getLabels;
         },
@@ -150,26 +139,20 @@ export default {
 </script>
 
 <style scoped>
-.selectedAxis-row {
+.axis-container {
     margin-left: 12px;
+    padding: 12px;
     padding-left: 0px;
+    border-bottom: 1.5px solid rgb(128, 128, 128, 0.5);
+    text-align: left;
+    
 }
-
 .colorpicker-container {
     position: relative;
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
     width: 100%;
-}
-
-.col-auto {
-    padding-left: 2.5px;
-    padding-right: 2.5px;
-}
-
-div.absolute {
-    position: absolute;
 }
 
 .btn-circle {
@@ -221,21 +204,13 @@ div.absolute {
     color: gray;
 }
 
-.fa-times {
+.fa {
     opacity: 0.5;
 }
 
-.fa-times:hover {
+.fa:hover {
     opacity: 1;
     cursor: pointer;
 }
 
-.fa-edit {
-    opacity: 0.5;
-}
-
-.fa-edit:hover {
-    opacity: 1;
-    cursor: pointer;
-}
 </style>

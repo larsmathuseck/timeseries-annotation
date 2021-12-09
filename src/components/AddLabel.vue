@@ -133,6 +133,7 @@ export default {
     height: 10px;
     width: 10px;
     color: white;
+    opacity: 1;
 }
 
 .colorpicker-container {

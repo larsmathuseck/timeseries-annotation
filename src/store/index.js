@@ -52,6 +52,7 @@ export default createStore({
                     selectedAxes: [dataJson[0].id],
                 });
             }
+            console.log(state.data)
         },
         addAnnotationData: (state, payload) => {
             let data = parse(payload.result);
