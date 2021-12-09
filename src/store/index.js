@@ -34,14 +34,14 @@ export default createStore({
             }
             if(timestampLocation >= 0){
                 data.forEach(row => {
-                    timestamps.push(row[timestampLocation]);
+                    timestamps.push(new Date(row[timestampLocation]).getTime());
                     row.splice(timestampLocation, 1);
                 });
             
                 // Get dimensions in own arrays
                 for(let row = 0; row < data.length; row++){
                     for(let column = 0; column < data[row].length; column++){
-                        dataJson[column].dataPoints.push([timestamps[row], data[row][column]]);   
+                        dataJson[column].dataPoints.push([new Date(timestamps[row]).getTime(), data[row][column]]);   
                     }
                 }
                 state.data.push({
@@ -91,7 +91,7 @@ export default createStore({
                 dataArray.push({
                     id: i,
                     label: label.id,
-                    timestamp: data[i][timestampLocation],
+                    timestamp: new Date(data[i][timestampLocation]).getTime(),
                 });
             }
 
@@ -104,7 +104,7 @@ export default createStore({
         },
         addAnnotationPoint: (state, timestamp) => {
             if(state.activeLabel != null){
-                let time = new Date(timestamp);
+                let time = new Date(timestamp).getTime();
                 let annotations = state.annotations[state.currAnn].data;
                 let newAnn = {
                     id: annotations[annotations.length-1].id +1,
@@ -112,7 +112,7 @@ export default createStore({
                     timestamp: time,
                 }
                 for(let i = 0; i < annotations.length; i++){
-                    if(new Date(annotations[i].timestamp) > time){
+                    if(annotations[i].timestamp > time){
                         annotations.splice(i, 0, newAnn);
                         break;
                     }

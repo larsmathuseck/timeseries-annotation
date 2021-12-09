@@ -15,6 +15,7 @@
 </template>
 
 <script>
+import { DateTime } from "luxon"
 import AnnotationLabel from "./AnnotationLabel.vue"
 
 export default {
@@ -24,7 +25,11 @@ export default {
     },
     computed: {
         annotationLabels: function() {
-            return this.$store.getters.getAnnotations;
+            let ann = this.$store.getters.getAnnotations;
+            for(let i = 0; i < ann.length; i++){
+                ann[i].timestamp = DateTime.fromMillis(ann[i].timestamp).toFormat('hh:mm:ss SSS');
+            }
+            return ann;
         }
     },
 }

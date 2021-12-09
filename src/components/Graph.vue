@@ -19,6 +19,7 @@ import {
     MarkPointComponent,
 } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
+import { DateTime } from "luxon";
 
 use([
     CanvasRenderer,
@@ -101,8 +102,11 @@ export default {
                     showSymbol: false,
                     emphasis: {
                         scale: false,
+                        lineStyle: {
+                            width: 1.5,
+                        },
                     },
-                    itemStyle: {
+                    lineStyle: {
                         color: graphData[key].color,
                         width: 1.5,
                     },
@@ -140,15 +144,10 @@ export default {
                 series: series,
                 tooltip: {
                     trigger: "axis",
-                    formatter: '{b0}',
+                    formatter: (value) => {
+                        return DateTime.fromMillis(value[0].axisValue).toFormat('hh:mm:ss SSS');
+                    }
                 },
-                // toolbox: {
-                //     feature: {
-                //         dataZoom: {
-                //             yAxisIndex: "none",
-                //         },
-                //     },
-                // },
                 legend: {
                     data: legende
                 },
@@ -172,13 +171,13 @@ export default {
                         filterMode: "filter",
                         throttle: 100,
                         dataBackground: {
-                        lineStyle: {
-                            color: "green",
-                            width: 1.5,
-                        },
-                        areaStyle: {
-                            color: "#ffffff00",
-                        },
+                            lineStyle: {
+                                color: "green",
+                                width: 1.5,
+                            },
+                            areaStyle: {
+                                color: "#ffffff00",
+                            },
                         },
                         height: 100,
                         bottom: 10,
@@ -187,6 +186,9 @@ export default {
                         start: this.dataZoomStart,
                         end: this.dataZoomEnd,
                         handleSize: "70%",
+                        labelFormatter: (value) => {
+                            return DateTime.fromMillis(value).toFormat('hh:mm:ss SSS');
+                        }
                     },
                 ],
             };
