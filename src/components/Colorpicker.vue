@@ -21,13 +21,13 @@ export default {
     methods: {
         colorPicked(color) {
             if (this.colorForAxis) {
-                this.$emit("axis-color-picked", color)
+                this.$emit("axisColorPicked", color)
             } else {
                 this.$emit("labelColorPicked", color)
             }
         }
     },
-    emits: ["axis-color-picked", "labelColorPicked"],
+    emits: ["axisColorPicked", "labelColorPicked"],
 }
 </script>
 

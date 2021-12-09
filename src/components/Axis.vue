@@ -1,6 +1,6 @@
 <template>
-    <div class="col-auto me-auto" :style="isSelected ? selectedStyle : notSelectedStyle" @click="toggleAxis">
-        <label :style="isSelected ? 'color: white' : 'color: black'" >
+    <div class="col-auto me-auto" :style="{background: axis.color}">
+        <label>
             {{ axis.name }}
         </label>
     </div>
@@ -14,7 +14,7 @@
         </label>
     </div>
     <div class="colorpicker-container" id="colorpicker-con">
-        <ColorPicker v-show="showColorPicker" :colorForAxis="true" />
+        <ColorPicker @axisColorPicked="setSelectedAxisColor" v-show="showColorPicker" :colorForAxis="true" />
     </div>
 </template>
 
@@ -34,17 +34,7 @@ export default {
         return {
             showColorPicker: false,
             selected: this.isSelected,
-            selectedStyle: {
-                background: this.axis.color,
-                border: '4px solid '+this.axis.color,
-            },
-            notSelectedStyle: {
-                background: "white",
-                border: '4px solid '+this.axis.color,
-            },
         }
-    },
-    computed: {
     },
     watcher: {
         isSelected: function() {
@@ -53,7 +43,6 @@ export default {
     },
     methods: {
         toggleAxis() {
-            console.log("try to change selection from:", this.isSelected)
             if (this.selected) {
                 this.$store.commit("addSelectedAxes", this.axis);
             } else {
@@ -65,29 +54,16 @@ export default {
                 this.$store.commit("deleteSelectedAxis", this.axis);
             }
         },
-        asdf() {
-            window.onload = function() {
-                const colorContainer = document.getElementById("colorpicker-con");
-                document.onclick=function(div) {
-                    if (div.target.id !== colorContainer.id) {
-                        this.showColorPicker = false;
-                    }
-                }
-            }
-        },
-        onWindowLoad() {
-            const colorContainer = document.getElementById("colorpicker-con");
-                document.onclick=function(div) {
-                    if (div.target.id !== colorContainer.id) {
-                        this.showColorPicker = false;
-                    }
-                }
+        setSelectedAxisColor(color) {
+            let newAxis = this.axis;
+            newAxis.color = color;
+            this.$store.commit("changeAxisColor", newAxis);
+            this.showColorPicker = false;
         },
         /*mounted() {
         window.addEventListener("load", this.onWindowLoad);
         },*/
     },
-    emits: [""],
 }
 /*
 const colorContainer = document.getElementById("colorpicker-con");
@@ -115,6 +91,7 @@ document.onclick=function(mouseClick) {
 label {
     font-family: Tahoma;
     font-size: 1rem;
+    color: white;
     padding: 5px;
     margin: 0px;
 }
@@ -127,6 +104,7 @@ button {
 
 .fa {
     margin-top: 8px;
+    color: #2196F3;
 }
 
 .colorpicker-container {
@@ -137,7 +115,6 @@ button {
     width: 100%;
 }
 
-/* The switch - the box around the slider */
 .switch {
   position: relative;
   display: inline-block;
@@ -145,14 +122,6 @@ button {
   height: 34px;
 }
 
-/* Hide default HTML checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* The slider */
 .slider {
   position: absolute;
   cursor: pointer;
@@ -191,7 +160,6 @@ input:checked + .slider:before {
   transform: translateX(26px);
 }
 
-/* Rounded sliders */
 .slider.round {
   border-radius: 34px;
 }

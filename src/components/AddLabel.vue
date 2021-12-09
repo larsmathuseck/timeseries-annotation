@@ -112,7 +112,7 @@ export default {
 #colorButton {
     margin-left: 1,5px;
     align-self: center;
-    background-color: rgb(8, 173, 173);
+    background-color: #2196F3;
     opacity: 0.7;
 }
 

@@ -125,13 +125,18 @@ export default createStore({
         },
         deleteSelectedAxis(state, axis) {
             let selectedAxes = state.data[state.currentSelectedData].selectedAxes;
-            if (selectedAxes.length <= 1) {
-                alert("At least 1 axis must be selected!")
-                return;
-            }
             const index = selectedAxes.indexOf(axis.id)
             if (index > -1) {
                 selectedAxes.splice(index, 1)
+            }
+        },
+        changeAxisColor(state, changedAxis) {
+            let axes = state.data[state.currentSelectedData].dataPoints;
+            for (let i in axes) {
+                if (axes[i].id === changedAxis.id) {
+                    axes[i].color = changedAxis.color;
+                    break;
+                }
             }
         },
         addLabel(state, label) {

@@ -6,7 +6,7 @@
         <label class="description-text-sm">
             List of Annotations
         </label>
-        <div id="scroll-container" class="mh-50">
+        <div id="scroll-container-annotations">
             <div class="annotation-container" v-for="annotation in annotations" :key="annotation.id">
                 <Annotation :annotation="annotation" />
             </div>
@@ -31,10 +31,13 @@ export default {
 </script>
 
 <style scoped>
-
-#scroll-container {
+#scroll-container-annotations {
     overflow-y: auto;
-    max-height: 75vh;;
+    max-height: 85vh;;
+}
+#scroll-container-annotations::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
 }
 
 .annotation-container {
