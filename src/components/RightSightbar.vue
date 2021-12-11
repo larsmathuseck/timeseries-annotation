@@ -33,7 +33,7 @@ export default {
 <style scoped>
 #scroll-container-annotations {
     overflow-y: auto;
-    max-height: 85vh;;
+    max-height: 80vh;;
 }
 #scroll-container-annotations::-webkit-scrollbar {
     width: 0px;

@@ -145,7 +145,7 @@ export default {
     padding: 0px;
     overflow-y: auto;
     scrollbar-width: none;
-    max-height: 25vh;;
+    max-height: 25vh;
 }
 #scroll-container-axes::-webkit-scrollbar {
     width: 0;
@@ -194,7 +194,7 @@ export default {
     padding: 0px;
     overflow-y: auto;
     scrollbar-width: none;
-    max-height: 40vh;;
+    max-height: 25vh;
 }
 #scroll-container-labels::-webkit-scrollbar { 
     width: 0;
@@ -220,11 +220,11 @@ export default {
     color: gray;
 }
 
-.fa {
+.fa-plus, .fa-edit , .fa-times{
     opacity: 0.5;
 }
 
-.fa:hover {
+.fa-plus:hover, .fa-edit:hover, .fa-times:hover {
     opacity: 1;
     cursor: pointer;
 }

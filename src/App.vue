@@ -5,7 +5,8 @@
 <style>
     html, body {
         height: 100%;
-        overflow: hidden;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     #app {
