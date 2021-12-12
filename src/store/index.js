@@ -28,7 +28,7 @@ export default createStore({
                         id: i,
                         name: legende[i],
                         dataPoints: [],
-                        color: state.colors[Math.floor(Math.random() * state.colors.length)],
+                        color: state.colors[i % state.colors.length],
                     });
                 }
             }
@@ -52,7 +52,6 @@ export default createStore({
                     selectedAxes: [dataJson[0].id],
                 });
             }
-            console.log(state.data)
         },
         addAnnotationData: (state, payload) => {
             let data = parse(payload.result);
@@ -84,7 +83,7 @@ export default createStore({
                     label = {
                         id: newestLabelId,
                         name: data[i][labelLocation],
-                        color: state.colors[Math.floor(Math.random() * state.colors.length)],
+                        color: state.colors[i % state.colors.length],
                     }
                     labels[`${newestLabelId}`] = label;
                     newestLabelId += 1;
@@ -166,7 +165,6 @@ export default createStore({
                 }
             }
             if (index > -1) {
-                console.log("delete anno: ", annotation)
                 state.annotations[state.currAnn].data.splice(index, 1);
             }
         },
@@ -180,7 +178,6 @@ export default createStore({
             let annotations = state.annotations[state.currAnn].data;
             for (let index in annotations) {
                 if (annotations[index].label == labelNumber) {
-                    console.log("anno found: ", annotations[index])
                     this.commit("deleteAnnotation", annotations[index])
                 }
             }
@@ -229,6 +226,14 @@ export default createStore({
         },
         getLabels: state => {
             return state.annotations[state.currAnn]?.labels;
+        },
+        showGraph: state => {
+            if(state.data.length > 1){
+                return true;
+            }
+            else {
+                return false;
+            }
         }
     },
     modules: {

@@ -6,7 +6,9 @@
                 <LeftSightbar/>
             </div>
             <div class="col col-8">
-                <graph v-if="showGraph" class="chart" />
+                <div class="graphDiv">
+                    <graph ref="graphRef" v-if="showGraph" class="chart" />
+                </div>
             </div>
             <div class="col col-2">
                 <RightSightbar />
@@ -32,29 +34,19 @@ export default {
     },
     data() {
         return {
-            showGraph: true,
             annotationFiles: [],
         }
     },
-    created() {
-        this.annotationFiles = [
-            {
-                id: 1,
-                name: "annoFile1"
-            },
-            {
-                id: 2,
-                name: "testFile"
-            },
-            {
-                id: 3,
-                name: "bliblu"
-            },
-        ];
-    },
+    computed: {
+        showGraph: function(){
+            return this.$store.getters.showGraph;
+        }
+    }
 };
 </script>
 
 <style scoped>
-
+    .graphDiv {
+        height: 100%;
+    }
 </style>

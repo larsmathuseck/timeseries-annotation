@@ -1,6 +1,6 @@
 <template>
     <div @click="chartClicked">
-        <v-chart ref="charts" v-if="showGraph" class="chart" :option="option" @datazoom="zoom" />
+        <v-chart ref="charts" class="chart" :option="option" @datazoom="zoom" :autoresize="resize" />
     </div>
 </template>
 
@@ -41,11 +41,11 @@ export default {
     },
     data: function () {
         return {
-            showGraph: true,
             dataZoomStart: 0,
             dataZoomEnd: 100,
             tempDataZoomStart: 0,
             tempDataZoomEnd: 100,
+            resize: true,
         };
     },
     provide: {
@@ -67,6 +67,9 @@ export default {
                 this.tempDataZoomStart = event.batch[0].start;
                 this.tempDataZoomEnd = event.batch[0].end;
             }
+        },
+        resizeChart: function () {
+            this.$refs.charts?.resize();
         }
     },
     computed: {
@@ -158,6 +161,12 @@ export default {
                 yAxis: {
                     type: "value",
                 },
+                grid: {
+                    left: '20',
+                    right: '20',
+                    top: '30',
+                    containLabel: true
+                },
                 dataZoom: [
                     {
                         type: "inside",
@@ -166,6 +175,7 @@ export default {
                         filterMode: "filter",
                     },
                     {
+                        type: "slider",
                         animation: true,
                         showDataShadow: true,
                         filterMode: "filter",
@@ -179,10 +189,9 @@ export default {
                                 color: "#ffffff00",
                             },
                         },
-                        height: 100,
-                        bottom: 10,
+                        height:"100",
+                        top: this.$refs.charts?.getHeight() - 300,
                         show: true,
-                        type: "slider",
                         start: this.dataZoomStart,
                         end: this.dataZoomEnd,
                         handleSize: "70%",
@@ -196,7 +205,7 @@ export default {
     },
     watch:{
         option: function(){
-            this.$refs.charts.clear();
+            this.$refs.charts?.clear();
             this.dataZoomStart = this.tempDataZoomStart;
             this.dataZoomEnd = this.tempDataZoomEnd;
         }
@@ -208,7 +217,7 @@ export default {
 <style scoped>
 
 .chart {
-    height: 700px;
+    height: 100%;
 }
 
 </style>
