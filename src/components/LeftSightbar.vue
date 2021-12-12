@@ -11,24 +11,14 @@
         </div>
     </div>
     <div class="row">
-        <p @click="test" class="description-text" >Add Y-Axis</p>
-        <p class="description-text-sm">Add Y-axis to show</p>
-        <div class="select" >
-            <select v-model="lastSelectedAxis" class="form-select" @click="addSelectedAxis($events)">
-                <option v-for="axis in axes" :key="axis.id" v-bind:value="axis">
-                    {{ axis.name }}
-                </option>
-            </select>
-            <div class="colorpicker-container">
-                <input type="hidden" @focusout="this.showColorPicker = false"/>
-                <ColorPicker :colorForAxis="true" @axis-color-picked="setSelectedAxisColor" v-show="showColorPicker"/>
+        <p class="description-text" >Choose Y-Axis</p>
+        <div id="scroll-container-axes">
+            <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
+                <Axis :axis="axis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
+                <div class="colorpicker-container">
+                    <ColorPicker v-show="showColorPicker" />
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="row">
-        <p class="description-text" >Selected Axis</p>
-        <div class="col-auto" v-for="selectedAxis in this.selectedAxes" :key="selectedAxis.name" >
-            <SelectedAxis :selectedAxis="selectedAxis" />
         </div>
     </div>
     <div class="row">
@@ -44,33 +34,35 @@
     </div>
     <div class="row">
         <span class="description-text" >
-            Labels
-            <button type="button" class="btn btn-default btn-circle" @click="toggleShowAddLabel">
+            <label>Labels</label>
+            <button type="button" class="btn btn-default btn-circle" @click="showModal">
                 <i class="fa fa-plus"></i>
             </button>
         </span>
-        <AddLabel @labelCreated="onLabelCreated" v-show="showAddLabel"/>
-        <p class="description-text-sm">Select Labels to annotate Chart</p>
-        <div class="label-container" v-for="label in this.labels" :key="label.name" @click="labelOnClick(label)" >
-            <Label :label="label" />
+        <label class="description-text-sm">Select Labels to annotate Chart</label>
+        <div id="scroll-container-labels">
+            <div class="row label-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
+                <Label :label="label" @editLabel="editLabel" />
+            </div>
         </div>
     </div>
+    <LabelModal :toggleModalVisibility="toggleModalVisibility" :labelToEdit="labelToEdit" @closeModal="closeModal" />
 </template>
 
 <script>
-import SelectedAxis from "./SelectedAxis.vue"
+import Axis from "./Axis.vue"
 import ColorPicker from "./Colorpicker.vue"
-import AddLabel from "./AddLabel.vue"
 import Label from "./Label.vue"
+import LabelModal from "./LabelModal.vue"
 
 
 export default {
     name: "LeftSightbar",
     components: {
-        SelectedAxis,
+        Axis,
         ColorPicker,
-        AddLabel,
         Label,
+        LabelModal,
     },
     data() {
         return {
@@ -79,6 +71,8 @@ export default {
             lastSelectedAnnotation: this.$store.state.currAnn,
             showColorPicker: false,
             showAddLabel: false,
+            toggleModalVisibility: false,
+            labelToEdit: null,
         }
     },
     computed: {
@@ -89,6 +83,9 @@ export default {
             return this.$store.getters.getAxes;
         },
         selectedAxes: function() {
+            return this.$store.getters.selectedAxes;
+        },
+        /*selectedAxes: function() {
             let selectedIds = this.$store.getters.selectedAxes;
             let selected = [];
             this.axes.forEach(axis => {
@@ -97,7 +94,7 @@ export default {
                 }
             });
             return selected;
-        },
+        },*/
         labels: function() {
             return this.$store.getters.getLabels;
         },
@@ -106,19 +103,19 @@ export default {
         },
     },
     methods: {
-        addSelectedAxis() {
-            this.showColorPicker = true;
-        },
-        setSelectedAxisColor(color) {
-            this.lastSelectedAxis.color = color
-            this.$store.commit("addSelectedAxes", this.lastSelectedAxis);
-            this.showColorPicker = false;
-        },
         labelOnClick(label) {
             this.$store.commit("toggleActiveLabel", label);
         },
-        toggleShowAddLabel() {
-            this.showAddLabel = !this.showAddLabel;
+        editLabel(label) {
+            this.labelToEdit = label;
+            this.toggleModalVisibility = !this.toggleModalVisibility;
+        },
+        showModal() {
+            this.labelToEdit = null;
+            this.toggleModalVisibility = !this.toggleModalVisibility;
+        },
+        closeModal() {
+            this.modalVisible = false;
         },
         onLabelCreated(label) {
             this.$store.commit('addLabel', label)
@@ -131,26 +128,36 @@ export default {
             this.$store.commit("selectAnnotationFile", this.lastSelectedAnnotation);
         }
     },
-    emits: ["delete-selected-axis", "axis-color-picked", "toggle-active-label", "labelCreated"],
 }
 </script>
 
 <style scoped>
+.axis-container {
+    margin-left: 12px;
+    padding: 12px;
+    padding-left: 0px;
+    border-bottom: 1.5px solid rgb(128, 128, 128, 0.5);
+    text-align: left;
+    
+}
+
+#scroll-container-axes {
+    padding: 0px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    max-height: 25vh;
+}
+#scroll-container-axes::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
 .colorpicker-container {
     position: relative;
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
     width: 100%;
-}
-
-.col-auto {
-    padding-left: 2.5px;
-    padding-right: 2.5px;
-}
-
-div.absolute {
-    position: absolute;
 }
 
 .btn-circle {
@@ -163,6 +170,7 @@ div.absolute {
     line-height: 1.42857;
     background-color: #bbb;
     opacity: 0.7;
+    margin-left: 15px;
 }
 
 .btn-circle:hover { 
@@ -174,10 +182,23 @@ div.absolute {
     padding: 12px;
     padding-left: 0px;
     border-bottom: 1.5px solid rgb(128, 128, 128, 0.5);
+    text-align: left;
+    
 }
 
 .label-container:hover {
     background-color: rgb(128, 128, 128, 0.1);
+}
+
+#scroll-container-labels {
+    padding: 0px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    max-height: 25vh;
+}
+#scroll-container-labels::-webkit-scrollbar { 
+    width: 0;
+    height: 0;
 }
 
 </style>
@@ -198,4 +219,14 @@ div.absolute {
     margin: 2px;
     color: gray;
 }
+
+.fa-plus, .fa-edit , .fa-times{
+    opacity: 0.5;
+}
+
+.fa-plus:hover, .fa-edit:hover, .fa-times:hover {
+    opacity: 1;
+    cursor: pointer;
+}
+
 </style>

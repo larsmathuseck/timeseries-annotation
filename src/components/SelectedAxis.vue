@@ -1,10 +1,10 @@
 <template>
     <div class="col-auto"
     :style="{ background: selectedAxis.color }">
-        <p>
+        <label>
             {{ selectedAxis.name }}
             <i @click="deleteSelectedAxis(selectedAxis)" class="fa fa-times"></i>
-        </p>
+        </label>
     </div>
 </template>
 
@@ -30,7 +30,7 @@ export default {
     margin: 0px;
 }
 
-p {
+label {
     font-family: Tahoma;
     font-size: 1rem;
     font-weight: 10%;
@@ -38,12 +38,4 @@ p {
     padding: 5px;
 }
 
-.fa-times {
-   opacity: 0.5;
-}
-
-.fa-times:hover {
-    opacity: 1;
-    cursor: pointer;
-}
 </style>

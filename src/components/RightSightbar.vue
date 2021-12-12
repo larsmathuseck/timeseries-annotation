@@ -1,27 +1,28 @@
 <template>
     <div class="row">
-        <p class="description-text">
+        <label class="description-text">
             Annotations
-        </p>
-        <p class="description-text-sm">
+        </label>
+        <label class="description-text-sm">
             List of Annotations
-        </p>
-        <div id="scroll-container" class="mh-50">
-            <div class="annotation-container" v-for="annotationLabel in annotationLabels" :key="annotationLabel.id">
-                <AnnotationLabel :annotationLabel="annotationLabel" />
+        </label>
+        <div id="scroll-container-annotations">
+            <div class="annotation-container" v-for="annotation in annotations" :key="annotation.id">
+                <Annotation :annotation="annotation" />
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import Annotation from "./Annotation.vue"
 import { DateTime } from "luxon"
 import AnnotationLabel from "./AnnotationLabel.vue"
 
 export default {
     name: "RightSightbar",
     components: {
-        AnnotationLabel,
+        Annotation,
     },
     computed: {
         annotationLabels: function() {
@@ -36,10 +37,13 @@ export default {
 </script>
 
 <style scoped>
-
-#scroll-container {
+#scroll-container-annotations {
     overflow-y: auto;
-    max-height: 75vh;;
+    max-height: 80vh;;
+}
+#scroll-container-annotations::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
 }
 
 .annotation-container {
