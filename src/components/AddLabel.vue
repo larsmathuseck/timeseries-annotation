@@ -10,10 +10,10 @@
             <div class="col-auto text-start">
                 <label for="validationLabelColor" class="form-label description-text-sm">Label Color:</label>
                 <div class="row">
-                    <div class="col-auto" id="colorInputContainer">
+                    <div class="col col-10" id="colorInputContainer">
                         <input type="text" v-model="labelColor" class="form-control" id="validationLabelColor" required>
                     </div>
-                    <div class="col-auto" id="submitButtonContainer">
+                    <div class="col col-2" id="submitButtonContainer">
                         <button id="colorButton" class="btn rounded" type="button" @click="showColorPicker = !showColorPicker">
                             <i class="fa fa-tint" />
                         </button>
@@ -24,6 +24,13 @@
         <div class="row">
             <div class="col">
                 <ColorPicker @labelColorPicked="colorPicked" :colorForAxis="false" v-show="showColorPicker"/> 
+            </div>
+        </div>
+        <div class="row" v-show="this.error != ''">
+            <div id="allert-div" class="col-auto">
+                <div class="alert alert-danger" role="alert">
+                    {{ this.error }}
+                </div>
             </div>
         </div>
         <div class="modal-footer">
@@ -49,6 +56,7 @@ export default {
             labelName: "",
             labelColor: "",
             showColorPicker: false,
+            error: resetErrorOnOpen(),
         }
     },
     methods: {
@@ -59,6 +67,12 @@ export default {
             e.preventDefault()
             if (this.labelToEdit === null) {
                 const labels = this.$store.getters.getLabels;
+                console.log(labels)
+                if (typeof labels == "undefined") { // no or false data uploaded --> no annotation file
+                    console.log("here")
+                    this.error = "Can't add Label. First add Annotation and Data files!"
+                    return;
+                } 
                 const labelKeys = Object.keys(labels);
                 const lastKey = labelKeys.at(-1);
                 const lastLabel = labels[lastKey];
@@ -80,10 +94,14 @@ export default {
                 }
                 this.$emit("labelEdited", label)
             }
-            this.labelName = ""
-            this.labelColor = ""
+            this.labelName = "";
+            this.labelColor = "";
             this.showColorPicker = false;
+            this.error = "";
         },
+        resetWindow: function (){
+            Object.assign(this.error, resetErrorOnOpen());
+        }
     },
     watch: {
         labelToEdit: function() {
@@ -97,6 +115,10 @@ export default {
         }
     },
     emits: ["closeModal", "labelCreated", "labelEdited"],
+}
+
+function resetErrorOnOpen() {
+    return "";
 }
 </script>
 
@@ -128,6 +150,10 @@ export default {
     padding-left: 0px;
 }
 
+.alert-danger {
+    margin-top: 25px;
+    margin-bottom: 0px;
+}
 
 .fa {
     height: 10px;

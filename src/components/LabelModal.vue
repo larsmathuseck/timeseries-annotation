@@ -7,7 +7,7 @@
                     <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <AddLabel :labelToEdit="labelToEdit" @labelCreated="onLabelCreated" @labelEdited="labelEdited" @closeModal="closeModal" />
+                    <AddLabel :key="addLabelKey" :labelToEdit="labelToEdit" @labelCreated="onLabelCreated" @labelEdited="labelEdited" @closeModal="closeModal" />
                 </div>
             </div>
         </div>
@@ -26,6 +26,7 @@ export default {
     props: {
         toggleModalVisibility: Boolean,
         labelToEdit: Object,
+        addLabelKey: Number,
     },
     data() {
         return {

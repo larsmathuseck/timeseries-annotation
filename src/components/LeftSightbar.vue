@@ -46,7 +46,7 @@
             </div>
         </div>
     </div>
-    <LabelModal :toggleModalVisibility="toggleModalVisibility" :labelToEdit="labelToEdit" />
+    <LabelModal :addLabelKey="addLabelKey" :toggleModalVisibility="toggleModalVisibility" :labelToEdit="labelToEdit" />
 </template>
 
 <script>
@@ -73,6 +73,7 @@ export default {
             showAddLabel: false,
             toggleModalVisibility: false,
             labelToEdit: null,
+            addLabelKey: 0,
         }
     },
     computed: {
@@ -111,12 +112,13 @@ export default {
             this.toggleModalVisibility = !this.toggleModalVisibility;
         },
         showModal() {
+            if (this.addLabelKey == 0) {
+                this.addLabelKey = 1;
+            } else {
+                this.addLabelKey = 0;
+            }
             this.labelToEdit = null;
             this.toggleModalVisibility = !this.toggleModalVisibility;
-        },
-        onLabelCreated(label) {
-            this.$store.commit('addLabel', label)
-            this.toggleShowAddLabel();
         },
         selectDataFile() {
             this.$store.commit("selectDataFile", this.lastSelectedData);
@@ -158,12 +160,12 @@ export default {
 }
 
 .btn-circle {
-    height: 45px;
-    width: 45px;
+    height: 2.5vw;
+    width: 2.5vw;
     padding: 6px 0px;
-    border-radius: 22.5px;
+    border-radius: 1.25vw;
     text-align: center;
-    font-size: 20px;
+    font-size: 1vw;
     line-height: 1.42857;
     background-color: #bbb;
     opacity: 0.7;
@@ -178,9 +180,8 @@ export default {
     margin-left: 12px;
     padding: 12px;
     padding-left: 0px;
-    border-bottom: 1.5px solid rgb(128, 128, 128, 0.5);
+    border-bottom: 0.1vw solid rgb(128, 128, 128, 0.5);
     text-align: left;
-    
 }
 
 .label-container:hover {
@@ -205,14 +206,14 @@ export default {
     text-align: left;
     font-family: Tahoma;
     font-weight: Bold;
-    font-size: 1.5rem;
+    font-size: 1.5vw;
     margin: 2px;
 }
 
 .description-text-sm {
     text-align: left;
     font-family: Tahoma;
-    font-size: 1rem;
+    font-size: 1vw;
     margin: 2px;
     color: gray;
 }

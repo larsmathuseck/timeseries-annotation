@@ -56,7 +56,7 @@ export default {
 
 label {
     font-family: Tahoma;
-    font-size: 1rem;
+    font-size: 1vw;
     font-weight: bold;
     color: white;
     padding: 5px;

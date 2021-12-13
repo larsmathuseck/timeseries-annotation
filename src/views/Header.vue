@@ -91,5 +91,10 @@ li {
 
 button {
     background-color: #e1e1e5;
+    font-size: 1vw;
+}
+
+h1 {
+    font-size: 2.5vw;
 }
 </style>

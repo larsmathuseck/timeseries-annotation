@@ -2,13 +2,13 @@
     <div class="container-fluid">
         <Header title="TF Annotator" />
         <div class="row">
-            <div class="col col-2">
+            <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
                 <LeftSightbar/>
             </div>
-            <div class="col col-8">
+            <div class="col col-lg-8 col-md-8 col-sm-12 col-12">
                 <graph v-if="showGraph" class="chart" />
             </div>
-            <div class="col col-2">
+            <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
                 <RightSightbar />
             </div>
         </div>
@@ -33,24 +33,7 @@ export default {
     data() {
         return {
             showGraph: true,
-            annotationFiles: [],
         }
-    },
-    created() {
-        this.annotationFiles = [
-            {
-                id: 1,
-                name: "annoFile1"
-            },
-            {
-                id: 2,
-                name: "testFile"
-            },
-            {
-                id: 3,
-                name: "bliblu"
-            },
-        ];
     },
 };
 </script>
