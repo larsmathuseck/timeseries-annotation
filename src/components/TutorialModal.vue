@@ -44,6 +44,9 @@ export default {
                 },
                 {
                     image: require('../../public/img/tutorial/ExampleChooseDataWithText.jpg')
+                }, 
+                {
+                    image: require('../../public/img/tutorial/ExampleChooseAnnotation.jpg')
                 }
             ]
         }
@@ -76,4 +79,16 @@ export default {
 .vueperslides__arrow {
     color: grey
 }
+
+.vueperslides__bullet .default {
+  background-color: rgb(218, 218, 218);
+  border: none;
+  box-shadow: none;
+  transition: 0.3s;
+}
+
+.vueperslides__bullet--active .default {
+    background-color: grey;
+}
+
 </style>
