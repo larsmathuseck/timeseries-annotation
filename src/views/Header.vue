@@ -19,7 +19,7 @@
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button type="button" class="btn btn-light">
+                    <button type="button" class="btn btn-light" @click="toggleModalVisibility  = !toggleModalVisibility">
                         <i class="fa fa-file"></i>
                         Tutorial
                     </button>
@@ -27,14 +27,24 @@
             </ul>
         </div>
     </div>
+    <TutorialModal :toggleModalVisibility="toggleModalVisibility" />
 </template>
 
-
 <script>
+import TutorialModal from "../components/TutorialModal.vue";
+
 export default {
     name: "Header",
+    components: {
+        TutorialModal,
+    },
     props: {
         title: String,
+    },
+    data() {
+        return {
+            toggleModalVisibility: false,
+        }
     },
     methods: {
         chooseFiles() {

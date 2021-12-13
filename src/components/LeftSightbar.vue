@@ -46,7 +46,7 @@
             </div>
         </div>
     </div>
-    <LabelModal :toggleModalVisibility="toggleModalVisibility" :labelToEdit="labelToEdit" @closeModal="closeModal" />
+    <LabelModal :toggleModalVisibility="toggleModalVisibility" :labelToEdit="labelToEdit" />
 </template>
 
 <script>
@@ -113,9 +113,6 @@ export default {
         showModal() {
             this.labelToEdit = null;
             this.toggleModalVisibility = !this.toggleModalVisibility;
-        },
-        closeModal() {
-            this.modalVisible = false;
         },
         onLabelCreated(label) {
             this.$store.commit('addLabel', label)

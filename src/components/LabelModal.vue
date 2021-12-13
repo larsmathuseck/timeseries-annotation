@@ -1,9 +1,9 @@
 <template>
-    <div class="modal fade" ref="exampleModal" tabindex="-1" aria-hidden="false">
+    <div class="modal fade" ref="labelModal" tabindex="-1" aria-hidden="false">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Label</h5>
+                    <h5 class="modal-title">Add Label</h5>
                     <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -52,7 +52,7 @@ export default {
     },
 
     mounted() {
-        this.modal = new Modal(this.$refs.exampleModal)
+        this.modal = new Modal(this.$refs.labelModal)
     },
 }
 </script>
