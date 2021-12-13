@@ -1,6 +1,6 @@
 <template>
     <div @click="chartClicked">
-        <v-chart ref="charts" class="chart" :option="option" @datazoom="zoom" :autoresize="resize" />
+        <v-chart ref="charts" class="chart" :option="option" @datazoom="zoom"/>
     </div>
 </template>
 
@@ -46,6 +46,7 @@ export default {
             tempDataZoomStart: 0,
             tempDataZoomEnd: 100,
             resize: true,
+            sizeOfGraph: 0,
         };
     },
     provide: {
@@ -86,7 +87,7 @@ export default {
                     },
                     name: (i + 1).toString() + " " + x.name,
                     xAxis: new Date(x.timestamp),
-                    y: "15%"
+                    y: "75"
                 };
             });
             let ml = annotations.map(x => {
@@ -138,7 +139,7 @@ export default {
                 });
             }
             return {
-                height: 500,
+                height: this.sizeOfGraph,
                 animation: true,
                 responsive: true,
                 maintainAspectRatio: false,
@@ -190,7 +191,7 @@ export default {
                             },
                         },
                         height:"100",
-                        top: this.$refs.charts?.getHeight() - 300,
+                        bottom: 0,
                         show: true,
                         start: this.dataZoomStart,
                         end: this.dataZoomEnd,
@@ -208,7 +209,14 @@ export default {
             this.$refs.charts?.clear();
             this.dataZoomStart = this.tempDataZoomStart;
             this.dataZoomEnd = this.tempDataZoomEnd;
+            this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
         }
+    },
+    created: function(){
+        window.addEventListener("resize", () => {
+            this.resizeChart();
+            this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
+        })
     }
 }
 
