@@ -106,6 +106,7 @@ export default createStore({
             if(state.activeLabel != null){
                 let time = new Date(timestamp).getTime();
                 let annotations = state.annotations[state.currAnn].data;
+                let inserted = false;
                 let newAnn = {
                     id: annotations[annotations.length-1].id +1,
                     label: state.activeLabel.id,
@@ -114,8 +115,12 @@ export default createStore({
                 for(let i = 0; i < annotations.length; i++){
                     if(annotations[i].timestamp > time){
                         annotations.splice(i, 0, newAnn);
+                        inserted = true;
                         break;
                     }
+                }
+                if(!inserted){
+                    annotations.push(newAnn);
                 }
             }
         },

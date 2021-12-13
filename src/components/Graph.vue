@@ -1,5 +1,5 @@
 <template>
-    <div @click="chartClicked">
+    <div ref="chartDiv" @mouseup="chartClicked" @mousedown="dragDetected">
         <v-chart ref="charts" class="chart" :option="option" @datazoom="zoom"/>
     </div>
 </template>
@@ -46,6 +46,7 @@ export default {
             tempDataZoomStart: 0,
             tempDataZoomEnd: 100,
             resize: true,
+            drag: false,
             sizeOfGraph: 0,
         };
     },
@@ -54,11 +55,20 @@ export default {
     },
     methods: {
         chartClicked: function (event) {
-            let pointInPixel = [event.offsetX, event.offsetY];
-            if (this.$refs.charts.containPixel("grid", pointInPixel)) {
-                let pointInGrid = this.$refs.charts.convertFromPixel("grid", pointInPixel);
-                this.$store.commit("addAnnotationPoint", Math.round(pointInGrid[0]));
+            if(!this.drag){
+                let pointInPixel = [event.offsetX, event.offsetY];
+                if (this.$refs.charts.containPixel("grid", pointInPixel)) {
+                    let pointInGrid = this.$refs.charts.convertFromPixel("grid", pointInPixel);
+                    this.$store.commit("addAnnotationPoint", Math.round(pointInGrid[0]));
+                }
             }
+            this.$refs.chartDiv.removeEventListener("mousemove", () => {});
+            this.drag = false;
+        },
+        dragDetected: function () {
+            this.$refs.chartDiv.addEventListener("mousemove", () => {
+                this.drag = true;
+            })
         },
         zoom: function (event) {
             if (event.start !== undefined && event.end !== undefined) {
