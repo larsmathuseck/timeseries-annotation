@@ -3,7 +3,7 @@
         <Header title="TF Annotator" />
         <div class="row">
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
-                <LeftSightbar/>
+                <LeftSidebar/>
             </div>
             <div class="col col-lg-8 col-md-8 col-sm-12 col-12">
                 <div class="graphDiv">
@@ -11,7 +11,7 @@
                 </div>
             </div>
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
-                <RightSightbar />
+                <RightSidebar />
             </div>
         </div>
     </div>
@@ -20,8 +20,8 @@
 <script>
 import graph from "../components/Graph.vue"
 import Header from "./Header.vue"
-import LeftSightbar from "../components/LeftSightbar.vue"
-import RightSightbar from "../components/RightSightbar.vue"
+import LeftSidebar from "../components/LeftSidebar.vue"
+import RightSidebar from "../components/RightSidebar.vue"
 
 
 export default {  
@@ -29,8 +29,8 @@ export default {
     components: {
         graph,
         Header,
-        LeftSightbar,
-        RightSightbar,
+        LeftSidebar,
+        RightSidebar,
     },
     computed: {
         showGraph: function(){

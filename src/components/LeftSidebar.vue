@@ -57,7 +57,7 @@ import LabelModal from "./LabelModal.vue"
 
 
 export default {
-    name: "LeftSightbar",
+    name: "LeftSidebar",
     components: {
         Axis,
         ColorPicker,

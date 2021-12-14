@@ -19,7 +19,7 @@ import Annotation from "./Annotation.vue"
 import { DateTime } from "luxon"
 
 export default {
-    name: "RightSightbar",
+    name: "RightSidebar",
     components: {
         Annotation,
     },
