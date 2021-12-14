@@ -39,7 +39,6 @@ export default {
 .annotation-name {
     font-family: Tahoma;
     font-size: 1vw;
-    font-weight: bold;
     color: white;
     margin: 0px;
 }

@@ -6,7 +6,7 @@
         <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
             <ul class="nav nav-pills">
                 <li class="nav-item">
-                    <input id="fileUpload" type="file" webkitdirectory directory multiple v-on:change="onFileChange" hidden>
+                    <input id="multipleFileUpload" type="file" webkitdirectory directory multiple v-on:change="onFileChange" hidden>
                     <button @click="chooseFiles()" type="button" class="btn btn-light">
                         <i class="fa fa-folder"></i>
                         Import Folder
@@ -48,7 +48,7 @@ export default {
     },
     methods: {
         chooseFiles() {
-            document.getElementById("fileUpload").click()
+            document.getElementById("multipleFileUpload").click()
         },
         onFileChange(e) {
             const fileList = e.target.files;

@@ -2,12 +2,18 @@
     <div class="row">
         <p @click="test" class="description-text" >Select Data File</p>
         <p class="description-text-sm">Select data file to use</p>
-        <div class="select" >
+        <div class="input-group">
             <select v-model="lastSelectedData" class="form-select" @change="selectDataFile()">
                 <option v-for="row in data" :key="row.id" v-bind:value="row.id">
                     {{ row.name }}
                 </option>
             </select>
+            <div class="input-group-apend">
+                <input id="dataFileUpload" type="file" accept=".csv" multiple v-on:change="onDataFileChange" hidden>
+                <button type="button" class="btn btn-default btn-circle" @click="chooseDataFile">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -24,12 +30,18 @@
     <div class="row">
         <p class="description-text" >Annotation Files</p>
         <p class="description-text-sm">Select file to annotate Chart</p>
-        <div class="select" >
+        <div class="input-group">
             <select v-model="lastSelectedAnnotation" class="form-select" @change="selectAnnotationFile()">
                 <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" v-bind:value="annotationFile.id">
                     {{ annotationFile.name }}
                 </option>
             </select>
+            <div class="input-group-apend">
+                <input id="annotationFileUpload" type="file" accept=".csv" multiple v-on:change="onAnnotationFileChange" hidden>
+                <button type="button" class="btn btn-default btn-circle" @click="chooseAnnotationFile">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -86,16 +98,6 @@ export default {
         selectedAxes: function() {
             return this.$store.getters.selectedAxes;
         },
-        /*selectedAxes: function() {
-            let selectedIds = this.$store.getters.selectedAxes;
-            let selected = [];
-            this.axes.forEach(axis => {
-                if(selectedIds.includes(axis.id)){
-                    selected.push(axis);
-                }
-            });
-            return selected;
-        },*/
         labels: function() {
             return this.$store.getters.getLabels;
         },
@@ -125,6 +127,42 @@ export default {
         },
         selectAnnotationFile() {
             this.$store.commit("selectAnnotationFile", this.lastSelectedAnnotation);
+        },
+        chooseDataFile() {
+            document.getElementById("dataFileUpload").click()
+        },
+        chooseAnnotationFile() {
+            document.getElementById("annotationFileUpload").click()
+        },
+        onDataFileChange(e) {
+            const fileList = e.target.files;
+            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
+                const reader = new FileReader();
+                const file = fileList[i];
+                if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
+                    reader.readAsText(file);
+                    reader.onload = () => {
+                        if(file.name.includes("data")){
+                            this.$store.commit("addData", {result: reader.result, name: file.name});
+                        }
+                    }
+                }
+            }
+        },
+        onAnnotationFileChange(e) {
+            const fileList = e.target.files;
+            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
+                const reader = new FileReader();
+                const file = fileList[i];
+                if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
+                    reader.readAsText(file);
+                    reader.onload = () => {
+                        if(file.name.includes("annotation") || file.name.includes("labels")){
+                            this.$store.commit("addAnnotationData", {result: reader.result, name: file.name});
+                        }
+                    }
+                }
+            }
         }
     },
 }
@@ -157,6 +195,16 @@ export default {
     flex-wrap: wrap;
     align-items: stretch;
     width: 100%;
+}
+
+.input-group {
+    padding-right: 0;
+}
+
+.input-group-apend {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-circle {
