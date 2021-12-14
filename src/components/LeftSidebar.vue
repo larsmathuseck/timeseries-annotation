@@ -1,7 +1,6 @@
 <template>
     <div class="row">
-        <p @click="test" class="description-text" >Select Data File</p>
-        <p class="description-text-sm">Select data file to use</p>
+        <p @click="test" class="description-text" >Data Files</p>
         <div class="input-group">
             <select v-model="lastSelectedData" class="form-select" @change="selectDataFile()">
                 <option v-for="row in data" :key="row.id" v-bind:value="row.id">
@@ -17,7 +16,7 @@
         </div>
     </div>
     <div class="row">
-        <p class="description-text" >Choose Y-Axis</p>
+        <p class="description-text" >Y-Axes</p>
         <div id="scroll-container-axes">
             <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
                 <Axis :axis="axis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
@@ -29,7 +28,6 @@
     </div>
     <div class="row">
         <p class="description-text" >Annotation Files</p>
-        <p class="description-text-sm">Select file to annotate Chart</p>
         <div class="input-group">
             <select v-model="lastSelectedAnnotation" class="form-select" @change="selectAnnotationFile()">
                 <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" v-bind:value="annotationFile.id">
@@ -51,7 +49,6 @@
                 <i class="fa fa-plus"></i>
             </button>
         </span>
-        <label class="description-text-sm">Select Labels to annotate Chart</label>
         <div id="scroll-container-labels">
             <div class="row label-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
                 <Label :label="label" @editLabel="editLabel" />
@@ -263,7 +260,9 @@ export default {
     font-family: Tahoma;
     font-weight: Bold;
     font-size: 1.5vw;
-    margin: 2px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    margin: 0;
 }
 
 .description-text-sm {
