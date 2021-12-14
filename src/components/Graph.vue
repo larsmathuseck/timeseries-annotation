@@ -1,6 +1,6 @@
 <template>
-    <div @click="chartClicked">
-        <v-chart ref="charts" v-if="showGraph" class="chart" :option="option" @datazoom="zoom" />
+    <div ref="chartDiv" @mouseup="chartClicked" @mousedown="dragDetection">
+        <v-chart ref="charts" class="chart" :option="option" @datazoom="zoom"/>
     </div>
 </template>
 
@@ -19,6 +19,7 @@ import {
     MarkPointComponent,
 } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
+import { DateTime } from "luxon";
 
 use([
     CanvasRenderer,
@@ -40,11 +41,14 @@ export default {
     },
     data: function () {
         return {
-            showGraph: true,
             dataZoomStart: 0,
             dataZoomEnd: 100,
             tempDataZoomStart: 0,
             tempDataZoomEnd: 100,
+            resize: true,
+            sizeOfGraph: 0,
+            clickX: 0,
+            clickY: 0,
         };
     },
     provide: {
@@ -52,11 +56,19 @@ export default {
     },
     methods: {
         chartClicked: function (event) {
-            let pointInPixel = [event.offsetX, event.offsetY];
-            if (this.$refs.charts.containPixel("grid", pointInPixel)) {
-                let pointInGrid = this.$refs.charts.convertFromPixel("grid", pointInPixel);
-                this.$store.commit("addAnnotationPoint", Math.round(pointInGrid[0]));
+            const diffX = Math.abs(event.pageX - this.clickX);
+            const diffY = Math.abs(event.pageY - this.clickY);
+            if(diffX < 3 && diffY < 3){
+                let pointInPixel = [event.offsetX, event.offsetY];
+                if (this.$refs.charts.containPixel("grid", pointInPixel)) {
+                    let pointInGrid = this.$refs.charts.convertFromPixel("grid", pointInPixel);
+                    this.$store.commit("addAnnotationPoint", Math.round(pointInGrid[0]));
+                }
             }
+        },
+        dragDetection: function (event) {
+            this.clickX = event.pageX;
+            this.clickY = event.pageY;
         },
         zoom: function (event) {
             if (event.start !== undefined && event.end !== undefined) {
@@ -66,6 +78,9 @@ export default {
                 this.tempDataZoomStart = event.batch[0].start;
                 this.tempDataZoomEnd = event.batch[0].end;
             }
+        },
+        resizeChart: function () {
+            this.$refs.charts?.resize();
         }
     },
     computed: {
@@ -82,7 +97,7 @@ export default {
                     },
                     name: (i + 1).toString() + " " + x.name,
                     xAxis: new Date(x.timestamp),
-                    y: "15%"
+                    y: "75"
                 };
             });
             let ml = annotations.map(x => {
@@ -101,8 +116,11 @@ export default {
                     showSymbol: false,
                     emphasis: {
                         scale: false,
+                        lineStyle: {
+                            width: 1.5,
+                        },
                     },
-                    itemStyle: {
+                    lineStyle: {
                         color: graphData[key].color,
                         width: 1.5,
                     },
@@ -131,8 +149,8 @@ export default {
                 });
             }
             return {
-                height: 500,
-                animation: true,
+                height: this.sizeOfGraph,
+                animation: false,
                 responsive: true,
                 maintainAspectRatio: false,
                 clip: true,
@@ -140,15 +158,10 @@ export default {
                 series: series,
                 tooltip: {
                     trigger: "axis",
-                    formatter: '{b0}',
+                    formatter: (value) => {
+                        return DateTime.fromMillis(value[0].axisValue).toFormat('hh:mm:ss SSS');
+                    }
                 },
-                // toolbox: {
-                //     feature: {
-                //         dataZoom: {
-                //             yAxisIndex: "none",
-                //         },
-                //     },
-                // },
                 legend: {
                     data: legende
                 },
@@ -159,6 +172,12 @@ export default {
                 yAxis: {
                     type: "value",
                 },
+                grid: {
+                    left: '20',
+                    right: '20',
+                    top: '30',
+                    containLabel: true
+                },
                 dataZoom: [
                     {
                         type: "inside",
@@ -167,26 +186,29 @@ export default {
                         filterMode: "filter",
                     },
                     {
+                        type: "slider",
                         animation: true,
                         showDataShadow: true,
                         filterMode: "filter",
                         throttle: 100,
                         dataBackground: {
-                        lineStyle: {
-                            color: "green",
-                            width: 1.5,
+                            lineStyle: {
+                                color: "green",
+                                width: 1.5,
+                            },
+                            areaStyle: {
+                                color: "#ffffff00",
+                            },
                         },
-                        areaStyle: {
-                            color: "#ffffff00",
-                        },
-                        },
-                        height: 100,
-                        bottom: 10,
+                        height:"100",
+                        bottom: 0,
                         show: true,
-                        type: "slider",
                         start: this.dataZoomStart,
                         end: this.dataZoomEnd,
                         handleSize: "70%",
+                        labelFormatter: (value) => {
+                            return DateTime.fromMillis(value).toFormat('hh:mm:ss SSS');
+                        }
                     },
                 ],
             };
@@ -194,10 +216,17 @@ export default {
     },
     watch:{
         option: function(){
-            this.$refs.charts.clear();
+            this.$refs.charts?.clear();
             this.dataZoomStart = this.tempDataZoomStart;
             this.dataZoomEnd = this.tempDataZoomEnd;
+            this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
         }
+    },
+    created: function(){
+        window.addEventListener("resize", () => {
+            this.resizeChart();
+            this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
+        })
     }
 }
 
@@ -206,7 +235,7 @@ export default {
 <style scoped>
 
 .chart {
-    height: 700px;
+    height: 100%;
 }
 
 </style>

@@ -16,6 +16,7 @@
 
 <script>
 import Annotation from "./Annotation.vue"
+import { DateTime } from "luxon"
 
 export default {
     name: "RightSightbar",
@@ -24,7 +25,11 @@ export default {
     },
     computed: {
         annotations: function() {
-            return this.$store.getters.getAnnotations;
+            let ann = this.$store.getters.getAnnotations;
+            for(let i = 0; i < ann.length; i++){
+                ann[i].timestamp = DateTime.fromMillis(ann[i].timestamp).toFormat('hh:mm:ss SSS');
+            }
+            return ann;
         }
     },
 }

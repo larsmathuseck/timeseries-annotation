@@ -28,20 +28,20 @@ export default createStore({
                         id: i,
                         name: legende[i],
                         dataPoints: [],
-                        color: state.colors[Math.floor(Math.random() * state.colors.length)],
+                        color: state.colors[i % state.colors.length],
                     });
                 }
             }
             if(timestampLocation >= 0){
                 data.forEach(row => {
-                    timestamps.push(row[timestampLocation]);
+                    timestamps.push(new Date(row[timestampLocation]).getTime());
                     row.splice(timestampLocation, 1);
                 });
             
                 // Get dimensions in own arrays
                 for(let row = 0; row < data.length; row++){
                     for(let column = 0; column < data[row].length; column++){
-                        dataJson[column].dataPoints.push([timestamps[row], data[row][column]]);   
+                        dataJson[column].dataPoints.push([new Date(timestamps[row]).getTime(), data[row][column]]);   
                     }
                 }
                 state.data.push({
@@ -52,7 +52,6 @@ export default createStore({
                     selectedAxes: [dataJson[0].id],
                 });
             }
-            console.log(state.data)
         },
         addAnnotationData: (state, payload) => {
             let data = parse(payload.result);
@@ -84,7 +83,7 @@ export default createStore({
                     label = {
                         id: newestLabelId,
                         name: data[i][labelLocation],
-                        color: state.colors[Math.floor(Math.random() * state.colors.length)],
+                        color: state.colors[i % state.colors.length],
                     }
                     labels[`${newestLabelId}`] = label;
                     newestLabelId += 1;
@@ -92,7 +91,7 @@ export default createStore({
                 dataArray.push({
                     id: i,
                     label: label.id,
-                    timestamp: data[i][timestampLocation],
+                    timestamp: new Date(data[i][timestampLocation]).getTime(),
                 });
             }
 
@@ -105,18 +104,23 @@ export default createStore({
         },
         addAnnotationPoint: (state, timestamp) => {
             if(state.activeLabel != null){
-                let time = new Date(timestamp);
+                let time = new Date(timestamp).getTime();
                 let annotations = state.annotations[state.currAnn].data;
+                let inserted = false;
                 let newAnn = {
                     id: annotations[annotations.length-1].id +1,
                     label: state.activeLabel.id,
                     timestamp: time,
                 }
                 for(let i = 0; i < annotations.length; i++){
-                    if(new Date(annotations[i].timestamp) > time){
+                    if(annotations[i].timestamp > time){
                         annotations.splice(i, 0, newAnn);
+                        inserted = true;
                         break;
                     }
+                }
+                if(!inserted){
+                    annotations.push(newAnn);
                 }
             }
         },
@@ -166,7 +170,6 @@ export default createStore({
                 }
             }
             if (index > -1) {
-                console.log("delete anno: ", annotation)
                 state.annotations[state.currAnn].data.splice(index, 1);
             }
         },
@@ -180,7 +183,6 @@ export default createStore({
             let annotations = state.annotations[state.currAnn].data;
             for (let index in annotations) {
                 if (annotations[index].label == labelNumber) {
-                    console.log("anno found: ", annotations[index])
                     this.commit("deleteAnnotation", annotations[index])
                 }
             }
@@ -229,6 +231,14 @@ export default createStore({
         },
         getLabels: state => {
             return state.annotations[state.currAnn]?.labels;
+        },
+        showGraph: state => {
+            if(state.data.length > 1){
+                return true;
+            }
+            else {
+                return false;
+            }
         }
     },
     modules: {

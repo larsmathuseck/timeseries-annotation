@@ -6,7 +6,9 @@
                 <LeftSightbar/>
             </div>
             <div class="col col-lg-8 col-md-8 col-sm-12 col-12">
-                <graph v-if="showGraph" class="chart" />
+                <div class="graphDiv">
+                    <graph ref="graphRef" v-if="showGraph" class="chart" />
+                </div>
             </div>
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
                 <RightSightbar />
@@ -30,14 +32,16 @@ export default {
         LeftSightbar,
         RightSightbar,
     },
-    data() {
-        return {
-            showGraph: true,
+    computed: {
+        showGraph: function(){
+            return this.$store.getters.showGraph;
         }
-    },
+    }
 };
 </script>
 
 <style scoped>
-
+    .graphDiv {
+        height: 100%;
+    }
 </style>
