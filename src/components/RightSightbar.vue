@@ -42,7 +42,7 @@ export default {
 
 .annotation-container {
     padding: 12px 12px 12px 0px;
-    border-bottom: 1.5px solid rgb(128, 128, 128, 0.5);
+    border-bottom: 0.1vw solid rgb(128, 128, 128, 0.5);
     
 }
 

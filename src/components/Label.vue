@@ -51,7 +51,9 @@ export default {
     border-radius: 10px;
     margin: 0px;
     padding: 0px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 label {
@@ -74,12 +76,12 @@ label {
 }
 
 button {
-    text-align: center;
     background-color: rgb(255, 255, 255, 0);
-    border-color: rgb(255, 255, 255, 0);
+    border: 0px;
+    padding: 0 3px 0 3px;
 }
 
 .fa {
-    margin-top: 8px;
+    font-size: 1.25vw;
 }
 </style>

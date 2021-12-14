@@ -86,6 +86,9 @@ document.onclick=function(mouseClick) {
     border-radius: 10px;
     margin: 0px;
     padding: 0px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 label {
@@ -103,7 +106,6 @@ button {
 }
 
 .fa {
-    margin-top: 8px;
     color: #2196F3;
     font-size: 1vw;
 }

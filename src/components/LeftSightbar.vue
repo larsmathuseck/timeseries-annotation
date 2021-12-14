@@ -135,9 +135,9 @@ export default {
     margin-left: 12px;
     padding: 12px;
     padding-left: 0px;
-    border-bottom: 1.5px solid rgb(128, 128, 128, 0.5);
+    border-bottom: 0.1vw solid rgb(128, 128, 128, 0.5);
     text-align: left;
-    
+    align-items: center;
 }
 
 #scroll-container-axes {
@@ -162,18 +162,25 @@ export default {
 .btn-circle {
     height: 2.5vw;
     width: 2.5vw;
-    padding: 6px 0px;
     border-radius: 1.25vw;
     text-align: center;
     font-size: 1vw;
-    line-height: 1.42857;
     background-color: #bbb;
     opacity: 0.7;
-    margin-left: 15px;
+    margin-left: 1vw;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0px;
 }
 
 .btn-circle:hover { 
     opacity: 1;
+}
+
+.fa-plus {
+    max-height: fit-content;
+    max-width: fit-content;
 }
 
 .label-container {
@@ -182,6 +189,7 @@ export default {
     padding-left: 0px;
     border-bottom: 0.1vw solid rgb(128, 128, 128, 0.5);
     text-align: left;
+    align-items: center;
 }
 
 .label-container:hover {
