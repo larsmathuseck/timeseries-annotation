@@ -1,5 +1,5 @@
 <template>
-    <div class="row">
+    <div class="row h-100">
         <label class="description-text">
             Annotations
         </label>
@@ -38,7 +38,7 @@ export default {
 <style scoped>
 #scroll-container-annotations {
     overflow-y: auto;
-    max-height: 80vh;;
+    max-height: 80vh;
 }
 #scroll-container-annotations::-webkit-scrollbar {
     width: 0px;

@@ -23,11 +23,11 @@
                         <i class="fa fa-file"></i>
                         Tutorial
                     </button>
+                        <TutorialModal :toggleModalVisibility="toggleModalVisibility" />
                 </li>
             </ul>
         </div>
     </div>
-    <TutorialModal :toggleModalVisibility="toggleModalVisibility" />
 </template>
 
 <script>
@@ -80,8 +80,7 @@ export default {
 }
 
 .row {
-    margin-bottom: 20px;
-    margin-top: 10px;
+    padding-top: 10px;
     border-bottom: solid gray;
 }
 

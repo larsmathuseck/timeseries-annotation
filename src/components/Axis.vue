@@ -103,11 +103,17 @@ button {
     text-align: center;
     background-color: rgb(255, 255, 255, 0);
     border-color: rgb(255, 255, 255, 0);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .fa {
     color: #2196F3;
     font-size: 1vw;
+    display:inline-block;
+    text-align: center;
+    vertical-align: bottom;
 }
 
 .colorpicker-container {

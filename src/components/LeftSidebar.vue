@@ -226,6 +226,9 @@ export default {
 .fa-plus {
     max-height: fit-content;
     max-width: fit-content;
+    display:inline-block;
+    text-align: center;
+    vertical-align: bottom;
 }
 
 .label-container {
@@ -245,7 +248,7 @@ export default {
     padding: 0px;
     overflow-y: auto;
     scrollbar-width: none;
-    max-height: 25vh;
+    max-height: 30vh;
 }
 #scroll-container-labels::-webkit-scrollbar { 
     width: 0;
@@ -260,7 +263,7 @@ export default {
     font-family: Tahoma;
     font-weight: Bold;
     font-size: 1.5vw;
-    padding-top: 2px;
+    padding-top: 10px;
     padding-bottom: 2px;
     margin: 0;
 }
