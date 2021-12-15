@@ -1,5 +1,5 @@
 <template>
-    <div class="row">
+    <div class="row h-100">
         <label class="description-text">
             Annotations
         </label>
@@ -19,7 +19,7 @@ import Annotation from "./Annotation.vue"
 import { DateTime } from "luxon"
 
 export default {
-    name: "RightSightbar",
+    name: "RightSidebar",
     components: {
         Annotation,
     },
@@ -38,7 +38,7 @@ export default {
 <style scoped>
 #scroll-container-annotations {
     overflow-y: auto;
-    max-height: 80vh;;
+    max-height: 80vh;
 }
 #scroll-container-annotations::-webkit-scrollbar {
     width: 0px;
@@ -47,7 +47,7 @@ export default {
 
 .annotation-container {
     padding: 12px 12px 12px 0px;
-    border-bottom: 1.5px solid rgb(128, 128, 128, 0.5);
+    border-bottom: 0.1vw solid rgb(128, 128, 128, 0.5);
     
 }
 

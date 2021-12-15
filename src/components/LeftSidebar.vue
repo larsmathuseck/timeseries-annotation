@@ -1,17 +1,22 @@
 <template>
     <div class="row">
-        <p @click="test" class="description-text" >Select Data File</p>
-        <p class="description-text-sm">Select data file to use</p>
-        <div class="select" >
+        <p @click="test" class="description-text" >Data Files</p>
+        <div class="input-group">
             <select v-model="lastSelectedData" class="form-select" @change="selectDataFile()">
                 <option v-for="row in data" :key="row.id" v-bind:value="row.id">
                     {{ row.name }}
                 </option>
             </select>
+            <div class="input-group-apend">
+                <input id="dataFileUpload" type="file" accept=".csv" multiple v-on:change="onDataFileChange" hidden>
+                <button type="button" class="btn btn-default btn-circle" @click="chooseDataFile">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
         </div>
     </div>
     <div class="row">
-        <p class="description-text" >Choose Y-Axis</p>
+        <p class="description-text" >Y-Axes</p>
         <div id="scroll-container-axes">
             <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
                 <Axis :axis="axis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
@@ -23,13 +28,18 @@
     </div>
     <div class="row">
         <p class="description-text" >Annotation Files</p>
-        <p class="description-text-sm">Select file to annotate Chart</p>
-        <div class="select" >
+        <div class="input-group">
             <select v-model="lastSelectedAnnotation" class="form-select" @change="selectAnnotationFile()">
                 <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" v-bind:value="annotationFile.id">
                     {{ annotationFile.name }}
                 </option>
             </select>
+            <div class="input-group-apend">
+                <input id="annotationFileUpload" type="file" accept=".csv" multiple v-on:change="onAnnotationFileChange" hidden>
+                <button type="button" class="btn btn-default btn-circle" @click="chooseAnnotationFile">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -39,14 +49,13 @@
                 <i class="fa fa-plus"></i>
             </button>
         </span>
-        <label class="description-text-sm">Select Labels to annotate Chart</label>
         <div id="scroll-container-labels">
             <div class="row label-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
                 <Label :label="label" @editLabel="editLabel" />
             </div>
         </div>
     </div>
-    <LabelModal :toggleModalVisibility="toggleModalVisibility" :labelToEdit="labelToEdit" @closeModal="closeModal" />
+    <LabelModal :addLabelKey="addLabelKey" :toggleModalVisibility="toggleModalVisibility" :labelToEdit="labelToEdit" />
 </template>
 
 <script>
@@ -57,7 +66,7 @@ import LabelModal from "./LabelModal.vue"
 
 
 export default {
-    name: "LeftSightbar",
+    name: "LeftSidebar",
     components: {
         Axis,
         ColorPicker,
@@ -73,6 +82,7 @@ export default {
             showAddLabel: false,
             toggleModalVisibility: false,
             labelToEdit: null,
+            addLabelKey: 0,
         }
     },
     computed: {
@@ -85,16 +95,6 @@ export default {
         selectedAxes: function() {
             return this.$store.getters.selectedAxes;
         },
-        /*selectedAxes: function() {
-            let selectedIds = this.$store.getters.selectedAxes;
-            let selected = [];
-            this.axes.forEach(axis => {
-                if(selectedIds.includes(axis.id)){
-                    selected.push(axis);
-                }
-            });
-            return selected;
-        },*/
         labels: function() {
             return this.$store.getters.getLabels;
         },
@@ -111,21 +111,55 @@ export default {
             this.toggleModalVisibility = !this.toggleModalVisibility;
         },
         showModal() {
+            if (this.addLabelKey == 0) {
+                this.addLabelKey = 1;
+            } else {
+                this.addLabelKey = 0;
+            }
             this.labelToEdit = null;
             this.toggleModalVisibility = !this.toggleModalVisibility;
-        },
-        closeModal() {
-            this.modalVisible = false;
-        },
-        onLabelCreated(label) {
-            this.$store.commit('addLabel', label)
-            this.toggleShowAddLabel();
         },
         selectDataFile() {
             this.$store.commit("selectDataFile", this.lastSelectedData);
         },
         selectAnnotationFile() {
             this.$store.commit("selectAnnotationFile", this.lastSelectedAnnotation);
+        },
+        chooseDataFile() {
+            document.getElementById("dataFileUpload").click()
+        },
+        chooseAnnotationFile() {
+            document.getElementById("annotationFileUpload").click()
+        },
+        onDataFileChange(e) {
+            const fileList = e.target.files;
+            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
+                const reader = new FileReader();
+                const file = fileList[i];
+                if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
+                    reader.readAsText(file);
+                    reader.onload = () => {
+                        if(file.name.includes("data")){
+                            this.$store.commit("addData", {result: reader.result, name: file.name});
+                        }
+                    }
+                }
+            }
+        },
+        onAnnotationFileChange(e) {
+            const fileList = e.target.files;
+            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
+                const reader = new FileReader();
+                const file = fileList[i];
+                if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
+                    reader.readAsText(file);
+                    reader.onload = () => {
+                        if(file.name.includes("annotation") || file.name.includes("labels")){
+                            this.$store.commit("addAnnotationData", {result: reader.result, name: file.name});
+                        }
+                    }
+                }
+            }
         }
     },
 }
@@ -136,9 +170,9 @@ export default {
     margin-left: 12px;
     padding: 12px;
     padding-left: 0px;
-    border-bottom: 1.5px solid rgb(128, 128, 128, 0.5);
+    border-bottom: 0.1vw solid rgb(128, 128, 128, 0.5);
     text-align: left;
-    
+    align-items: center;
 }
 
 #scroll-container-axes {
@@ -160,30 +194,50 @@ export default {
     width: 100%;
 }
 
+.input-group {
+    padding-right: 0;
+}
+
+.input-group-apend {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .btn-circle {
-    height: 45px;
-    width: 45px;
-    padding: 6px 0px;
-    border-radius: 22.5px;
+    height: 2.5vw;
+    width: 2.5vw;
+    border-radius: 1.25vw;
     text-align: center;
-    font-size: 20px;
-    line-height: 1.42857;
+    font-size: 1vw;
     background-color: #bbb;
     opacity: 0.7;
-    margin-left: 15px;
+    margin-left: 1vw;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0px;
 }
 
 .btn-circle:hover { 
     opacity: 1;
 }
 
+.fa-plus {
+    max-height: fit-content;
+    max-width: fit-content;
+    display:inline-block;
+    text-align: center;
+    vertical-align: bottom;
+}
+
 .label-container {
     margin-left: 12px;
     padding: 12px;
     padding-left: 0px;
-    border-bottom: 1.5px solid rgb(128, 128, 128, 0.5);
+    border-bottom: 0.1vw solid rgb(128, 128, 128, 0.5);
     text-align: left;
-    
+    align-items: center;
 }
 
 .label-container:hover {
@@ -194,7 +248,7 @@ export default {
     padding: 0px;
     overflow-y: auto;
     scrollbar-width: none;
-    max-height: 25vh;
+    max-height: 30vh;
 }
 #scroll-container-labels::-webkit-scrollbar { 
     width: 0;
@@ -208,14 +262,16 @@ export default {
     text-align: left;
     font-family: Tahoma;
     font-weight: Bold;
-    font-size: 1.5rem;
-    margin: 2px;
+    font-size: 1.5vw;
+    padding-top: 10px;
+    padding-bottom: 2px;
+    margin: 0;
 }
 
 .description-text-sm {
     text-align: left;
     font-family: Tahoma;
-    font-size: 1rem;
+    font-size: 1vw;
     margin: 2px;
     color: gray;
 }

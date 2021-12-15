@@ -9,7 +9,7 @@
             <i class="fa fa-tint"  @click="showColorPicker = !showColorPicker" />
         </button>
         <label class="switch">
-            <input type="checkbox" v-model="selected" @change="toggleAxis">
+            <input type="checkbox" v-model="selected" @change="toggleAxis" v-show="false">
             <span class="slider round"></span>
         </label>
     </div>
@@ -86,11 +86,14 @@ document.onclick=function(mouseClick) {
     border-radius: 10px;
     margin: 0px;
     padding: 0px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 label {
     font-family: Tahoma;
-    font-size: 1rem;
+    font-size: 1vw;
     color: white;
     padding: 5px;
     margin: 0px;
@@ -100,11 +103,17 @@ button {
     text-align: center;
     background-color: rgb(255, 255, 255, 0);
     border-color: rgb(255, 255, 255, 0);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .fa {
-    margin-top: 8px;
     color: #2196F3;
+    font-size: 1vw;
+    display:inline-block;
+    text-align: center;
+    vertical-align: bottom;
 }
 
 .colorpicker-container {
@@ -118,8 +127,10 @@ button {
 .switch {
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 34px;
+  width: 3vw;
+  height: 1.5vw;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .slider {
@@ -137,10 +148,10 @@ button {
 .slider:before {
   position: absolute;
   content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
+  height: 1.15vw;
+  width: 1.15vw;
+  left: 0.25vw;
+  bottom: 0.2vw;
   background-color: white;
   -webkit-transition: .4s;
   transition: .4s;
@@ -155,13 +166,13 @@ input:focus + .slider {
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
+  -webkit-transform: translateX(1.25vw);
+  -ms-transform: translateX(1.25vw);
+  transform: translateX(1.3vw);
 }
 
 .slider.round {
-  border-radius: 34px;
+  border-radius: 1vw;
 }
 
 .slider.round:before {

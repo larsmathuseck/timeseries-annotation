@@ -38,8 +38,7 @@ export default {
 
 .annotation-name {
     font-family: Tahoma;
-    font-size: 1rem;
-    font-weight: bold;
+    font-size: 1vw;
     color: white;
     margin: 0px;
 }
@@ -49,7 +48,7 @@ export default {
     display: block;
     color: rgb(128, 128, 128, 0.5);
     margin-top: 0;
-    margin-bottom: 1rem;
+    margin-bottom: 1vw;
 }
 
 i {

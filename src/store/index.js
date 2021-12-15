@@ -233,7 +233,7 @@ export default createStore({
             return state.annotations[state.currAnn]?.labels;
         },
         showGraph: state => {
-            if(state.data.length > 1){
+            if(state.data.length > 0){
                 return true;
             }
             else {
