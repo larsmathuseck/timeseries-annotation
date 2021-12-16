@@ -13,7 +13,7 @@
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button type="button" class="btn btn-light">
+                    <button type="button" class="btn btn-light" @click="saveAnnotation">
                         <i class="fa fa-download"></i>
                         Save File
                     </button>
@@ -67,6 +67,16 @@ export default {
                     }
                 }
             }
+        },
+        async saveAnnotation() {
+            // var a = document.createElement("a");
+            // a.href = window.URL.createObjectURL(new Blob(["CONTENT"], {type: "text/plain"}));
+            // a.download = "demo.txt";
+            // a.click();
+            const fileHandle = await window.showSaveFilePicker();
+            const fileStream = await fileHandle.createWritable();
+            await fileStream.write(new Blob(["CONTENT"], {type: "text/plain"}));
+            await fileStream.close();
         },
     },
 }
