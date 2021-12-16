@@ -236,6 +236,7 @@ export default {
 
 .chart {
     height: 100%;
+    padding-bottom: 20px;
 }
 
 </style>

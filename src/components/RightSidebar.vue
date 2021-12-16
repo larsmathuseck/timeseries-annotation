@@ -3,9 +3,6 @@
         <label class="description-text">
             Annotations
         </label>
-        <label class="description-text-sm">
-            List of Annotations
-        </label>
         <div id="scroll-container-annotations">
             <div class="annotation-container" v-for="annotation in annotations" :key="annotation.id">
                 <Annotation :annotation="annotation" />
