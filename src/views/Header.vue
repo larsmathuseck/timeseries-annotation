@@ -69,14 +69,18 @@ export default {
             }
         },
         async saveAnnotation() {
-            // var a = document.createElement("a");
-            // a.href = window.URL.createObjectURL(new Blob(["CONTENT"], {type: "text/plain"}));
-            // a.download = "demo.txt";
-            // a.click();
-            const fileHandle = await window.showSaveFilePicker();
-            const fileStream = await fileHandle.createWritable();
-            await fileStream.write(new Blob(["CONTENT"], {type: "text/plain"}));
-            await fileStream.close();
+            if (typeof showSaveFilePicker === 'undefined'){
+                var a = document.createElement("a");
+                a.href = window.URL.createObjectURL(new Blob(["CONTENT"], {type: "text/plain"}));
+                a.download = "demo.txt";
+                a.click();
+            }
+            else{
+                const fileHandle = await window.showSaveFilePicker();
+                const fileStream = await fileHandle.createWritable();
+                await fileStream.write(new Blob(["CONTENT"], {type: "text/plain"}));
+                await fileStream.close();
+            }
         },
     },
 }
