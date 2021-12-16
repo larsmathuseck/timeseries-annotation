@@ -9,21 +9,33 @@
         <div class="row">
             <div class="col-auto text-start">
                 <label for="validationLabelColor" class="form-label description-text-sm">Label Color:</label>
-                <div class="input-group">
-                    <input type="text" v-model="labelColor" class="form-control" id="validationLabelColor" required>
-                    <div class="input-group-append">
+                <div class="row">
+                    <div class="col col-10" id="colorInputContainer">
+                        <input type="text" v-model="labelColor" class="form-control" id="validationLabelColor" required>
+                    </div>
+                    <div class="col col-2" id="submitButtonContainer">
                         <button id="colorButton" class="btn rounded" type="button" @click="showColorPicker = !showColorPicker">
                             <i class="fa fa-tint" />
                         </button>
                     </div>
-                    <ColorPicker @labelColorPicked="colorPicked" :colorForAxis="false" v-show="showColorPicker"/>
                 </div>
             </div>
         </div>
-        <div id="buttonRow" class="row">
-            <div class="col text-center">
-                <button id="submitButton" class="btn btn-primary" type="submit">Add Label</button>
+        <div class="row">
+            <div class="col">
+                <ColorPicker @labelColorPicked="colorPicked" :colorForAxis="false" v-show="showColorPicker"/> 
             </div>
+        </div>
+        <div class="row" v-show="this.error != ''">
+            <div id="allert-div" class="col-auto">
+                <div class="alert alert-danger" role="alert">
+                    {{ this.error }}
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="$emit('closeModal')">Close</button>
+            <button id="submitButton" class="btn btn-primary" type="submit">Save</button>
         </div>
     </form>
 </template>
@@ -36,11 +48,15 @@ export default {
     components: { 
         ColorPicker,
     },
+    props: {
+        labelToEdit: Object,
+    },
     data() {
         return {
             labelName: "",
             labelColor: "",
             showColorPicker: false,
+            error: resetErrorOnOpen(),
         }
     },
     methods: {
@@ -49,27 +65,66 @@ export default {
         },
         onSubmit(e) {
             e.preventDefault()
-            const label = {
-                id: this.$store.state.labels.length + 1,
-                name: this.labelName,
-                color: this.labelColor,
+            if (this.labelToEdit === null) {
+                const labels = this.$store.getters.getLabels;
+                console.log(labels)
+                if (typeof labels == "undefined") { // no or false data uploaded --> no annotation file
+                    console.log("here")
+                    this.error = "Can't add Label. First add Annotation and Data files!"
+                    return;
+                } 
+                const labelKeys = Object.keys(labels);
+                const lastKey = labelKeys.at(-1);
+                const lastLabel = labels[lastKey];
+                let newId = 0
+                if (Object.values(labels).length != 0) {
+                    newId = lastLabel.id +1;
+                }
+                const label = {
+                    id: newId,
+                    name: this.labelName,
+                    color: this.labelColor,
+                }
+                this.$emit("labelCreated", label)
+            } else {
+                const label = {
+                    id: this.labelToEdit.id,
+                    name: this.labelName,
+                    color: this.labelColor,
+                }
+                this.$emit("labelEdited", label)
             }
-            this.$emit("labelCreated", label)
-            this.labelName = ""
-            this.labelColor = ""
+            this.labelName = "";
+            this.labelColor = "";
             this.showColorPicker = false;
+            this.error = "";
         },
-    }
+        resetWindow: function (){
+            Object.assign(this.error, resetErrorOnOpen());
+        }
+    },
+    watch: {
+        labelToEdit: function() {
+            if (this.labelToEdit !== null) {
+                this.labelName = this.labelToEdit.name;
+                this.labelColor = this.labelToEdit.color;
+            } else {
+                this.labelName = "";
+                this.labelColor = "";
+            }
+        }
+    },
+    emits: ["closeModal", "labelCreated", "labelEdited"],
+}
+
+function resetErrorOnOpen() {
+    return "";
 }
 </script>
 
 <style scoped>
-
 .form-container {
-    padding: 10px;
-    margin: 12px;
-    border: 1.5px solid rgb(128, 128, 128, 0.5);
-    border-radius: 30px;
+    padding: 16px;
 }
 
 #buttonRow {
@@ -79,7 +134,7 @@ export default {
 #colorButton {
     margin-left: 1,5px;
     align-self: center;
-    background-color: rgb(8, 173, 173);
+    background-color: #2196F3;
     opacity: 0.7;
 }
 
@@ -87,10 +142,35 @@ export default {
     opacity: 1;
 }
 
+#colorInputContainer {
+    padding-right: 0px;
+}
+
+#submitButtonContainer {
+    padding-left: 0px;
+}
+
+.alert-danger {
+    margin-top: 25px;
+    margin-bottom: 0px;
+}
 
 .fa {
     height: 10px;
     width: 10px;
     color: white;
+    opacity: 1;
+}
+
+.colorpicker-container {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+}
+
+.modal-footer {
+    margin-top: 25px;
 }
 </style>

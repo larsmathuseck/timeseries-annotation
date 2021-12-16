@@ -6,7 +6,7 @@
         <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
             <ul class="nav nav-pills">
                 <li class="nav-item">
-                    <input id="fileUpload" type="file" v-on:change="onFileChange" hidden>
+                    <input id="multipleFileUpload" type="file" webkitdirectory directory multiple v-on:change="onFileChange" hidden>
                     <button @click="chooseFiles()" type="button" class="btn btn-light">
                         <i class="fa fa-folder"></i>
                         Import Folder
@@ -19,34 +19,54 @@
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button type="button" class="btn btn-light">
+                    <button type="button" class="btn btn-light" @click="toggleModalVisibility  = !toggleModalVisibility">
                         <i class="fa fa-file"></i>
                         Tutorial
                     </button>
+                        <TutorialModal :toggleModalVisibility="toggleModalVisibility" />
                 </li>
             </ul>
         </div>
     </div>
 </template>
 
-
 <script>
+import TutorialModal from "../components/TutorialModal.vue";
+
 export default {
     name: "Header",
+    components: {
+        TutorialModal,
+    },
     props: {
         title: String,
     },
+    data() {
+        return {
+            toggleModalVisibility: false,
+        }
+    },
     methods: {
         chooseFiles() {
-            document.getElementById("fileUpload").click()
+            document.getElementById("multipleFileUpload").click()
         },
         onFileChange(e) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = () => {
-                this.$store.commit("loadData", reader.result);
-            };
-            reader.readAsText(file);
+            const fileList = e.target.files;
+            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
+                const reader = new FileReader();
+                const file = fileList[i];
+                if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
+                    reader.readAsText(file);
+                    reader.onload = () => {
+                        if(file.name.includes("data")){
+                            this.$store.commit("addData", {result: reader.result, name: file.name});
+                        }
+                        else if(file.name.includes("annotation") || file.name.includes("labels")){
+                            this.$store.commit("addAnnotationData", {result: reader.result, name: file.name});
+                        }
+                    }
+                }
+            }
         },
     },
 }
@@ -60,12 +80,20 @@ export default {
 }
 
 .row {
-    margin-bottom: 20px;
-    margin-top: 10px;
+    padding-top: 10px;
     border-bottom: solid gray;
 }
 
 li {
     margin: 5px;
+}
+
+button {
+    background-color: #e1e1e5;
+    font-size: 1vw;
+}
+
+h1 {
+    font-size: 2.5vw;
 }
 </style>

@@ -1,0 +1,6 @@
+- change label colorpicker not in same row
+- axis colorpicker button to small
+- select data not showing path              
+- subtitels still there
+- main row not full height
+
