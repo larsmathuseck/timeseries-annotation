@@ -1,6 +1,6 @@
-- change label colorpicker not in same row
-- axis colorpicker button to small
-- select data not showing path              
-- subtitels still there
-- main row not full height
+- axis colorpicker button to small && no cancel on colorpicker
+- select data not showing path
+- annotations delete bug
+- single data import -> graph not updating
+- annotations list smaller text to show more annotations on screen
 
