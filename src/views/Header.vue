@@ -15,7 +15,7 @@
                 <li class="nav-item">
                     <button type="button" class="btn btn-light" @click="saveAnnotation">
                         <i class="fa fa-download"></i>
-                        Save File
+                        Save Annotation
                     </button>
                 </li>
                 <li class="nav-item">
@@ -69,17 +69,34 @@ export default {
             }
         },
         async saveAnnotation() {
-            if (typeof showSaveFilePicker === 'undefined'){
-                var a = document.createElement("a");
-                a.href = window.URL.createObjectURL(new Blob(["CONTENT"], {type: "text/plain"}));
-                a.download = "demo.txt";
-                a.click();
-            }
-            else{
-                const fileHandle = await window.showSaveFilePicker();
-                const fileStream = await fileHandle.createWritable();
-                await fileStream.write(new Blob(["CONTENT"], {type: "text/plain"}));
-                await fileStream.close();
+            let content = this.$store.getters.saveAnnotations;
+            let name = this.$store.state.annotations[this.$store.state.currAnn]?.name;
+            if(content.length > 1 && name != undefined){
+                if (typeof showSaveFilePicker === 'undefined'){
+                    var a = document.createElement("a");
+                    a.href = window.URL.createObjectURL(new Blob([content], {type: "text/csv"}));
+                    a.download = name;
+                    a.click();
+                }
+                else{
+                    try{
+                        const fileHandle = await self.showSaveFilePicker({
+                            suggestedName: name,
+                            types: [{
+                                description: 'CSV documents',
+                                accept: {
+                                'text/csv': ['.csv'],
+                                },
+                            }],
+                        });
+                        console.log(fileHandle);
+                        const fileStream = await fileHandle.createWritable();
+                        await fileStream.write(new Blob([content], {type: "text/csv;charset=utf-8;"}));
+                        await fileStream.close();
+                    } catch(error){
+                        console.log(error);
+                    }
+                }
             }
         },
     },
