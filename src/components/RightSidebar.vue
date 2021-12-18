@@ -1,5 +1,5 @@
 <template>
-    <div class="row h-100">
+    <div class="row">
         <label class="description-text">
             Annotations
         </label>

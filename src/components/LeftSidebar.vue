@@ -75,11 +75,9 @@ export default {
     },
     data() {
         return {
-            lastSelectedAxis: Object,
             lastSelectedData: this.$store.state.currentSelectedData,
             lastSelectedAnnotation: this.$store.state.currAnn,
             showColorPicker: false,
-            showAddLabel: false,
             toggleModalVisibility: false,
             labelToEdit: null,
             addLabelKey: 0,

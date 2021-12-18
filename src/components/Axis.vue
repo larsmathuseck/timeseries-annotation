@@ -60,22 +60,8 @@ export default {
             this.$store.commit("changeAxisColor", newAxis);
             this.showColorPicker = false;
         },
-        /*mounted() {
-        window.addEventListener("load", this.onWindowLoad);
-        },*/
     },
 }
-/*
-const colorContainer = document.getElementById("colorpicker-con");
-document.onclick=function(mouseClick) {
-    console.log(mouseClick.target.id)
-    console.log(colorContainer.id)
-    if (mouseClick.target.id != colorContainer.id && this.showColorPicker) {
-        console.log("false")
-        this.showColorPicker = false;
-        console.log(this.showColorPicker)
-    }
-}*/
 </script>
 
 <style scoped>

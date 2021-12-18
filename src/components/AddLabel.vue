@@ -67,9 +67,7 @@ export default {
             e.preventDefault()
             if (this.labelToEdit === null) {
                 const labels = this.$store.getters.getLabels;
-                console.log(labels)
                 if (typeof labels == "undefined") { // no or false data uploaded --> no annotation file
-                    console.log("here")
                     this.error = "Can't add Label. First add Annotation and Data files!"
                     return;
                 } 
