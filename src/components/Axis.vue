@@ -94,9 +94,9 @@ button {
     justify-content: center;
 }
 
-.fa {
+.fa-tint {
     color: #2196F3;
-    font-size: 1vw;
+    font-size: 1.2vw;
     display:inline-block;
     text-align: center;
     vertical-align: bottom;

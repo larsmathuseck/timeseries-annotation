@@ -183,7 +183,6 @@ export default createStore({
             let annotations = state.annotations[state.currAnn].data;
             let annotationsToDelete = [];
             for (let i = 0; i < annotations.length; i++) {
-                console.log("look at annotation: ", i,  annotations[i]);
                 if (annotations[i].label == labelNumber) {
                     annotationsToDelete.push(annotations[i]);
                 }
