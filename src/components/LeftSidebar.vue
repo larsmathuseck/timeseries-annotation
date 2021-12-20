@@ -35,8 +35,7 @@
                 </option>
             </select>
             <div class="input-group-apend">
-                <input id="annotationFileUpload" type="file" accept=".csv" multiple v-on:change="onAnnotationFileChange" hidden>
-                <button type="button" class="btn btn-default btn-circle" @click="chooseAnnotationFile">
+                <button type="button" class="btn btn-default btn-circle" @click="showAnnotationModal">
                     <i class="fa fa-plus"></i>
                 </button>
             </div>
@@ -45,7 +44,7 @@
     <div class="row">
         <span class="description-text" >
             <label>Labels</label>
-            <button type="button" class="btn btn-default btn-circle" @click="showModal">
+            <button type="button" class="btn btn-default btn-circle" @click="showLabelModal">
                 <i class="fa fa-plus"></i>
             </button>
         </span>
@@ -55,13 +54,15 @@
             </div>
         </div>
     </div>
-    <LabelModal :addLabelKey="addLabelKey" :toggleModalVisibility="toggleModalVisibility" :labelToEdit="labelToEdit" />
+    <AnnotationModal :annotationModalKey="annotationModalKey" :toggleModalVisibility="toggleAnnotationModalVisibility" />
+    <LabelModal :addLabelKey="addLabelKey" :toggleModalVisibility="toggleLabelModalVisibility" :labelToEdit="labelToEdit" />
 </template>
 
 <script>
 import Axis from "./Axis.vue"
 import ColorPicker from "./Colorpicker.vue"
 import Label from "./Label.vue"
+import AnnotationModal from "./AnnotationModal.vue"
 import LabelModal from "./LabelModal.vue"
 
 
@@ -71,6 +72,7 @@ export default {
         Axis,
         ColorPicker,
         Label,
+        AnnotationModal,
         LabelModal,
     },
     data() {
@@ -78,8 +80,10 @@ export default {
             lastSelectedData: this.$store.state.currentSelectedData,
             lastSelectedAnnotation: this.$store.state.currAnn,
             showColorPicker: false,
-            toggleModalVisibility: false,
+            toggleAnnotationModalVisibility: false,
+            toggleLabelModalVisibility: false,
             labelToEdit: null,
+            annotationModalKey: 2,
             addLabelKey: 0,
         }
     },
@@ -106,16 +110,24 @@ export default {
         },
         editLabel(label) {
             this.labelToEdit = label;
-            this.toggleModalVisibility = !this.toggleModalVisibility;
+            this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
         },
-        showModal() {
+        showAnnotationModal() {
+            if (this.annotationModalKey == 2) {
+                this.annotationModalKey = 3;
+            } else {
+                this.annotationModalKey = 2;
+            }
+            this.toggleAnnotationModalVisibility = !this.toggleAnnotationModalVisibility;
+        },
+        showLabelModal() {
             if (this.addLabelKey == 0) {
                 this.addLabelKey = 1;
             } else {
                 this.addLabelKey = 0;
             }
             this.labelToEdit = null;
-            this.toggleModalVisibility = !this.toggleModalVisibility;
+            this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
         },
         selectDataFile() {
             this.$store.commit("selectDataFile", this.lastSelectedData);
@@ -125,9 +137,6 @@ export default {
         },
         chooseDataFile() {
             document.getElementById("dataFileUpload").click()
-        },
-        chooseAnnotationFile() {
-            document.getElementById("annotationFileUpload").click()
         },
         onDataFileChange(e) {
             const fileList = e.target.files;
@@ -144,21 +153,6 @@ export default {
                 }
             }
         },
-        onAnnotationFileChange(e) {
-            const fileList = e.target.files;
-            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const reader = new FileReader();
-                const file = fileList[i];
-                if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
-                    reader.readAsText(file);
-                    reader.onload = () => {
-                        if(file.name.includes("annotation") || file.name.includes("labels")){
-                            this.$store.commit("addAnnotationData", {result: reader.result, name: file.name});
-                        }
-                    }
-                }
-            }
-        }
     },
 }
 </script>
@@ -274,11 +268,11 @@ export default {
     color: gray;
 }
 
-.fa-plus, .fa-edit , .fa-times{
+.fa-edit , .fa-times{
     opacity: 0.5;
 }
 
-.fa-plus:hover, .fa-edit:hover, .fa-times:hover {
+.fa-edit:hover, .fa-times:hover {
     opacity: 1;
     cursor: pointer;
 }

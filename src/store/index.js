@@ -101,6 +101,7 @@ export default createStore({
                 data: dataArray,
                 labels: labels,
             });
+            console.log(state.annotations);
         },
         addAnnotationPoint: (state, timestamp) => {
             if(state.activeLabel != null){
