@@ -54,7 +54,7 @@
             </div>
         </div>
     </div>
-    <AnnotationModal :annotationModalKey="annotationModalKey" :toggleModalVisibility="toggleAnnotationModalVisibility" />
+    <AnnotationModal :toggleModalVisibility="toggleAnnotationModalVisibility" />
     <LabelModal :addLabelKey="addLabelKey" :toggleModalVisibility="toggleLabelModalVisibility" :labelToEdit="labelToEdit" />
 </template>
 
@@ -83,7 +83,6 @@ export default {
             toggleAnnotationModalVisibility: false,
             toggleLabelModalVisibility: false,
             labelToEdit: null,
-            annotationModalKey: 2,
             addLabelKey: 0,
         }
     },
@@ -113,11 +112,6 @@ export default {
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
         },
         showAnnotationModal() {
-            if (this.annotationModalKey == 2) {
-                this.annotationModalKey = 3;
-            } else {
-                this.annotationModalKey = 2;
-            }
             this.toggleAnnotationModalVisibility = !this.toggleAnnotationModalVisibility;
         },
         showLabelModal() {

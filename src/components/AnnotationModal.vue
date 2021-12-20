@@ -9,10 +9,14 @@
                 <form class="form-container" @submit="onSubmit">
                     <div class="modal-body">
                         <div class="row justify-content-md-center">
-                            <div class="col-auto">
-                                <label>
-                                    Import existing Annotation File:
-                                </label>
+                            <div class="col-10 d-flex justify-content-center">
+                                <div class="row">
+                                    <label class="modal-description-text">
+                                        Import existing Annotation File:
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-2">
                                 <input id="annotationFileUpload" type="file" accept=".csv" multiple v-on:change="onAnnotationFileChange" hidden>
                                 <button type="button" class="btn btn-default btn-circle" @click="chooseAnnotationFile">
                                     <i class="fa fa-folder"></i>
@@ -29,7 +33,9 @@
                         <div class="separator">or</div>
                         <div class="row justify-content-md-center">
                             <div class="col-auto">
-                                <label>Create a new Annotation File:</label>
+                                <label class="modal-description-text">
+                                    Create a new Annotation File:
+                                </label>
                             </div>
                         </div>
                         <div class="row">
@@ -56,7 +62,6 @@ export default {
     name: "AnnotationModal",
     props: {
         toggleModalVisibility: Boolean,
-        annotationModalKey: Number,
     },
     data() {
         return {
@@ -73,7 +78,6 @@ export default {
             document.getElementById("annotationFileUpload").click()
         },
         onAnnotationFileChange(e) {
-            console.log("annotationFilechange called");
             const fileList = e.target.files;
             let annotationFileImported = false;
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
@@ -84,18 +88,18 @@ export default {
                     reader.onload = () => {
                         if(file.name.includes("annotation") || file.name.includes("labels")){
                             this.$store.commit("addAnnotationData", {result: reader.result, name: file.name});
-                            this.annotationFileImported = true;
+                            annotationFileImported = true;
+                        }
+                        if (!annotationFileImported) { // check if file is correct if not show error 
+                            this.error = "The chosen file has to contain \"annotation\" or \"annotation\" in its name!";
+                        } else {
+                            this.error = "";
+                            this.modal.hide();
                         }
                     }
                 }
             }
-            if (!annotationFileImported) {
-                this.error = "The chosen file has to contain \"annotation\" or \"annotation\" in its name!"
-                console.log(this.error)
-            } else {
-                console.log("upload success, modal close")
-                this.modal.hide();
-            }
+            document.getElementById("annotationFileUpload").value = ""; // reset file input so when same file chosen again its an "onChange"
         },
         onSubmit(e) {
             e.preventDefault();
@@ -104,6 +108,7 @@ export default {
     },
     watch: {
         toggleModalVisibility: function() {
+            this.error = "";
             this.modal.show();
         },
     },
@@ -115,15 +120,26 @@ export default {
 </script>
 
 <style scoped>
+.col-8 {
+    display: inline-flex;
+    align-items: center;
+}
+.col-2 {
+    padding-left: 0;
+}
+.modal-description-text {
+    font-size: 1vw;
+    align-self: center;
+}
+
 .btn-circle {
-    height: 2.5vw;
-    width: 2.5vw;
-    border-radius: 1.25vw;
+    height: 2vw;
+    width: 2vw;
+    border-radius: 1vw;
     text-align: center;
     font-size: 1vw;
     background-color: #bbb;
     opacity: 0.7;
-    margin-left: 1vw;
     display: inline-flex;
     align-items: center;
     justify-content: center;
