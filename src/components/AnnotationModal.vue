@@ -24,7 +24,7 @@
                             </div>
                         </div>
                         <div class="row justify-content-md-center" v-show="this.error != ''">
-                            <div id="allert-div" class="col-auto">
+                            <div class="col-auto">
                                 <div class="alert alert-danger" role="alert">
                                     {{ this.error }}
                                 </div>
@@ -42,6 +42,13 @@
                             <div class="col-auto text-start">
                                 <label for="inputFileName" class="form-label description-text-sm">File Name:</label>
                                 <input type="text" v-model="fileName" class="form-control" id="inputFileName" required>
+                            </div>
+                        </div>
+                        <div class="row justify-content-md-center" v-show="showInvalidFeedback">
+                            <div class="col-auto">
+                                <div class="alert alert-danger" role="alert">
+                                    The file has to contain "annotation" or "labels" in its name!
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -68,6 +75,7 @@ export default {
             modal: null,
             fileName: "",
             error: "",
+            showInvalidFeedback: false,
         }
     },
     methods: {
@@ -91,7 +99,7 @@ export default {
                             annotationFileImported = true;
                         }
                         if (!annotationFileImported) { // check if file is correct if not show error 
-                            this.error = "The chosen file has to contain \"annotation\" or \"annotation\" in its name!";
+                            this.error = "The chosen file has to contain \"annotation\" or \"labels\" in its name!";
                         } else {
                             this.error = "";
                             this.modal.hide();
@@ -103,12 +111,19 @@ export default {
         },
         onSubmit(e) {
             e.preventDefault();
-            this.$store.commit("addAnnotationFile", this.fileName);
+            if(!this.fileName.toLowerCase().includes("annotation") && !this.fileName.toLowerCase().includes("labels")) {
+                this.showInvalidFeedback = true;
+                return;
+            }
+            this.$store.commit("addNewAnnotationFile", this.fileName);
+            this.modal.hide();
         },
     },
     watch: {
         toggleModalVisibility: function() {
+            this.fileName = ""; 
             this.error = "";
+            this.showInvalidFeedback = false;
             this.modal.show();
         },
     },
@@ -128,16 +143,16 @@ export default {
     padding-left: 0;
 }
 .modal-description-text {
-    font-size: 1vw;
+    font-size: 14px;
     align-self: center;
 }
 
 .btn-circle {
-    height: 2vw;
-    width: 2vw;
-    border-radius: 1vw;
+    height: 30px;
+    width: 30px;
+    border-radius: 15px;
     text-align: center;
-    font-size: 1vw;
+    font-size: 12px;
     background-color: #bbb;
     opacity: 0.7;
     display: inline-flex;
@@ -154,7 +169,7 @@ export default {
     display: flex;
     align-items: center;
     text-align: center;
-    font-size: 1.2vw;
+    font-size: 12px;
 }
 
 .separator::before,

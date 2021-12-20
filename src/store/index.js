@@ -101,13 +101,28 @@ export default createStore({
                 data: dataArray,
                 labels: labels,
             });
-            console.log(state.annotations);
+        },
+        addNewAnnotationFile: (state, fileName) => {
+            state.annotations.push({
+                id: state.annotations.length,
+                name: fileName + ".csv",
+                data: [],
+                labels: {},
+            });
         },
         addAnnotationPoint: (state, timestamp) => {
             if(state.activeLabel != null){
                 let time = new Date(timestamp).getTime();
                 let annotations = state.annotations[state.currAnn].data;
                 let inserted = false;
+                if (annotations.length == 0) {
+                    annotations.push({
+                        id: 0,
+                        label: state.activeLabel.id,
+                        timestamp: time,
+                    });
+                    return;
+                }
                 let newAnn = {
                     id: annotations[annotations.length-1].id +1,
                     label: state.activeLabel.id,
@@ -130,9 +145,9 @@ export default createStore({
         },
         deleteSelectedAxis(state, axis) {
             let selectedAxes = state.data[state.currentSelectedData].selectedAxes;
-            const index = selectedAxes.indexOf(axis.id)
+            const index = selectedAxes.indexOf(axis.id);
             if (index > -1) {
-                selectedAxes.splice(index, 1)
+                selectedAxes.splice(index, 1);
             }
         },
         changeAxisColor(state, changedAxis) {
@@ -212,7 +227,7 @@ export default createStore({
                     name: labels[annotations.data[key].label].name,
                     color: labels[annotations.data[key].label].color,
                     annotationObject: annotations.data[key],
-                })
+                });
             }
             return data;
         },
