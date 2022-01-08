@@ -5,8 +5,8 @@
         </label>
     </div>
     <div class="col-auto">
-        <button>
-            <i class="fa fa-tint"  @click="showColorPicker = !showColorPicker" />
+        <button @click="showColorPicker = !showColorPicker">
+            <i class="fa fa-tint" />
         </button>
         <label class="switch">
             <input type="checkbox" v-model="selected" @change="toggleAxis" v-show="false">

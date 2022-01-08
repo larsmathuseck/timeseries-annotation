@@ -223,6 +223,7 @@ export default {
         }
     },
     created: function(){
+        this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
         window.addEventListener("resize", () => {
             this.resizeChart();
             this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
