@@ -56,7 +56,7 @@ export default {
             labelName: "",
             labelColor: "",
             showColorPicker: false,
-            error: resetErrorOnOpen(),
+            error: "",
         }
     },
     methods: {
@@ -64,12 +64,10 @@ export default {
             this.labelColor = color
         },
         onSubmit(e) {
-            e.preventDefault()
+            e.preventDefault();
             if (this.labelToEdit === null) {
                 const labels = this.$store.getters.getLabels;
-                console.log(labels)
                 if (typeof labels == "undefined") { // no or false data uploaded --> no annotation file
-                    console.log("here")
                     this.error = "Can't add Label. First add Annotation and Data files!"
                     return;
                 } 
@@ -99,9 +97,6 @@ export default {
             this.showColorPicker = false;
             this.error = "";
         },
-        resetWindow: function (){
-            Object.assign(this.error, resetErrorOnOpen());
-        }
     },
     watch: {
         labelToEdit: function() {
@@ -117,9 +112,6 @@ export default {
     emits: ["closeModal", "labelCreated", "labelEdited"],
 }
 
-function resetErrorOnOpen() {
-    return "";
-}
 </script>
 
 <style scoped>

@@ -5,8 +5,8 @@
         </label>
     </div>
     <div class="col-auto">
-        <button>
-            <i class="fa fa-tint"  @click="showColorPicker = !showColorPicker" />
+        <button @click="showColorPicker = !showColorPicker">
+            <i class="fa fa-tint" />
         </button>
         <label class="switch">
             <input type="checkbox" v-model="selected" @change="toggleAxis" v-show="false">
@@ -60,22 +60,8 @@ export default {
             this.$store.commit("changeAxisColor", newAxis);
             this.showColorPicker = false;
         },
-        /*mounted() {
-        window.addEventListener("load", this.onWindowLoad);
-        },*/
     },
 }
-/*
-const colorContainer = document.getElementById("colorpicker-con");
-document.onclick=function(mouseClick) {
-    console.log(mouseClick.target.id)
-    console.log(colorContainer.id)
-    if (mouseClick.target.id != colorContainer.id && this.showColorPicker) {
-        console.log("false")
-        this.showColorPicker = false;
-        console.log(this.showColorPicker)
-    }
-}*/
 </script>
 
 <style scoped>
@@ -108,9 +94,9 @@ button {
     justify-content: center;
 }
 
-.fa {
+.fa-tint {
     color: #2196F3;
-    font-size: 1vw;
+    font-size: 1.2vw;
     display:inline-block;
     text-align: center;
     vertical-align: bottom;

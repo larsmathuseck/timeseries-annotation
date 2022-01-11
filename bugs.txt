@@ -1,6 +1,1 @@
-- axis colorpicker button to small && no cancel on colorpicker
 - select data not showing path
-- annotations delete bug
-- single data import -> graph not updating
-- annotations list smaller text to show more annotations on screen
-

@@ -1,13 +1,10 @@
 <template>
-    <div class="row h-100">
+    <div class="row">
         <label class="description-text">
             Annotations
         </label>
-        <label class="description-text-sm">
-            List of Annotations
-        </label>
         <div id="scroll-container-annotations">
-            <div class="annotation-container" v-for="annotation in annotations" :key="annotation.id">
+            <div class="d-flex justify-content-between annotation-container" v-for="annotation in annotations" :key="annotation.id">
                 <Annotation :annotation="annotation" />
             </div>
         </div>
@@ -46,9 +43,8 @@ export default {
 }
 
 .annotation-container {
-    padding: 12px 12px 12px 0px;
+    padding: 0.3vw 0.3vw 0.3vw 0vw;
     border-bottom: 0.1vw solid rgb(128, 128, 128, 0.5);
-    
 }
 
 .annotation-container:hover {

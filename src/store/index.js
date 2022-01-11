@@ -103,11 +103,27 @@ export default createStore({
                 labels: labels,
             });
         },
+        addNewAnnotationFile: (state, fileName) => {
+            state.annotations.push({
+                id: state.annotations.length,
+                name: fileName + ".csv",
+                data: [],
+                labels: {},
+            });
+        },
         addAnnotationPoint: (state, timestamp) => {
             if(state.activeLabel != null){
                 let time = new Date(timestamp).getTime();
                 let annotations = state.annotations[state.currAnn].data;
                 let inserted = false;
+                if (annotations.length == 0) {
+                    annotations.push({
+                        id: 0,
+                        label: state.activeLabel.id,
+                        timestamp: time,
+                    });
+                    return;
+                }
                 let newAnn = {
                     id: annotations[annotations.length-1].id +1,
                     label: state.activeLabel.id,
@@ -130,9 +146,9 @@ export default createStore({
         },
         deleteSelectedAxis(state, axis) {
             let selectedAxes = state.data[state.currentSelectedData].selectedAxes;
-            const index = selectedAxes.indexOf(axis.id)
+            const index = selectedAxes.indexOf(axis.id);
             if (index > -1) {
-                selectedAxes.splice(index, 1)
+                selectedAxes.splice(index, 1);
             }
         },
         changeAxisColor(state, changedAxis) {
@@ -155,7 +171,7 @@ export default createStore({
         toggleActiveLabel(state, label) {
             state.activeLabel = label;
         },
-        deleteLabel(state, label) {
+        async deleteLabel(state, label) {
             let labels = state.annotations[state.currAnn].labels;
             const key = Object.keys(labels).find(key => labels[key] === label);
             this.commit("deleteAnnotationsWithLabel", key);
@@ -182,10 +198,14 @@ export default createStore({
         },
         deleteAnnotationsWithLabel(state, labelNumber) {
             let annotations = state.annotations[state.currAnn].data;
-            for (let index in annotations) {
-                if (annotations[index].label == labelNumber) {
-                    this.commit("deleteAnnotation", annotations[index])
+            let annotationsToDelete = [];
+            for (let i = 0; i < annotations.length; i++) {
+                if (annotations[i].label == labelNumber) {
+                    annotationsToDelete.push(annotations[i]);
                 }
+            }
+            for (let i = 0; i < annotationsToDelete.length; i++) {
+                this.commit("deleteAnnotation", annotationsToDelete[i]);
             }
         }
     },
@@ -208,7 +228,7 @@ export default createStore({
                     name: labels[annotations.data[key].label].name,
                     color: labels[annotations.data[key].label].color,
                     annotationObject: annotations.data[key],
-                })
+                });
             }
             return data;
         },
