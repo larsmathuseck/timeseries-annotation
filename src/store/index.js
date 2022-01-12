@@ -168,13 +168,22 @@ export default createStore({
             state.annotations[state.currAnn].labels[labelNumber] = label;
         },
         toggleActiveLabel(state, label) {
+            // check if label isnt deleted already
+            const labels = state.annotations[state.currAnn].labels;
+            if (Object.keys(labels).indexOf((label.id).toString()) < 0) {
+                state.activeLabel = null;
+                return;
+            }
             state.activeLabel = label;
         },
-        async deleteLabel(state, label) {
+        deleteLabel(state, label) {
             let labels = state.annotations[state.currAnn].labels;
             const key = Object.keys(labels).find(key => labels[key] === label);
             this.commit("deleteAnnotationsWithLabel", key);
             delete labels[key];
+            if (state.activeLabel != null && label.id == state.activeLabel.id) {
+                state.activeLabel = null;
+            }
         },
         deleteAnnotation(state, annotation) {
             let index = -1;
