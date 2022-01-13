@@ -59,6 +59,7 @@ export default createStore({
             let labels = {};
             let newestLabelId = 0;
             let dataArray = [];
+            let lastAnn = {};
 
             // Get Timestamp and Label location
             let timestampLocation = -1;
@@ -88,18 +89,20 @@ export default createStore({
                     labels[`${newestLabelId}`] = label;
                     newestLabelId += 1;
                 }
-                dataArray.push({
+                const newAnn = {
                     id: i,
                     label: label.id,
                     timestamp: new Date(data[i][timestampLocation]).getTime(),
-                });
+                };
+                lastAnn = newAnn;
+                dataArray.push(newAnn);
             }
-
             state.annotations.push({
                 id: state.annotations.length,
                 name: payload.name,
                 data: dataArray,
                 labels: labels,
+                lastAddedAnnotation: lastAnn,
             });
         },
         addNewAnnotationFile: (state, fileName) => {
@@ -108,6 +111,7 @@ export default createStore({
                 name: fileName + ".csv",
                 data: [],
                 labels: {},
+                lastAddedAnnotation: {},
             });
         },
         addAnnotationPoint: (state, timestamp) => {
@@ -115,19 +119,24 @@ export default createStore({
                 let time = new Date(timestamp).getTime();
                 let annotations = state.annotations[state.currAnn].data;
                 let inserted = false;
+                let lastAddedAnnotation = state.annotations[state.currAnn].lastAddedAnnotation;
                 if (annotations.length == 0) {
-                    annotations.push({
+                    const newAnn = {
                         id: 0,
                         label: state.activeLabel.id,
                         timestamp: time,
-                    });
+                    };
+                    annotations.push(newAnn);
+                    state.annotations[state.currAnn].lastAddedAnnotation = newAnn;
                     return;
                 }
-                let newAnn = {
-                    id: annotations[annotations.length-1].id +1,
+
+                const newAnn = {
+                    id: lastAddedAnnotation.id +1,
                     label: state.activeLabel.id,
                     timestamp: time,
-                }
+                };
+                state.annotations[state.currAnn].lastAddedAnnotation = newAnn;
                 for(let i = 0; i < annotations.length; i++){
                     if(annotations[i].timestamp > time){
                         annotations.splice(i, 0, newAnn);
@@ -195,7 +204,7 @@ export default createStore({
             let labels = state.annotations[state.currAnn].labels;
             const key = Object.keys(labels).find(key => labels[key] === label);
             this.commit("deleteAnnotationsWithLabel", key);
-            delete labels[key];
+            delete state.annotations[state.currAnn].labels[key];
             if (state.activeLabel != null && label.id == state.activeLabel.id) {
                 state.activeLabel = null;
             }
