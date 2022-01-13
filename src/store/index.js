@@ -176,6 +176,21 @@ export default createStore({
             }
             state.activeLabel = label;
         },
+        toggleActiveLabelByKey(state, key) {
+            const annotations = state.annotations[state.currAnn];
+            if (annotations == undefined || annotations == null) {
+                return;
+            }
+            const labels = state.annotations[state.currAnn].labels;
+            if (labels == undefined || labels == null) {
+                return;
+            }
+            const keys = Object.keys(labels);
+            if (keys.length > 0 && keys.length > key) {
+                key = keys[key];
+                state.activeLabel = labels[key];
+            }
+        },
         deleteLabel(state, label) {
             let labels = state.annotations[state.currAnn].labels;
             const key = Object.keys(labels).find(key => labels[key] === label);
