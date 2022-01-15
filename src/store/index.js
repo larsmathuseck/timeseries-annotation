@@ -1,5 +1,6 @@
 import { createStore } from 'vuex'
-import { parse } from "@vanillaes/csv";
+import { parse, stringify } from "@vanillaes/csv";
+import { DateTime } from "luxon";
 
 export default createStore({
     state: {
@@ -263,6 +264,15 @@ export default createStore({
                 });
             }
             return data;
+        },
+        saveAnnotations: state => {
+            let annotations = state.annotations[state.currAnn];
+            let labels = annotations?.labels;
+            let data = [["Timestamp", "Label"]];
+            for(let key in annotations?.data){
+                data.push([DateTime.fromMillis(annotations.data[key].timestamp).toFormat('yyyy-MM-dd hh:mm:ss.SSS'), labels[annotations.data[key].label].name]);
+            }
+            return stringify(data);
         },
         getAxes: state => {
             if(state.data.length > 0){
