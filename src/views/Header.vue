@@ -6,6 +6,9 @@
         <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
             <ul class="nav nav-pills">
                 <li class="nav-item">
+                    <ImportModel />
+                </li>
+                <li class="nav-item">
                     <input id="multipleFileUpload" type="file" webkitdirectory directory multiple v-on:change="onFileChange" hidden>
                     <button @click="chooseFiles()" type="button" class="btn btn-light">
                         <i class="fa fa-folder"></i>
@@ -32,11 +35,13 @@
 
 <script>
 import TutorialModal from "../components/TutorialModal.vue";
+import ImportModel from "../components/ImportModel.vue";
 
 export default {
     name: "Header",
     components: {
         TutorialModal,
+        ImportModel,
     },
     props: {
         title: String,
