@@ -6,6 +6,11 @@
         <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
             <ul class="nav nav-pills">
                 <li class="nav-item">
+                    <button type="button" class="btn btn-light" @click="testDanfo">
+                            Test Danfo
+                    </button>
+                </li>
+                <li class="nav-item">
                     <ImportModel />
                 </li>
                 <li class="nav-item">
@@ -52,6 +57,9 @@ export default {
         }
     },
     methods: {
+        testDanfo: function() {
+            this.$store.commit("testDanfo");
+        },
         chooseFiles() {
             document.getElementById("multipleFileUpload").click()
         },

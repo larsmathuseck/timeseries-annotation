@@ -1,6 +1,7 @@
 import { createStore } from 'vuex'
 import { parse, stringify } from "@vanillaes/csv";
 import { DateTime } from "luxon";
+import * as dfd from "danfojs";
 
 export default createStore({
     state: {
@@ -53,6 +54,37 @@ export default createStore({
                     selectedAxes: [dataJson[0].id],
                 });
             }
+        },
+        testDanfo: (state) => {
+            const testData = state.data[0].dataPoints[0].dataPoints;
+            console.log(testData);
+            // let df = new dfd.DataFrame([[testData[0][0], testData[0][1]]]);
+            // df.print();
+            // console.log(df.values);
+            // let new_df = df.append([[5,6]], [2]);
+            // new_df.print();
+            // for (let i = 1; i < 20; i++) {
+            //     console.log(typeof testData[i]);
+            //     console.log(testData[i]);
+            //     console.log(testData[i][0]);
+            //     console.log(testData[i][1]);
+            //     df = df.append([[testData[i][0], testData[i][1]]], [i])
+            // }
+            const arr_data = [["bval1", 10, 1.2, "test"],
+                ["bval2", 20, 3.45, "train"],
+                ["bval3", 30, 60.1, "train"],
+                ["bval4", 35, 3.2, "test"],
+                ["bval5", 20, 3.45, "train"],
+                ["bval6", 30, 60.1, "train"],
+                ["bval7", 35, 3.2, "test"],
+                ["bval8", 20, 3.45, "train"],
+                ["bval9", 30, 60.1, "train"]];
+            let df = new dfd.DataFrame(arr_data);
+            df.print();
+            df = df.append([["bval10", 30, 60.1, "train"]], [9]);
+            df.print();
+            df = df.append([["bval11", 30, 60.1, "train"]], [10]);
+            df.print();
         },
         addAnnotationData: (state, payload) => {
             let data = parse(payload.result);
