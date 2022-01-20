@@ -13,7 +13,7 @@
     <div class="col-auto">
         <button>
             <i class="fa fa-edit" @click="editLabel(label)" />
-        </button>   
+        </button>
         <button>
             <i class="fa fa-times" @click="deleteLabel(label)" />
         </button>

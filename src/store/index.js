@@ -1,6 +1,7 @@
 import { createStore } from 'vuex'
 import { parse, stringify } from "@vanillaes/csv";
 import { DateTime } from "luxon";
+import * as dfd from "danfojs";
 
 export default createStore({
     state: {
@@ -54,12 +55,44 @@ export default createStore({
                 });
             }
         },
+        testDanfo: (state) => {
+            const testData = state.data[0].dataPoints[0].dataPoints;
+            console.log(testData);
+            // let df = new dfd.DataFrame([[testData[0][0], testData[0][1]]]);
+            // df.print();
+            // console.log(df.values);
+            // let new_df = df.append([[5,6]], [2]);
+            // new_df.print();
+            // for (let i = 1; i < 20; i++) {
+            //     console.log(typeof testData[i]);
+            //     console.log(testData[i]);
+            //     console.log(testData[i][0]);
+            //     console.log(testData[i][1]);
+            //     df = df.append([[testData[i][0], testData[i][1]]], [i])
+            // }
+            const arr_data = [["bval1", 10, 1.2, "test"],
+                ["bval2", 20, 3.45, "train"],
+                ["bval3", 30, 60.1, "train"],
+                ["bval4", 35, 3.2, "test"],
+                ["bval5", 20, 3.45, "train"],
+                ["bval6", 30, 60.1, "train"],
+                ["bval7", 35, 3.2, "test"],
+                ["bval8", 20, 3.45, "train"],
+                ["bval9", 30, 60.1, "train"]];
+            let df = new dfd.DataFrame(arr_data);
+            df.print();
+            df = df.append([["bval10", 30, 60.1, "train"]], [9]);
+            df.print();
+            df = df.append([["bval11", 30, 60.1, "train"]], [10]);
+            df.print();
+        },
         addAnnotationData: (state, payload) => {
             let data = parse(payload.result);
             let legende = data.shift();
             let labels = {};
             let newestLabelId = 0;
             let dataArray = [];
+            let lastAnn = {};
 
             // Get Timestamp and Label location
             let timestampLocation = -1;
@@ -89,18 +122,20 @@ export default createStore({
                     labels[`${newestLabelId}`] = label;
                     newestLabelId += 1;
                 }
-                dataArray.push({
+                const newAnn = {
                     id: i,
                     label: label.id,
                     timestamp: new Date(data[i][timestampLocation]).getTime(),
-                });
+                };
+                lastAnn = newAnn;
+                dataArray.push(newAnn);
             }
-
             state.annotations.push({
                 id: state.annotations.length,
                 name: payload.name,
                 data: dataArray,
                 labels: labels,
+                lastAddedAnnotation: lastAnn,
             });
         },
         addNewAnnotationFile: (state, fileName) => {
@@ -109,6 +144,7 @@ export default createStore({
                 name: fileName + ".csv",
                 data: [],
                 labels: {},
+                lastAddedAnnotation: {},
             });
         },
         addAnnotationPoint: (state, timestamp) => {
@@ -116,19 +152,24 @@ export default createStore({
                 let time = new Date(timestamp).getTime();
                 let annotations = state.annotations[state.currAnn].data;
                 let inserted = false;
+                let lastAddedAnnotation = state.annotations[state.currAnn].lastAddedAnnotation;
                 if (annotations.length == 0) {
-                    annotations.push({
+                    const newAnn = {
                         id: 0,
                         label: state.activeLabel.id,
                         timestamp: time,
-                    });
+                    };
+                    annotations.push(newAnn);
+                    state.annotations[state.currAnn].lastAddedAnnotation = newAnn;
                     return;
                 }
-                let newAnn = {
-                    id: annotations[annotations.length-1].id +1,
+
+                const newAnn = {
+                    id: lastAddedAnnotation.id +1,
                     label: state.activeLabel.id,
                     timestamp: time,
-                }
+                };
+                state.annotations[state.currAnn].lastAddedAnnotation = newAnn;
                 for(let i = 0; i < annotations.length; i++){
                     if(annotations[i].timestamp > time){
                         annotations.splice(i, 0, newAnn);
@@ -169,13 +210,37 @@ export default createStore({
             state.annotations[state.currAnn].labels[labelNumber] = label;
         },
         toggleActiveLabel(state, label) {
+            // check if label isnt deleted already
+            const labels = state.annotations[state.currAnn].labels;
+            if (Object.keys(labels).indexOf((label.id).toString()) < 0) {
+                state.activeLabel = null;
+                return;
+            }
             state.activeLabel = label;
         },
-        async deleteLabel(state, label) {
+        toggleActiveLabelByKey(state, key) {
+            const annotations = state.annotations[state.currAnn];
+            if (annotations == undefined || annotations == null) {
+                return;
+            }
+            const labels = state.annotations[state.currAnn].labels;
+            if (labels == undefined || labels == null) {
+                return;
+            }
+            const keys = Object.keys(labels);
+            if (keys.length > 0 && keys.length > key) {
+                key = keys[key];
+                state.activeLabel = labels[key];
+            }
+        },
+        deleteLabel(state, label) {
             let labels = state.annotations[state.currAnn].labels;
             const key = Object.keys(labels).find(key => labels[key] === label);
             this.commit("deleteAnnotationsWithLabel", key);
-            delete labels[key];
+            delete state.annotations[state.currAnn].labels[key];
+            if (state.activeLabel != null && label.id == state.activeLabel.id) {
+                state.activeLabel = null;
+            }
         },
         deleteAnnotation(state, annotation) {
             let index = -1;
