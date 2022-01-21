@@ -56,35 +56,42 @@ export default createStore({
             }
         },
         testDanfo: (state) => {
+            const samplingrate = 8;
             const testData = state.data[0].dataPoints[0].dataPoints;
-            console.log(testData);
-            // let df = new dfd.DataFrame([[testData[0][0], testData[0][1]]]);
-            // df.print();
-            // console.log(df.values);
-            // let new_df = df.append([[5,6]], [2]);
-            // new_df.print();
-            // for (let i = 1; i < 20; i++) {
-            //     console.log(typeof testData[i]);
-            //     console.log(testData[i]);
-            //     console.log(testData[i][0]);
-            //     console.log(testData[i][1]);
-            //     df = df.append([[testData[i][0], testData[i][1]]], [i])
-            // }
-            const arr_data = [["bval1", 10, 1.2, "test"],
-                ["bval2", 20, 3.45, "train"],
-                ["bval3", 30, 60.1, "train"],
-                ["bval4", 35, 3.2, "test"],
-                ["bval5", 20, 3.45, "train"],
-                ["bval6", 30, 60.1, "train"],
-                ["bval7", 35, 3.2, "test"],
-                ["bval8", 20, 3.45, "train"],
-                ["bval9", 30, 60.1, "train"]];
-            let df = new dfd.DataFrame(arr_data);
-            df.print();
-            df = df.append([["bval10", 30, 60.1, "train"]], [9]);
-            df.print();
-            df = df.append([["bval11", 30, 60.1, "train"]], [10]);
-            df.print();
+            const timestamps = state.data[0].timestamps;
+            let segmentlengths = [];
+            let timestamp = timestamps[0];
+            let timestapplus = timestamp + 1000;
+            let i = 0;
+            while(i < testData.length){
+                let dataCount = 0;
+                while(timestamp < timestapplus){
+                    i++;
+                    dataCount++;
+                    timestamp = timestamps[i];
+                }
+                let segmentlength = Math.floor(dataCount / samplingrate);
+                let remainder = dataCount % samplingrate;
+                for(let i = 0; i < samplingrate; i++){
+                    if(remainder > 0){
+                        segmentlengths.push(segmentlength + 1);
+                        remainder--;
+                    }
+                    else{
+                        segmentlengths.push(segmentlength);
+                    }
+                }
+                timestapplus = timestamp + 1000;
+            }
+            console.log(segmentlengths);
+            let result = [];
+            segmentlengths.forEach(segment => {
+                let data = testData.splice(0, segment);
+                let df = new dfd.DataFrame(data);
+                df.drop({ columns: ["0"], inplace: true })
+                result.push(df.median({ axis: 0 }).values[0]);
+            })
+            console.log(result)
         },
         addAnnotationData: (state, payload) => {
             let data = parse(payload.result);
