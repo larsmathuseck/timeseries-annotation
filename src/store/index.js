@@ -58,33 +58,64 @@ export default createStore({
         testDanfo: (state) => {
             const testData = state.data[0].dataPoints[0].dataPoints;
             console.log(testData);
-            // let df = new dfd.DataFrame([[testData[0][0], testData[0][1]]]);
-            // df.print();
-            // console.log(df.values);
-            // let new_df = df.append([[5,6]], [2]);
-            // new_df.print();
-            // for (let i = 1; i < 20; i++) {
-            //     console.log(typeof testData[i]);
-            //     console.log(testData[i]);
-            //     console.log(testData[i][0]);
-            //     console.log(testData[i][1]);
-            //     df = df.append([[testData[i][0], testData[i][1]]], [i])
-            // }
-            const arr_data = [["bval1", 10, 1.2, "test"],
-                ["bval2", 20, 3.45, "train"],
-                ["bval3", 30, 60.1, "train"],
-                ["bval4", 35, 3.2, "test"],
-                ["bval5", 20, 3.45, "train"],
-                ["bval6", 30, 60.1, "train"],
-                ["bval7", 35, 3.2, "test"],
-                ["bval8", 20, 3.45, "train"],
-                ["bval9", 30, 60.1, "train"]];
-            let df = new dfd.DataFrame(arr_data);
-            df.print();
-            df = df.append([["bval10", 30, 60.1, "train"]], [9]);
-            df.print();
-            df = df.append([["bval11", 30, 60.1, "train"]], [10]);
-            df.print();
+            let completeDataTable = new dfd.DataFrame(testData);
+            completeDataTable.print();
+            console.log(completeDataTable.values);
+            // divide in 1 second parts --> Samplinrate = 32Hz
+            const seconds = 1;
+            const samplingrate = 8;
+            let subTablesSeconds = [];
+            let endCreatingTables = false;
+            let firstTimestamp;
+            let secondTimestamp;
+            for (let i = 0; (!endCreatingTables) /*&& (i < 20)*/; i++) {
+                if (i == 0) {
+                    firstTimestamp = testData[0][0];
+                } else {
+                    firstTimestamp = secondTimestamp;
+                }
+                secondTimestamp = firstTimestamp + seconds * 1000;
+                const subTable = completeDataTable.query(completeDataTable[0].ge(firstTimestamp).and(completeDataTable[0].lt(secondTimestamp)));
+                // console.log(subTable);
+                // console.log(subTable.values);
+                if (subTable.values.length > samplingrate) {
+                    subTablesSeconds.push(subTable);
+                } else {
+                    endCreatingTables = true;
+                }
+            }
+            console.log(subTablesSeconds);
+            // split each subTable again in segments so that it matches the samplingrate. Amount Segments = samplingrate
+            let segments = [];
+            for (let i = 0; i < subTablesSeconds.length; i++) {
+                const subTable = subTablesSeconds[i];
+                console.log("watchting at table: ", i);
+                console.log(subTable);
+                let segmentlength = Math.floor(subTable.values.length / samplingrate);
+                let remainder = subTable.length % samplingrate;
+                let startIndex = 0;
+                let segment = [];
+                for(let j = 0; j < samplingrate; j++) {
+                    let correctSegmentLength;
+                    if(remainder > 0){
+                        correctSegmentLength = segmentlength + 1;
+                        remainder--;
+                    }
+                    else{
+                        correctSegmentLength = segmentlength;
+                    }
+                    const endIndex = startIndex + correctSegmentLength;
+                    //console.log(startIndex.toString() + ":" + endIndex.toString())
+                    const subSegment = subTable.iloc({rows: [startIndex.toString() + ":" + endIndex.toString()]});
+                    startIndex += correctSegmentLength;
+                    //console.log("startIndex: ", startIndex)
+                    subSegment.drop({ columns: ["0"], inplace: true })
+                    const median = subSegment.median({ axis: 0 });
+                    segment.push(median.values[0]);
+                }
+                segments.push(segment);
+            }
+            console.log("segments: ", segments);
         },
         addAnnotationData: (state, payload) => {
             let data = parse(payload.result);
