@@ -57,13 +57,16 @@ export default createStore({
         },
         testDanfo: (state) => {
             const samplingrate = 8;
-            const testData = state.data[0].dataPoints[0].dataPoints;
+            const data = state.data[0].dataPoints[0].dataPoints;
+            let df = new dfd.DataFrame(data);
+            df.drop({ columns: ["0"], inplace: true })
+            df.print();
             const timestamps = state.data[0].timestamps;
             let segmentlengths = [];
             let timestamp = timestamps[0];
             let timestapplus = timestamp + 1000;
             let i = 0;
-            while(i < testData.length){
+            while(i < data.length){
                 let dataCount = 0;
                 while(timestamp < timestapplus){
                     i++;
@@ -83,13 +86,13 @@ export default createStore({
                 }
                 timestapplus = timestamp + 1000;
             }
-            console.log(segmentlengths);
             let result = [];
+            let oldsegment = 0;
             segmentlengths.forEach(segment => {
-                let data = testData.splice(0, segment);
-                let df = new dfd.DataFrame(data);
-                df.drop({ columns: ["0"], inplace: true })
-                result.push(df.median({ axis: 0 }).values[0]);
+                segment = oldsegment + segment;
+                let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]})
+                result.push(newFrame.std({ axis: 0 }).values[0]);
+                oldsegment = segment;
             })
             console.log(result)
         },
