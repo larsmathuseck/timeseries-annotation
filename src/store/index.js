@@ -61,6 +61,7 @@ export default createStore({
             let df = new dfd.DataFrame(data);
             df.drop({ columns: ["0"], inplace: true })
             df.print();
+            df = df.asType("1", "float32");
             const timestamps = state.data[0].timestamps;
             let segmentlengths = [];
             let timestamp = timestamps[0];
@@ -90,8 +91,8 @@ export default createStore({
             let oldsegment = 0;
             segmentlengths.forEach(segment => {
                 segment = oldsegment + segment;
-                let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]})
-                result.push(newFrame.std({ axis: 0 }).values[0]);
+                let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
+                result.push(newFrame.max({ axis: 0 }).values[0]);
                 oldsegment = segment;
             })
             console.log(result)
