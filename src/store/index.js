@@ -60,7 +60,6 @@ export default createStore({
             const data = state.data[0].dataPoints[0].dataPoints;
             let df = new dfd.DataFrame(data);
             df.drop({ columns: ["0"], inplace: true })
-            df.print();
             df = df.asType("1", "float32");
             const timestamps = state.data[0].timestamps;
             let segmentlengths = [];
@@ -87,15 +86,66 @@ export default createStore({
                 }
                 timestapplus = timestamp + 1000;
             }
-            let result = [];
+            let max = [];
+            let min = [];
+            let mean = [];
+            let median = [];
+            let std = [];
+            let varianz = [];
             let oldsegment = 0;
             segmentlengths.forEach(segment => {
                 segment = oldsegment + segment;
                 let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
-                result.push(newFrame.max({ axis: 0 }).values[0]);
+                max.push([timestamps[segment], newFrame.max({ axis: 0 }).values[0]]);
+                min.push([timestamps[segment], newFrame.min({ axis: 0 }).values[0]]);
+                mean.push([timestamps[segment], newFrame.mean({ axis: 0 }).values[0]]);
+                median.push([timestamps[segment], newFrame.median({ axis: 0 }).values[0]]);
+                std.push([timestamps[segment], newFrame.std({ axis: 0 }).values[0]]);
+                varianz.push([timestamps[segment], newFrame.var({ axis: 0 }).values[0]]);
                 oldsegment = segment;
             })
-            console.log(result)
+            state.data[0].dataPoints.push({
+                id: "max",
+                name: "Max",
+                dataPoints: max,
+                color: "black",
+            });
+            state.data[0].dataPoints.push({
+                id: "min",
+                name: "Min",
+                dataPoints: min,
+                color: "green",
+            });
+            state.data[0].dataPoints.push({
+                id: "mean",
+                name: "Mean",
+                dataPoints: mean,
+                color: "blue",
+            });
+            state.data[0].dataPoints.push({
+                id: "median",
+                name: "Median",
+                dataPoints: median,
+                color: "orange",
+            });
+            state.data[0].dataPoints.push({
+                id: "std",
+                name: "Std",
+                dataPoints: std,
+                color: "red",
+            });
+            state.data[0].dataPoints.push({
+                id: "var",
+                name: "Var",
+                dataPoints: varianz,
+                color: "brown",
+            });
+            state.data[0].selectedAxes.push("max");
+            state.data[0].selectedAxes.push("min");
+            state.data[0].selectedAxes.push("mean");
+            state.data[0].selectedAxes.push("median");
+            state.data[0].selectedAxes.push("std");
+            state.data[0].selectedAxes.push("var");
         },
         addAnnotationData: (state, payload) => {
             let data = parse(payload.result);
