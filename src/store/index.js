@@ -56,66 +56,96 @@ export default createStore({
             }
         },
         testDanfo: (state) => {
-            const testData = state.data[0].dataPoints[0].dataPoints;
-            console.log(testData);
-            let completeDataTable = new dfd.DataFrame(testData);
-            completeDataTable.print();
-            console.log(completeDataTable.values);
-            // divide in 1 second parts --> Samplinrate = 32Hz
-            const seconds = 1;
             const samplingrate = 8;
-            let subTablesSeconds = [];
-            let endCreatingTables = false;
-            let firstTimestamp;
-            let secondTimestamp;
-            for (let i = 0; (!endCreatingTables) /*&& (i < 20)*/; i++) {
-                if (i == 0) {
-                    firstTimestamp = testData[0][0];
-                } else {
-                    firstTimestamp = secondTimestamp;
+            const data = state.data[0].dataPoints[0].dataPoints;
+            let df = new dfd.DataFrame(data);
+            df.drop({ columns: ["0"], inplace: true })
+            df = df.asType("1", "float32");
+            const timestamps = state.data[0].timestamps;
+            let segmentlengths = [];
+            let timestamp = timestamps[0];
+            let timestapplus = timestamp + 1000;
+            let i = 0;
+            while(i < data.length){
+                let dataCount = 0;
+                while(timestamp < timestapplus){
+                    i++;
+                    dataCount++;
+                    timestamp = timestamps[i];
                 }
-                secondTimestamp = firstTimestamp + seconds * 1000;
-                const subTable = completeDataTable.query(completeDataTable[0].ge(firstTimestamp).and(completeDataTable[0].lt(secondTimestamp)));
-                // console.log(subTable);
-                // console.log(subTable.values);
-                if (subTable.values.length > samplingrate) {
-                    subTablesSeconds.push(subTable);
-                } else {
-                    endCreatingTables = true;
-                }
-            }
-            console.log(subTablesSeconds);
-            // split each subTable again in segments so that it matches the samplingrate. Amount Segments = samplingrate
-            let segments = [];
-            for (let i = 0; i < subTablesSeconds.length; i++) {
-                const subTable = subTablesSeconds[i];
-                console.log("watchting at table: ", i);
-                console.log(subTable);
-                let segmentlength = Math.floor(subTable.values.length / samplingrate);
-                let remainder = subTable.length % samplingrate;
-                let startIndex = 0;
-                let segment = [];
-                for(let j = 0; j < samplingrate; j++) {
-                    let correctSegmentLength;
+                let segmentlength = Math.floor(dataCount / samplingrate);
+                let remainder = dataCount % samplingrate;
+                for(let i = 0; i < samplingrate; i++){
                     if(remainder > 0){
-                        correctSegmentLength = segmentlength + 1;
+                        segmentlengths.push(segmentlength + 1);
                         remainder--;
                     }
                     else{
-                        correctSegmentLength = segmentlength;
+                        segmentlengths.push(segmentlength);
                     }
-                    const endIndex = startIndex + correctSegmentLength;
-                    //console.log(startIndex.toString() + ":" + endIndex.toString())
-                    const subSegment = subTable.iloc({rows: [startIndex.toString() + ":" + endIndex.toString()]});
-                    startIndex += correctSegmentLength;
-                    //console.log("startIndex: ", startIndex)
-                    subSegment.drop({ columns: ["0"], inplace: true })
-                    const median = subSegment.median({ axis: 0 });
-                    segment.push(median.values[0]);
                 }
-                segments.push(segment);
+                timestapplus = timestamp + 1000;
             }
-            console.log("segments: ", segments);
+            let max = [];
+            let min = [];
+            let mean = [];
+            let median = [];
+            let std = [];
+            let varianz = [];
+            let oldsegment = 0;
+            segmentlengths.forEach(segment => {
+                segment = oldsegment + segment;
+                let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
+                max.push([timestamps[segment], newFrame.max({ axis: 0 }).values[0]]);
+                min.push([timestamps[segment], newFrame.min({ axis: 0 }).values[0]]);
+                mean.push([timestamps[segment], newFrame.mean({ axis: 0 }).values[0]]);
+                median.push([timestamps[segment], newFrame.median({ axis: 0 }).values[0]]);
+                std.push([timestamps[segment], newFrame.std({ axis: 0 }).values[0]]);
+                varianz.push([timestamps[segment], newFrame.var({ axis: 0 }).values[0]]);
+                oldsegment = segment;
+            })
+            state.data[0].dataPoints.push({
+                id: "max",
+                name: "Max",
+                dataPoints: max,
+                color: "black",
+            });
+            state.data[0].dataPoints.push({
+                id: "min",
+                name: "Min",
+                dataPoints: min,
+                color: "green",
+            });
+            state.data[0].dataPoints.push({
+                id: "mean",
+                name: "Mean",
+                dataPoints: mean,
+                color: "blue",
+            });
+            state.data[0].dataPoints.push({
+                id: "median",
+                name: "Median",
+                dataPoints: median,
+                color: "orange",
+            });
+            state.data[0].dataPoints.push({
+                id: "std",
+                name: "Std",
+                dataPoints: std,
+                color: "red",
+            });
+            state.data[0].dataPoints.push({
+                id: "var",
+                name: "Var",
+                dataPoints: varianz,
+                color: "brown",
+            });
+            state.data[0].selectedAxes.push("max");
+            state.data[0].selectedAxes.push("min");
+            state.data[0].selectedAxes.push("mean");
+            state.data[0].selectedAxes.push("median");
+            state.data[0].selectedAxes.push("std");
+            state.data[0].selectedAxes.push("var");
         },
         addAnnotationData: (state, payload) => {
             let data = parse(payload.result);
