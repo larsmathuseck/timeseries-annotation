@@ -65,18 +65,35 @@ export default {
         },
         onFileChange(e) {
             const fileList = e.target.files;
+            let filesToUpload = [];
+            let fileNames = {};
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const reader = new FileReader();
                 const file = fileList[i];
                 if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
-                    reader.readAsText(file);
-                    reader.onload = () => {
-                        if(file.name.includes("data")){
-                            this.$store.commit("addData", {result: reader.result, name: file.name});
-                        }
-                        else if(file.name.includes("annotation") || file.name.includes("labels")){
-                            this.$store.commit("addAnnotationData", {result: reader.result, name: file.name});
-                        }
+                    filesToUpload.push(file);
+                    if (fileNames[file.name] == undefined) {
+                        fileNames[file.name] = 1;
+                    } else {
+                        fileNames[file.name] += 1;
+                    }
+                }
+            }
+            for (let i in filesToUpload) {
+                const file = filesToUpload[i];
+                let fileName = file.name;
+                if (fileNames[file.name] > 1) {
+                    const path = file.webkitRelativePath;
+                    const directories = path.split("/");
+                    fileName = directories.slice(-2)[0] + "/" + directories.slice(-1);
+                }
+                const reader = new FileReader();
+                reader.readAsText(file);
+                reader.onload = () => {
+                    if(file.name.includes("data")){
+                        this.$store.commit("addData", {result: reader.result, name: fileName});
+                    }
+                    else if(file.name.includes("annotation") || file.name.includes("labels")){
+                        this.$store.commit("addAnnotationData", {result: reader.result, name: fileName});
                     }
                 }
             }
