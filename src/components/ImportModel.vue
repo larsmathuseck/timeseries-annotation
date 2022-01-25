@@ -63,9 +63,16 @@ export default {
                                 [-3.8314820e-02,  9.8210140e+00, -1.0534668e-01,  1.6937256e-03, -5.1879880e-04,  6.2561035e-04],
                                 [-3.3523560e-02,  9.8258060e+00, -1.1492920e-01, -4.2724610e-04, -5.1879880e-04,  6.2561035e-04]]]
                                 
-            const tensor = tf.tensor(instance);
-            let a = model.predict(tensor);
-            a.print();
+            const data = this.$store.state.data[0]?.dataPoint[3];
+            if(data != null){
+                console.log(data.id);
+                console.log(data);
+            }
+            else{
+                const tensor = tf.tensor(instance);
+                let a = model.predict(tensor);
+                a.print();
+            }
         },
     }
 }

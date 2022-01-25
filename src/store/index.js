@@ -1,7 +1,7 @@
 import { createStore } from 'vuex'
 import { parse, stringify } from "@vanillaes/csv";
 import { DateTime } from "luxon";
-import * as dfd from "danfojs";
+import { DataFrame } from "danfojs";
 
 export default createStore({
     state: {
@@ -58,7 +58,7 @@ export default createStore({
         testDanfo: (state) => {
             const samplingrate = 8;
             const data = state.data[0].dataPoints[0].dataPoints;
-            let df = new dfd.DataFrame(data);
+            let df = new DataFrame(data);
             df.drop({ columns: ["0"], inplace: true })
             df = df.asType("1", "float32");
             const timestamps = state.data[0].timestamps;
