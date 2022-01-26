@@ -3,6 +3,29 @@ import { parse, stringify } from "@vanillaes/csv";
 import { DateTime } from "luxon";
 import { DataFrame } from "danfojs";
 
+function slope(df) {
+    let max = df.values[0][1];
+    let timestampMax = df.values[0][0];
+    let min = df.values[0][1];
+    let timestampMin = df.values[0][0];
+    const values = df.values;
+    for (let i = 1; i < values.length; i++) {
+        if (values[i][1] > max) {
+            max = values[i][1];
+            timestampMax = values[i][0];
+        }
+        if (values[i][1] < min) {
+            min = values[i][1];
+            timestampMin = values[i][0];
+        }
+    }
+    let slope = 0;
+    if (timestampMax != timestampMin) {
+        slope = (max - min) / (timestampMax - timestampMin);
+    }
+    return [timestampMax, slope];
+}
+
 export default createStore({
     state: {
         data: [],
@@ -59,7 +82,7 @@ export default createStore({
             const samplingrate = 8;
             const data = state.data[0].dataPoints[0].dataPoints;
             let df = new DataFrame(data);
-            df.drop({ columns: ["0"], inplace: true })
+            //df.drop({ columns: ["0"], inplace: true })
             df = df.asType("1", "float32");
             const timestamps = state.data[0].timestamps;
             let segmentlengths = [];
@@ -92,16 +115,20 @@ export default createStore({
             let median = [];
             let std = [];
             let varianz = [];
+            let slopes = [];
             let oldsegment = 0;
             segmentlengths.forEach(segment => {
                 segment = oldsegment + segment;
                 let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
-                max.push([timestamps[segment], newFrame.max({ axis: 0 }).values[0]]);
-                min.push([timestamps[segment], newFrame.min({ axis: 0 }).values[0]]);
-                mean.push([timestamps[segment], newFrame.mean({ axis: 0 }).values[0]]);
-                median.push([timestamps[segment], newFrame.median({ axis: 0 }).values[0]]);
-                std.push([timestamps[segment], newFrame.std({ axis: 0 }).values[0]]);
-                varianz.push([timestamps[segment], newFrame.var({ axis: 0 }).values[0]]);
+                max.push([timestamps[segment], newFrame.max({ axis: 0 }).values[1]]);
+                min.push([timestamps[segment], newFrame.min({ axis: 0 }).values[1]]);
+                mean.push([timestamps[segment], newFrame.mean({ axis: 0 }).values[1]]);
+                median.push([timestamps[segment], newFrame.median({ axis: 0 }).values[1]]);
+                std.push([timestamps[segment], newFrame.std({ axis: 0 }).values[1]]);
+                varianz.push([timestamps[segment], newFrame.var({ axis: 0 }).values[1]]);
+                const slopeArray = slope(newFrame);
+                // console.log(slopeArray)
+                slopes.push([slopeArray[0], slopeArray[1]]);
                 oldsegment = segment;
             })
             state.data[0].dataPoints.push({
@@ -140,12 +167,20 @@ export default createStore({
                 dataPoints: varianz,
                 color: "brown",
             });
+            state.data[0].dataPoints.push({
+                id: "slope",
+                name: "Slope",
+                dataPoints: slopes,
+                color: "purple",
+            });
             state.data[0].selectedAxes.push("max");
             state.data[0].selectedAxes.push("min");
             state.data[0].selectedAxes.push("mean");
             state.data[0].selectedAxes.push("median");
             state.data[0].selectedAxes.push("std");
             state.data[0].selectedAxes.push("var");
+            state.data[0].selectedAxes.push("slope");
+            console.log(state.data[0]);
         },
         addAnnotationData: (state, payload) => {
             let data = parse(payload.result);
