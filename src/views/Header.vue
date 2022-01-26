@@ -27,11 +27,11 @@
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button type="button" class="btn btn-light" @click="toggleModalVisibility  = !toggleModalVisibility">
+                    <button type="button" class="btn btn-light" @click="showModal = true; toggleModalVisibility=!toggleModalVisibility">
                         <i class="fa fa-file"></i>
                         Tutorial
                     </button>
-                        <TutorialModal :toggleModalVisibility="toggleModalVisibility" />
+                    <TutorialModal v-if="showModal" :toggleModalVisibility="toggleModalVisibility" />
                 </li>
             </ul>
         </div>
@@ -39,7 +39,8 @@
 </template>
 
 <script>
-import TutorialModal from "../components/TutorialModal.vue";
+import { defineAsyncComponent } from 'vue'
+const TutorialModal = defineAsyncComponent(() => import("@/components/TutorialModal.vue"))
 import ImportModel from "../components/ImportModel.vue";
 
 export default {
@@ -54,6 +55,7 @@ export default {
     data() {
         return {
             toggleModalVisibility: false,
+            showModal: false,
         }
     },
     methods: {

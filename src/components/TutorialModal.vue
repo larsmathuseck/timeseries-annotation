@@ -62,7 +62,10 @@ export default {
         },
     },
     mounted() {
-        this.modal = new Modal(this.$refs.tutorialModal)
+        this.modal = new Modal(this.$refs.tutorialModal);
+        if(this.toggleModalVisibility){
+            this.modal.show();
+        }
     },
 }
 </script>

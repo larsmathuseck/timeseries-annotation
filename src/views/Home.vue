@@ -7,7 +7,7 @@
             </div>
             <div class="col col-lg-8 col-md-8 col-sm-12 col-12">
                 <div class="graphDiv">
-                    <graph ref="graphRef" v-if="showGraph" class="chart" />
+                    <Graph ref="graphRef" v-if="showGraph" class="chart" />
                 </div>
             </div>
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
@@ -18,7 +18,8 @@
 </template>
 
 <script>
-import graph from "../components/Graph.vue"
+import { defineAsyncComponent } from 'vue'
+const Graph = defineAsyncComponent(() => import("@/components/Graph.vue"))
 import Header from "./Header.vue"
 import LeftSidebar from "../components/LeftSidebar.vue"
 import RightSidebar from "../components/RightSidebar.vue"
@@ -26,7 +27,7 @@ import RightSidebar from "../components/RightSidebar.vue"
 export default {  
     name: "Home",
     components: {
-        graph,
+        Graph,
         Header,
         LeftSidebar,
         RightSidebar,
