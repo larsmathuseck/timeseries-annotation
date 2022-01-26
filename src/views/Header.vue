@@ -1,7 +1,7 @@
 <template>
     <div class="row justify-content-between">
         <div id="col-header-title" class="col col-lg-auto col-md-auto col-sm-12 col-12">
-            <h1>{{ title }}</h1>
+            <label class="title">{{ title }}</label>
         </div>
         <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
             <ul class="nav nav-pills">
@@ -154,7 +154,7 @@ button {
     font-size: 1vw;
 }
 
-h1 {
+.title {
     font-size: 2.5vw;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <p @click="test" class="description-text" >Data Files</p>
+        <label class="description-text" >Data Files</label>
         <div class="input-group">
             <select v-model="lastSelectedData" class="form-select" @change="selectDataFile()">
                 <option v-for="row in data" :key="row.id" v-bind:value="row.id">
@@ -16,7 +16,7 @@
         </div>
     </div>
     <div class="row">
-        <p class="description-text" >Y-Axes</p>
+        <label class="description-text" >Y-Axes</label>
         <div id="scroll-container-axes">
             <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
                 <Axis :axis="axis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
@@ -27,7 +27,7 @@
         </div>
     </div>
     <div class="row">
-        <p class="description-text" >Annotation Files</p>
+        <label class="description-text" >Annotation Files</label>
         <div class="input-group">
             <select v-model="lastSelectedAnnotation" class="form-select" @change="selectAnnotationFile()">
                 <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" v-bind:value="annotationFile.id">
