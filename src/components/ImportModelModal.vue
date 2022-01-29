@@ -1,16 +1,86 @@
 <template>
-    <input id="modelFileInput" type="file" webkitdirectory directory v-on:change="onFileChange" hidden>
-    <button @click="importButtonOnClick" type="button" class="btn btn-light">
-        <i class="fa fa-folder"></i>
-        Import Model
-    </button>
+    <div class="modal fade" ref="ImportModelModal" tabindex="-1" aria-hidden="false">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Model Configuration</h5>
+                    <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid p-0">
+                        <div class="row justify-content-center">
+                            <div class="col-auto">
+                                <label class="form-label">Import Model from File</label>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-auto p-0 mx-2">
+                                <input id="modelFileInput" type="file" webkitdirectory directory v-on:change="onFileChange" hidden>
+                                <button @click="importButtonOnClick" type="button" class="btn btn-light styled-btn">
+                                    <i class="fa fa-folder"></i>
+                                    Choose Directory
+                                </button>
+                            </div>
+                            <div class="col-auto p-0 mx-2" id="importedModelDiv">
+                                <label id="importedModelLabel" class="col-form-label p-0"> {{ modelFileName.length > 0 ? modelFileName : 'No Model selected yet' }}</label>
+                            </div>
+                        </div>
+                        <div class="separator"></div>
+                        <div class="row justify-content-center">
+                            <div class="col-auto">
+                                <label class="form-label">Model Options:</label>
+                            </div>
+                        </div>
+                        <div class="row mb-3 justify-content-center">
+                            <label for="slidingWindowInput" class="col-6 col-form-label text-left ps-3 pe-0">Sliding Window</label>
+                            <div class="col-3">
+                                <input v-model="slidingWindow" type="number" class="form-control" id="slidingWindowInput" placeholder="4" :disabled="modelFileName.length == 0">
+                            </div>
+                            <label class="col-3 col-form-label text-left px-0">Seconds</label>
+                        </div>
+                        <div class="row mb-3 justify-content-center">
+                            <label for="samplingRateInput" class="col-6 col-form-label text-left ps-3 pe-0">Sampling Rate</label>
+                            <div class="col-3">
+                                <input v-model="samplingRate" type="number" class="form-control" id="samplingRateInput" placeholder="8" :disabled="modelFileName.length == 0">
+                            </div>
+                            <label class="col-3 col-form-label text-left px-0">Hertz</label>
+                        </div>
+                        <div class="row mb-3 justify-content-center">
+                            <label for="overlapValue" class="col-6 col-form-label text-left ps-3 pe-0">Overlaping</label>
+                            <div class="col-3">
+                                <input v-model="overlapping" type="number" class="form-control" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0">
+                            </div>
+                            <label class="col-3 col-form-label text-left px-0">Seconds</label>
+                        </div>
+                    </div>
+                </div>
+                {{ slidingWindow + "\t||\t" + samplingRate + "\t||\t" + overlapping}}
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary"  @click="closeModal">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
+import { Modal } from 'bootstrap'
 import * as tf from '@tensorflow/tfjs';
 
 export default {
-    name: "ImportModel",
+    name: "ImportModelModal",
+    data() {
+        return {
+            modal: null,
+            modelFileName: "",
+            slidingWindow: null,
+            samplingRate: null,
+            overlapping: null,
+        }
+    },
+    props: {
+        toggleModelModalVisibility: Boolean,
+    },
     methods: {
         importButtonOnClick: function() {
             document.getElementById("modelFileInput").click()
@@ -47,10 +117,11 @@ export default {
                 weights.forEach(weight => {
                     modelArray.push(weight);
                 });
-                await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => this.modelLoaded(model));
+                await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => this.modelLoaded(model, modelFile.name));
             }
         },
-        modelLoaded: function(model) {
+        modelLoaded: function(model, modelFileName) {
+            this.modelFileName = modelFileName;
             const instance = [[[-3.3523560e-02,  9.8258060e+00, -3.1604004e-01, -4.2724610e-04, 2.6702880e-03, -4.4250488e-04],
                                 [-4.7882080e-02,  9.8162230e+00, -1.3407898e-01,  1.6937256e-03, -5.1879880e-04,  6.2561035e-04],
                                 [-4.3090820e-02,  9.8210140e+00, -1.9154358e-01, -1.4953613e-03, -1.5869141e-03, -4.4250488e-04],
@@ -95,11 +166,22 @@ export default {
                 a.print();
             }
         },
-    }
+        closeModal: function() {
+            this.modal.hide();
+        },
+    },
+    watch: {
+        toggleModelModalVisibility: function() {
+            console.log("show");
+            this.modal.show();
+        },
+    },
+    mounted() {
+        this.modal = new Modal(this.$refs.ImportModelModal)
+    },
 }
 
 class L2 {
-
     static className = 'L2';
 
     constructor(config) {
@@ -109,12 +191,50 @@ class L2 {
 </script>
 
 <style scoped>
-li {
-    margin: 5px;
-}
-
-button {
+.styled-btn {
     background-color: #e1e1e5;
     font-size: 1vw;
-}   
+}
+
+#importedModelDiv {
+    padding: 0;
+}
+
+#importedModelLabel {
+    font-size: 1.7vw;
+}
+
+.separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    font-size: 12px;
+    margin: 10px 0 10px 0;    
+}
+
+.separator::before,
+.separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid grey;
+}
+
+.text-left {
+    text-align: left;
+}
+
+/**needed to hide arrows in number field */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+input { 
+    text-align: center; 
+}
 </style>

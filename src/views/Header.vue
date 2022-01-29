@@ -11,9 +11,6 @@
                     </button>
                 </li>
                 <li class="nav-item">
-                    <ImportModel />
-                </li>
-                <li class="nav-item">
                     <input id="multipleFileUpload" type="file" webkitdirectory directory multiple v-on:change="onFileChange" hidden>
                     <button @click="chooseFiles()" type="button" class="btn btn-light">
                         <i class="fa fa-folder"></i>
@@ -27,11 +24,18 @@
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button type="button" class="btn btn-light" @click="toggleModalVisibility  = !toggleModalVisibility">
+                    <button @click="toggleModelModalVisibility  = !toggleModelModalVisibility" type="button" class="btn btn-light">
+                        <i class="fa fa-wrench"></i>
+                        Model
+                    </button>
+                    <ImportModelModal :toggleModelModalVisibility="toggleModelModalVisibility" />
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="btn btn-light" @click="toggleTutorialModalVisibility  = !toggleTutorialModalVisibility">
                         <i class="fa fa-file"></i>
                         Tutorial
                     </button>
-                        <TutorialModal :toggleModalVisibility="toggleModalVisibility" />
+                    <TutorialModal :toggleTutorialModalVisibility="toggleTutorialModalVisibility" />
                 </li>
             </ul>
         </div>
@@ -40,20 +44,21 @@
 
 <script>
 import TutorialModal from "../components/TutorialModal.vue";
-import ImportModel from "../components/ImportModel.vue";
+import ImportModelModal from "../components/ImportModelModal.vue";
 
 export default {
     name: "Header",
     components: {
         TutorialModal,
-        ImportModel,
+        ImportModelModal,
     },
     props: {
         title: String,
     },
     data() {
         return {
-            toggleModalVisibility: false,
+            toggleTutorialModalVisibility: false,
+            toggleModelModalVisibility: false,
         }
     },
     methods: {
