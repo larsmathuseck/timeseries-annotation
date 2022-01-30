@@ -1,7 +1,7 @@
 <template>
     <div class="row justify-content-between">
         <div id="col-header-title" class="col col-lg-auto col-md-auto col-sm-12 col-12">
-            <label class="title">{{ title }}</label>
+            <h1>{{ title }}</h1>
         </div>
         <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
             <ul class="nav nav-pills">
@@ -11,7 +11,7 @@
                     </button>
                 </li>
                 <li class="nav-item">
-                    <ImportModel />
+                    <ImportModel/>
                 </li>
                 <li class="nav-item">
                     <input id="multipleFileUpload" type="file" webkitdirectory directory multiple v-on:change="onFileChange" hidden>
@@ -60,8 +60,20 @@ export default {
         testDanfo: function() {
             this.$store.commit("testDanfo");
         },
-        chooseFiles() {
-            document.getElementById("multipleFileUpload").click()
+        async chooseFiles() {
+            if(typeof showDirectoryPicker === 'undefined'){
+                document.getElementById("multipleFileUpload").click();
+            }
+            else{
+                try{
+                    const dirHandle = await window.showDirectoryPicker();
+                    console.log(dirHandle);
+                    const files = await dirHandle.values();
+                    console.log(files);
+                } catch(error){
+                    console.log(error);
+                }
+            }
         },
         onFileChange(e) {
             const fileList = e.target.files;
@@ -154,7 +166,7 @@ button {
     font-size: 1vw;
 }
 
-.title {
+h1 {
     font-size: 2.5vw;
 }
 </style>

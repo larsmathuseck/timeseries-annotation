@@ -56,6 +56,7 @@
     </div>
     <AnnotationModal :toggleModalVisibility="toggleAnnotationModalVisibility" />
     <LabelModal :addLabelKey="addLabelKey" :toggleModalVisibility="toggleLabelModalVisibility" :labelToEdit="labelToEdit" />
+    <ConfirmModal :toggleModalVisibility="showConfirm" @modalConfirm="dataLoadConfirmed"/>
 </template>
 
 <script>
@@ -64,7 +65,8 @@ import ColorPicker from "./Colorpicker.vue"
 import Label from "./Label.vue"
 import AnnotationModal from "./AnnotationModal.vue"
 import LabelModal from "./LabelModal.vue"
-
+import ConfirmModal from "../components/ConfirmModal.vue";
+import { get, set } from 'idb-keyval';
 
 export default {
     name: "LeftSidebar",
@@ -74,6 +76,7 @@ export default {
         Label,
         AnnotationModal,
         LabelModal,
+        ConfirmModal,
     },
     data() {
         return {
@@ -84,6 +87,8 @@ export default {
             toggleLabelModalVisibility: false,
             labelToEdit: null,
             addLabelKey: 0,
+            showConfirm: false,
+            currentFileHandle: null,
         }
     },
     computed: {
@@ -129,25 +134,57 @@ export default {
         selectAnnotationFile() {
             this.$store.commit("selectAnnotationFile", this.lastSelectedAnnotation);
         },
-        chooseDataFile() {
-            document.getElementById("dataFileUpload").click()
+        async chooseDataFile() {
+            if(typeof showOpenFilePicker === 'undefined'){
+                document.getElementById("dataFileUpload").click();
+            }
+            else{
+                try{
+                    await window.showOpenFilePicker().then(async ([fileHandle]) => {
+                        const file = await fileHandle.getFile();
+                        this.readFile(file);
+                        console.log(fileHandle);
+                        set('fileHandle', fileHandle);
+                    });
+                } catch(error){
+                    console.log(error);
+                }
+            }
         },
         onDataFileChange(e) {
             const fileList = e.target.files;
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const reader = new FileReader();
                 const file = fileList[i];
-                if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
-                    reader.readAsText(file);
-                    reader.onload = () => {
-                        if(file.name.includes("data")){
-                            this.$store.commit("addData", {result: reader.result, name: file.name});
-                        }
+                this.readFile(file);
+            }
+        },
+        readFile(file){
+            const reader = new FileReader();
+            if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
+                reader.readAsText(file);
+                reader.onload = () => {
+                    if(file.name.includes("data")){
+                        this.$store.commit("addData", {result: reader.result, name: file.name});
                     }
                 }
             }
         },
+        dataLoadConfirmed(){
+            this.currentFileHandle.requestPermission().then(() => {
+                const file = this.currentFileHandle.getFile();
+                console.log(file);
+                // this.readFile(file);
+            })
+        },
     },
+    mounted: async function() {
+        get('fileHandle').then(function(fileHandle){
+            if(fileHandle != null){
+                this.currentFileHandle = fileHandle;
+                this.showConfirm = true;
+            }
+        }.bind(this));
+    }
 }
 </script>
 
