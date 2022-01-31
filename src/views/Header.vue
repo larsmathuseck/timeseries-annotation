@@ -60,20 +60,8 @@ export default {
         testDanfo: function() {
             this.$store.commit("testDanfo");
         },
-        async chooseFiles() {
-            if(typeof showDirectoryPicker === 'undefined'){
-                document.getElementById("multipleFileUpload").click();
-            }
-            else{
-                try{
-                    const dirHandle = await window.showDirectoryPicker();
-                    console.log(dirHandle);
-                    const files = await dirHandle.values();
-                    console.log(files);
-                } catch(error){
-                    console.log(error);
-                }
-            }
+        chooseFiles() {
+            document.getElementById("multipleFileUpload").click();
         },
         onFileChange(e) {
             const fileList = e.target.files;

@@ -1,6 +1,7 @@
 <template>
     <div ref="chartDiv" @mouseup="chartClicked" @mousedown="dragDetection">
         <v-chart ref="charts" class="chart" :option="option" @datazoom="zoom"/>
+        <button @click="bclicked"/>
     </div>
 </template>
 
@@ -20,6 +21,9 @@ import {
 } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
 import { DateTime } from "luxon";
+import { liveQuery } from "dexie";
+import { db } from "/db";
+import { useObservable } from "@vueuse/rxjs";
 
 use([
     CanvasRenderer,
@@ -39,6 +43,12 @@ export default {
     components: {
         VChart,
     },
+    setup: function(){
+        const data = useObservable(liveQuery(() => db.data.toArray()));
+        return {
+            data,
+        }
+    },
     data: function () {
         return {
             dataZoomStart: 0,
@@ -55,6 +65,11 @@ export default {
         [THEME_KEY]: "light",
     },
     methods: {
+        bclicked: function() {
+            // const data = reactive(liveQuery(async () => {return await db.data.toArray()}));
+            console.log("hahaha");
+            console.log(this.data);
+        },
         chartClicked: function (event) {
             const diffX = Math.abs(event.pageX - this.clickX);
             const diffY = Math.abs(event.pageY - this.clickY);
@@ -85,6 +100,10 @@ export default {
     },
     computed: {
         option: function () {
+            // let data = this.data;
+            // if(data != null){ data = data[0]}
+            // console.log("1");
+            // console.log(data);
             let series = [];
             let graphData = this.$store.getters.getData;
             let legende = [];

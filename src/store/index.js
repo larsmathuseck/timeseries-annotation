@@ -2,6 +2,9 @@ import { createStore } from 'vuex'
 import { parse, stringify } from "@vanillaes/csv";
 import { DateTime } from "luxon";
 import { DataFrame } from "danfojs";
+import { liveQuery } from "dexie";
+import { db } from "/db";
+import { useObservable } from "@vueuse/rxjs";
 
 function slope(df) {
     let max = df.values[0][1];
@@ -28,7 +31,7 @@ function slope(df) {
 
 export default createStore({
     state: {
-        data: [],
+        data: useObservable(liveQuery(() => db.data.toArray())),
         currentSelectedData: 0,
         annotations: [],
         currAnn: 0,
@@ -36,7 +39,7 @@ export default createStore({
         colors: ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
     },
     mutations: {
-        addData: (state, payload) => {
+        addData: async (state, payload) => {
             let data = parse(payload.result);
             let legende = data.shift();
             let timestamps = [];
@@ -69,13 +72,20 @@ export default createStore({
                         dataJson[column].dataPoints.push([new Date(timestamps[row]).getTime(), data[row][column]]);   
                     }
                 }
-                state.data.push({
-                    id: state.data.length,
+                // state.data.push({
+                //     id: state.data.length,
+                //     name: payload.name,
+                //     dataPoints: dataJson,
+                //     timestamps: timestamps,
+                //     selectedAxes: [dataJson[0].id],
+                // });
+                const id = await db.data.add({
                     name: payload.name,
                     dataPoints: dataJson,
                     timestamps: timestamps,
                     selectedAxes: [dataJson[0].id],
-                });
+                })
+                console.log(id);
             }
         },
         testDanfo: (state) => {
@@ -278,8 +288,15 @@ export default createStore({
                 }
             }
         },
-        addSelectedAxes: (state, axis) => {
-            state.data[state.currentSelectedData].selectedAxes.push(axis.id);
+        addSelectedAxes: async (state, axis) => {
+            let newAxis = [];
+            state.data[state.currentSelectedData].selectedAxes.forEach(a => newAxis.push(a));
+            console.log(newAxis);
+            newAxis.push(axis.id);
+            console.log(newAxis);
+            console.log(state.currentSelectedData);
+            await db.data.update(state.currentSelectedData+1, {selectedAxes: newAxis});
+            console.log(await db.data.toArray());
         },
         deleteSelectedAxis(state, axis) {
             let selectedAxes = state.data[state.currentSelectedData].selectedAxes;
@@ -372,7 +389,7 @@ export default createStore({
     },
     getters: {
         getData: state => {
-            if(state.data.length > 0){
+            if(state.data?.length > 0){
                 return state.data[state.currentSelectedData].dataPoints.filter(key => state.data[state.currentSelectedData].selectedAxes.includes(key.id));
             }
             return [];
@@ -403,19 +420,19 @@ export default createStore({
             return stringify(data);
         },
         getAxes: state => {
-            if(state.data.length > 0){
+            if(state.data?.length > 0){
                 return state.data[state.currentSelectedData].dataPoints;
             }
             return [];
         },
         timestamps: state => {
-            if(state.data.length > 0){
+            if(state.data?.length > 0){
                 return state.data[state.currentSelectedData].timestamps;
             }
             return [];
         },
         selectedAxes: state => {
-            if(state.data.length > 0){
+            if(state.data?.length > 0){
                 return state.data[state.currentSelectedData].selectedAxes;
             }
             return [];
@@ -424,7 +441,7 @@ export default createStore({
             return state.annotations[state.currAnn]?.labels;
         },
         showGraph: state => {
-            if(state.data.length > 0){
+            if(state.data?.length > 0){
                 return true;
             }
             else {

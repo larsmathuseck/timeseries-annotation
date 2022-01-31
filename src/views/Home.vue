@@ -38,7 +38,8 @@ export default {
     },
     computed: {
         showGraph: function(){
-            return this.$store.getters.showGraph;
+            // return this.$store.getters.showGraph;
+            return true;
         }
     },
     methods: {
@@ -54,7 +55,7 @@ export default {
             }
         }
     },
-    mounted: function() {
+    mounted: async function() {
         window.addEventListener("keypress", this.keyPressed);
     },
     beforeUnmount: function() {
