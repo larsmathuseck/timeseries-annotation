@@ -26,6 +26,63 @@ function slope(df) {
     return [timestampMax, slope];
 }
 
+function createInstances(state, modelConfiguration) {
+    const slidingWindow = modelConfiguration.slidingWindow;
+    const samplingrate = modelConfiguration.samplingRate;
+    const data = state.data[0].dataPoints[0].dataPoints;
+    console.log(slidingWindow, samplingrate, data);
+    let df = new DataFrame(data);
+    //df.drop({ columns: ["0"], inplace: true })
+    df = df.asType("1", "float32");
+    const timestamps = state.data[0].timestamps;
+    let segmentlengths = [];
+    let timestamp = timestamps[0];
+    let timestapplus = timestamp + slidingWindow * 1000;
+    let i = 0;
+    while(i < data.length){
+        let dataCount = 0;
+        while(timestamp < timestapplus){
+            i++;
+            dataCount++;
+            timestamp = timestamps[i];
+        }
+        let segmentlength = Math.floor(dataCount / samplingrate);
+        let remainder = dataCount % samplingrate;
+        for(let i = 0; i < samplingrate; i++){
+            if(remainder > 0){
+                segmentlengths.push(segmentlength + 1);
+                remainder--;
+            }
+            else{
+                segmentlengths.push(segmentlength);
+            }
+        }
+        timestapplus = timestamp + 1000;
+    }
+    let max = [];
+    let min = [];
+    let mean = [];
+    let median = [];
+    let std = [];
+    let varianz = [];
+    let slopes = [];
+    let oldsegment = 0;
+    segmentlengths.forEach(segment => {
+        segment = oldsegment + segment;
+        let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
+        max.push([timestamps[segment], newFrame.max({ axis: 0 }).values[1]]);
+        min.push([timestamps[segment], newFrame.min({ axis: 0 }).values[1]]);
+        mean.push([timestamps[segment], newFrame.mean({ axis: 0 }).values[1]]);
+        median.push([timestamps[segment], newFrame.median({ axis: 0 }).values[1]]);
+        std.push([timestamps[segment], newFrame.std({ axis: 0 }).values[1]]);
+        varianz.push([timestamps[segment], newFrame.var({ axis: 0 }).values[1]]);
+        const slopeArray = slope(newFrame);
+        slopes.push([slopeArray[0], slopeArray[1]]);
+        oldsegment = segment;
+    });
+    return slopes;
+}
+
 export default createStore({
     state: {
         data: [],
@@ -33,6 +90,7 @@ export default createStore({
         annotations: [],
         currAnn: 0,
         activeLabel: null,
+        model: {},
         colors: ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
     },
     mutations: {
@@ -181,6 +239,14 @@ export default createStore({
             state.data[0].selectedAxes.push("var");
             state.data[0].selectedAxes.push("slope");
             console.log(state.data[0]);
+        },
+        modelLoaded: (state, model) => {
+            state.model = model;
+            console.log("model is saved in state: ", state.model);
+        },
+        loadDataIntoModel: (state, modelConfiguration) => {
+            const instance = createInstances(state, modelConfiguration);
+            console.log(instance)
         },
         addAnnotationData: (state, payload) => {
             let data = parse(payload.result);

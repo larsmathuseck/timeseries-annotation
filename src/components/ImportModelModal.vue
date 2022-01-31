@@ -3,61 +3,74 @@
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Model Configuration</h5>
+                    <h4 class="modal-title">Model Configuration</h4>
                     <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="container-fluid p-0">
-                        <div class="row justify-content-center">
-                            <div class="col-auto">
-                                <label class="form-label">Import Model from File</label>
+                <form id="modelConfigurationSubmit" @submit="onSubmit">
+                    <div class="modal-body">
+                        <div class="container-fluid p-0">
+                            <div class="row justify-content-center">
+                                <div class="col-auto">
+                                    <h5 class="form-label">Import Model from File</h5>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-auto p-0 mx-2">
+                                    <input id="modelFileInput" type="file" webkitdirectory directory v-on:change="onFileChange" hidden>
+                                    <button @click="importButtonOnClick" type="button" class="btn btn-light styled-btn">
+                                        <i class="fa fa-folder"></i>
+                                        Choose Directory
+                                    </button>
+                                </div>
+                                <div class="col-auto p-0 mx-2" id="importedModelDiv">
+                                    <label id="importedModelLabel" class="col-form-label p-0"> {{ modelFileName.length > 0 ? modelFileName : 'No Model selected yet' }}</label>
+                                </div>
+                            </div>
+                            <div class="row-justify-content-center">
+                                <div class="col-12">
+                                    <div class="separator"></div>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-auto">
+                                    <h5>Model Options:</h5>
+                                </div>
+                            </div>
+                            <div class="row mb-3 justify-content-center">
+                                <label for="slidingWindowInput" class="col-6 col-form-label text-left ps-3 pe-0">Sliding Window</label>
+                                <div class="col-3">
+                                    <input v-model="slidingWindow" type="number" class="form-control" id="slidingWindowInput" placeholder="4" :disabled="modelFileName.length == 0" required>
+                                </div>
+                                <label class="col-3 col-form-label text-left px-0">Seconds</label>
+                            </div>
+                            <div class="row mb-3 justify-content-center">
+                                <label for="samplingRateInput" class="col-6 col-form-label text-left ps-3 pe-0">Sampling Rate</label>
+                                <div class="col-3">
+                                    <input v-model="samplingRate" type="number" class="form-control" id="samplingRateInput" placeholder="8" :disabled="modelFileName.length == 0" required>
+                                </div>
+                                <label class="col-3 col-form-label text-left px-0">Hertz</label>
+                            </div>
+                            <div class="row mb-3 justify-content-center">
+                                <label for="overlapValue" class="col-6 col-form-label text-left ps-3 pe-0">Overlaping</label>
+                                <div class="col-3">
+                                    <input v-model="overlapping" type="number" class="form-control" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0" required>
+                                </div>
+                                <label class="col-3 col-form-label text-left px-0">Seconds</label>
                             </div>
                         </div>
-                        <div class="row justify-content-center">
-                            <div class="col-auto p-0 mx-2">
-                                <input id="modelFileInput" type="file" webkitdirectory directory v-on:change="onFileChange" hidden>
-                                <button @click="importButtonOnClick" type="button" class="btn btn-light styled-btn">
-                                    <i class="fa fa-folder"></i>
-                                    Choose Directory
-                                </button>
+                        <div class="row justify-content-center" v-show="showInvalidFeedback.length > 0">
+                            <div class="col-12">
+                                <div class="alert alert-danger p-1" role="alert">
+                                    {{ showInvalidFeedback }}
+                                </div>
                             </div>
-                            <div class="col-auto p-0 mx-2" id="importedModelDiv">
-                                <label id="importedModelLabel" class="col-form-label p-0"> {{ modelFileName.length > 0 ? modelFileName : 'No Model selected yet' }}</label>
-                            </div>
-                        </div>
-                        <div class="separator"></div>
-                        <div class="row justify-content-center">
-                            <div class="col-auto">
-                                <label class="form-label">Model Options:</label>
-                            </div>
-                        </div>
-                        <div class="row mb-3 justify-content-center">
-                            <label for="slidingWindowInput" class="col-6 col-form-label text-left ps-3 pe-0">Sliding Window</label>
-                            <div class="col-3">
-                                <input v-model="slidingWindow" type="number" class="form-control" id="slidingWindowInput" placeholder="4" :disabled="modelFileName.length == 0">
-                            </div>
-                            <label class="col-3 col-form-label text-left px-0">Seconds</label>
-                        </div>
-                        <div class="row mb-3 justify-content-center">
-                            <label for="samplingRateInput" class="col-6 col-form-label text-left ps-3 pe-0">Sampling Rate</label>
-                            <div class="col-3">
-                                <input v-model="samplingRate" type="number" class="form-control" id="samplingRateInput" placeholder="8" :disabled="modelFileName.length == 0">
-                            </div>
-                            <label class="col-3 col-form-label text-left px-0">Hertz</label>
-                        </div>
-                        <div class="row mb-3 justify-content-center">
-                            <label for="overlapValue" class="col-6 col-form-label text-left ps-3 pe-0">Overlaping</label>
-                            <div class="col-3">
-                                <input v-model="overlapping" type="number" class="form-control" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0">
-                            </div>
-                            <label class="col-3 col-form-label text-left px-0">Seconds</label>
                         </div>
                     </div>
-                </div>
-                {{ slidingWindow + "\t||\t" + samplingRate + "\t||\t" + overlapping}}
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary"  @click="closeModal">Save</button>
-                </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="loadDataIntoModel">Load Data in Model</button>
+                        <button id="saveBtn" type="submit" class="btn btn-primary">{{ saveBtnText }}</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -76,6 +89,8 @@ export default {
             slidingWindow: null,
             samplingRate: null,
             overlapping: null,
+            showInvalidFeedback: "",
+            saveBtnText: "",
         }
     },
     props: {
@@ -155,29 +170,72 @@ export default {
                                 [-3.8314820e-02,  9.8210140e+00, -1.0534668e-01,  1.6937256e-03, -5.1879880e-04,  6.2561035e-04],
                                 [-3.3523560e-02,  9.8258060e+00, -1.1492920e-01, -4.2724610e-04, -5.1879880e-04,  6.2561035e-04]]]
                                 
-            const data = this.$store.state.data[0]?.dataPoint[3];
-            if(data != null){
-                console.log(data.id);
-                console.log(data);
+            // const data = this.$store.state.data[0]?.dataPoint[3];
+            // if(data != null){
+            //     console.log(data.id);
+            //     console.log(data);
+            // }
+            // else{
+            //     const tensor = tf.tensor(instance);
+            //     let a = model.predict(tensor);
+            //     a.print();
+            // }
+            const tensor = tf.tensor(instance);
+            let a = model.predict(tensor);
+            a.print();
+            this.$store.commit("modelLoaded", model);
+        },
+        onSubmit: function(e) {
+            e.preventDefault();
+            if (this.modelFileName.length > 0 && this.overlapping >= this.slidingWindow) {
+                this.showInvalidFeedback = "Overlapping must be smaller than Sliding Window";
+                return;
             }
-            else{
-                const tensor = tf.tensor(instance);
-                let a = model.predict(tensor);
-                a.print();
+            this.saveBtnText = "Saved!"
+        },
+        loadDataIntoModel: function() {
+            const data = this.$store.state.data;
+            if (this.modelFileName.length == 0) {
+                this.showInvalidFeedback = "No Model imported yet!"
+                return;
+            }
+            if (data.length == 0) {
+                this.showInvalidFeedback = "Please Upload data first!"
+                return;
+            }
+            document.getElementById("saveBtn").click();
+            if (this.saveBtnText == "Saved!") {
+                const modelConfiguration = {
+                    slidingWindow: this.slidingWindow,
+                    samplingRate: this.samplingRate,
+                    overlapping: this.overlapping,
+                };
+                this.$store.commit("loadDataIntoModel", modelConfiguration);
+                this.modal.hide();
             }
         },
         closeModal: function() {
             this.modal.hide();
-        },
+        }
     },
     watch: {
         toggleModelModalVisibility: function() {
-            console.log("show");
+            this.showInvalidFeedback = "";
+            this.saveBtnText = "Save";
             this.modal.show();
         },
     },
+    computed: {
+        // showInvalidInputFeedback: function() {
+        //     if (this.modelFileName.length > 0 && this.overlapping != null && this.overlapping >= this.slidingWindow) {
+        //         return "Overlapping must be smaller than Sliding Window";
+        //     } else {
+        //         return "";
+        //     }
+        // }
+    },
     mounted() {
-        this.modal = new Modal(this.$refs.ImportModelModal)
+        this.modal = new Modal(this.$refs.ImportModelModal);
     },
 }
 
@@ -193,22 +251,23 @@ class L2 {
 <style scoped>
 .styled-btn {
     background-color: #e1e1e5;
-    font-size: 1vw;
+    font-size: 0.9rem;
 }
 
 #importedModelDiv {
     padding: 0;
+    margin: auto;
+    width: 50%;
 }
 
 #importedModelLabel {
-    font-size: 1.7vw;
+    font-size: 1rem;
 }
 
 .separator {
     display: flex;
     align-items: center;
     text-align: center;
-    font-size: 12px;
     margin: 10px 0 10px 0;    
 }
 
