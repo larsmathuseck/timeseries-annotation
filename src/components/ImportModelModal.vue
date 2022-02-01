@@ -1,13 +1,13 @@
 <template>
     <div class="modal fade" ref="ImportModelModal" tabindex="-1" aria-hidden="false">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Model Configuration</h4>
                     <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                 </div>
-                <form id="modelConfigurationSubmit" @submit="onSubmit">
-                    <div class="modal-body">
+                <div class="modal-body">
+                    <form id="modelConfigurationSubmit" @submit="onSubmit">
                         <div class="container-fluid p-0">
                             <div class="row justify-content-center">
                                 <div class="col-auto">
@@ -36,26 +36,44 @@
                                     <h5>Model Options:</h5>
                                 </div>
                             </div>
-                            <div class="row mb-3 justify-content-center">
-                                <label for="slidingWindowInput" class="col-6 col-form-label text-left ps-3 pe-0">Sliding Window</label>
-                                <div class="col-3">
-                                    <input v-model="slidingWindow" type="number" class="form-control" id="slidingWindowInput" placeholder="4" :disabled="modelFileName.length == 0" required>
+                            <div class="row">
+                                <div class="col-12 col-lg-6">
+                                    <div class="row mb-3 justify-content-center">
+                                        <label for="slidingWindowInput" class="col-6 col-form-label">Sliding Window</label>
+                                        <div class="col-2 col-lg-3">
+                                            <input v-model="slidingWindow" type="number" class="form-control" id="slidingWindowInput" placeholder="4" :disabled="modelFileName.length == 0" required>
+                                        </div>
+                                        <label class="col-4 col-lg-3 col-form-label text-left">Seconds</label>
+                                    </div>
+                                    <div class="row mb-3 justify-content-center">
+                                        <label for="samplingRateInput" class="col-6 col-form-label">Sampling Rate</label>
+                                        <div class="col-2 col-lg-3">
+                                            <input v-model="samplingRate" type="number" class="form-control" id="samplingRateInput" placeholder="8" :disabled="modelFileName.length == 0" required>
+                                        </div>
+                                        <label class="col-4 col-lg-3 col-form-label text-left">Hertz</label>
+                                    </div>
+                                    <div class="row mb-3 justify-content-center">
+                                        <label for="overlapValue" class="col-6 col-form-label">Overlaping</label>
+                                        <div class="col-2 col-lg-3">
+                                            <input v-model="overlapping" type="number" class="form-control" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0" required>
+                                        </div>
+                                        <label class="col-4 col-lg-3 col-form-label text-left">Seconds</label>
+                                    </div>
                                 </div>
-                                <label class="col-3 col-form-label text-left px-0">Seconds</label>
-                            </div>
-                            <div class="row mb-3 justify-content-center">
-                                <label for="samplingRateInput" class="col-6 col-form-label text-left ps-3 pe-0">Sampling Rate</label>
-                                <div class="col-3">
-                                    <input v-model="samplingRate" type="number" class="form-control" id="samplingRateInput" placeholder="8" :disabled="modelFileName.length == 0" required>
+                                <div class="col-12 col-lg-6">
+                                    <p>Axis Selection</p>
+                                    <div class="list-group">
+                                        <label class="list-group-item" v-for="axis in axes" :key="axis.id">
+                                            <input class="form-check-input me-1" type="checkbox" v-bind:value="axis.name" v-model="selectedAxes" :disabled="modelFileName.length == 0">
+                                            {{ axis.name }}
+                                        </label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <label v-for="axis in selectedAxes" :key="axis.name">
+                                            {{ (selectedAxes.indexOf(axis) + 1) + ". " + axis + ",  "}}
+                                        </label>
+                                    </div>
                                 </div>
-                                <label class="col-3 col-form-label text-left px-0">Hertz</label>
-                            </div>
-                            <div class="row mb-3 justify-content-center">
-                                <label for="overlapValue" class="col-6 col-form-label text-left ps-3 pe-0">Overlaping</label>
-                                <div class="col-3">
-                                    <input v-model="overlapping" type="number" class="form-control" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0" required>
-                                </div>
-                                <label class="col-3 col-form-label text-left px-0">Seconds</label>
                             </div>
                         </div>
                         <div class="row justify-content-center" v-show="showInvalidFeedback.length > 0">
@@ -65,12 +83,13 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @click="loadDataIntoModel">Load Data in Model</button>
-                        <button id="saveBtn" type="submit" class="btn btn-primary">{{ saveBtnText }}</button>
-                    </div>
-                </form>
+                        <button id="submitFormBtn" hidden></button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @click="loadDataIntoModel">Load Data in Model</button>
+                    <button id="saveBtn" type="button" class="btn btn-primary" @click="submitForm">{{ saveBtnText }}</button>
+                </div>
             </div>
         </div>
     </div>
@@ -91,6 +110,7 @@ export default {
             overlapping: null,
             showInvalidFeedback: "",
             saveBtnText: "",
+            selectedAxes: [],
         }
     },
     props: {
@@ -185,6 +205,9 @@ export default {
             a.print();
             this.$store.commit("modelLoaded", model);
         },
+        submitForm: function() {
+            document.getElementById("submitFormBtn").click();
+        },
         onSubmit: function(e) {
             e.preventDefault();
             if (this.modelFileName.length > 0 && this.overlapping >= this.slidingWindow) {
@@ -226,13 +249,9 @@ export default {
         },
     },
     computed: {
-        // showInvalidInputFeedback: function() {
-        //     if (this.modelFileName.length > 0 && this.overlapping != null && this.overlapping >= this.slidingWindow) {
-        //         return "Overlapping must be smaller than Sliding Window";
-        //     } else {
-        //         return "";
-        //     }
-        // }
+        axes: function() {
+            return this.$store.getters.getAxes;
+        },
     },
     mounted() {
         this.modal = new Modal(this.$refs.ImportModelModal);
@@ -249,6 +268,10 @@ class L2 {
 </script>
 
 <style scoped>
+.modal-body {
+    overflow-y: auto;
+}
+
 .styled-btn {
     background-color: #e1e1e5;
     font-size: 0.9rem;
@@ -257,7 +280,6 @@ class L2 {
 #importedModelDiv {
     padding: 0;
     margin: auto;
-    width: 50%;
 }
 
 #importedModelLabel {
@@ -295,5 +317,20 @@ input[type=number] {
 
 input { 
     text-align: center; 
+}
+
+.list-group {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr);
+  border-radius: 0;
+}
+
+.list-group-item {
+    border: 1px solid rgba(0,0,0,.125) !important;
+    border-radius: 0rem;
+}
+
+p {
+    margin-bottom: 0.5rem;
 }
 </style>
