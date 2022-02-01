@@ -1,7 +1,7 @@
 <template>
     <div class="row justify-content-between">
         <div id="col-header-title" class="col col-lg-auto col-md-auto col-sm-12 col-12">
-            <h1>{{ title }}</h1>
+            <label class="title">{{ title }}</label>
         </div>
         <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
             <ul class="nav nav-pills">
@@ -9,9 +9,6 @@
                     <button type="button" class="btn btn-light" @click="testDanfo">
                             Test Danfo
                     </button>
-                </li>
-                <li class="nav-item">
-                    <ImportModel />
                 </li>
                 <li class="nav-item">
                     <input id="multipleFileUpload" type="file" webkitdirectory directory multiple v-on:change="onFileChange" hidden>
@@ -27,11 +24,18 @@
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button type="button" class="btn btn-light" @click="toggleModalVisibility  = !toggleModalVisibility">
+                    <button @click="toggleModelModalVisibility  = !toggleModelModalVisibility" type="button" class="btn btn-light">
+                        <i class="fa fa-wrench"></i>
+                        Model
+                    </button>
+                    <ImportModelModal :toggleModelModalVisibility="toggleModelModalVisibility" />
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="btn btn-light" @click="toggleTutorialModalVisibility  = !toggleTutorialModalVisibility">
                         <i class="fa fa-file"></i>
                         Tutorial
                     </button>
-                        <TutorialModal :toggleModalVisibility="toggleModalVisibility" />
+                    <TutorialModal :toggleTutorialModalVisibility="toggleTutorialModalVisibility" />
                 </li>
             </ul>
         </div>
@@ -40,20 +44,21 @@
 
 <script>
 import TutorialModal from "../components/TutorialModal.vue";
-import ImportModel from "../components/ImportModel.vue";
+import ImportModelModal from "../components/ImportModelModal.vue";
 
 export default {
     name: "Header",
     components: {
         TutorialModal,
-        ImportModel,
+        ImportModelModal,
     },
     props: {
         title: String,
     },
     data() {
         return {
-            toggleModalVisibility: false,
+            toggleTutorialModalVisibility: false,
+            toggleModelModalVisibility: false,
         }
     },
     methods: {
@@ -65,18 +70,35 @@ export default {
         },
         onFileChange(e) {
             const fileList = e.target.files;
+            let filesToUpload = [];
+            let fileNames = {};
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const reader = new FileReader();
                 const file = fileList[i];
                 if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
-                    reader.readAsText(file);
-                    reader.onload = () => {
-                        if(file.name.includes("data")){
-                            this.$store.commit("addData", {result: reader.result, name: file.name});
-                        }
-                        else if(file.name.includes("annotation") || file.name.includes("labels")){
-                            this.$store.commit("addAnnotationData", {result: reader.result, name: file.name});
-                        }
+                    filesToUpload.push(file);
+                    if (fileNames[file.name] == undefined) {
+                        fileNames[file.name] = 1;
+                    } else {
+                        fileNames[file.name] += 1;
+                    }
+                }
+            }
+            for (let i in filesToUpload) {
+                const file = filesToUpload[i];
+                let fileName = file.name;
+                if (fileNames[file.name] > 1) {
+                    const path = file.webkitRelativePath;
+                    const directories = path.split("/");
+                    fileName = directories.slice(-2)[0] + "/" + directories.slice(-1);
+                }
+                const reader = new FileReader();
+                reader.readAsText(file);
+                reader.onload = () => {
+                    if(file.name.includes("data")){
+                        this.$store.commit("addData", {result: reader.result, name: fileName});
+                    }
+                    else if(file.name.includes("annotation") || file.name.includes("labels")){
+                        this.$store.commit("addAnnotationData", {result: reader.result, name: fileName});
                     }
                 }
             }
@@ -137,7 +159,7 @@ button {
     font-size: 1vw;
 }
 
-h1 {
+.title {
     font-size: 2.5vw;
 }
 </style>

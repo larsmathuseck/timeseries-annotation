@@ -29,18 +29,18 @@ import 'vueperslides/dist/vueperslides.css'
 export default {
     name: "TutorialModal",
     components: {
-        VueperSlides, 
-        VueperSlide        
+        VueperSlides,
+        VueperSlide
     },
     props: {
-        toggleModalVisibility: Boolean
+        toggleTutorialModalVisibility: Boolean
     },
     data() {
         return {
             modal: null,
             slides: [
                 {
-                    image: require('../../public/img/tutorial/UploadDataScreenshotWithFolderStructure.png')
+                    image: require('../../public/img/tutorial/ImportData.jpg')
                 },
                 {
                     image: require('../../public/img/tutorial/ExampleChooseDataWithText.jpg')
@@ -57,7 +57,7 @@ export default {
         },
     },
     watch: {
-        toggleModalVisibility: function() {
+        toggleTutorialModalVisibility: function() {
             this.modal.show();
         },
     },
