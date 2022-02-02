@@ -64,13 +64,13 @@
                                     <p>Axis Selection</p>
                                     <div class="list-group">
                                         <label class="list-group-item" v-for="axis in axes" :key="axis.id">
-                                            <input class="form-check-input me-1" type="checkbox" v-bind:value="axis.name" v-model="selectedAxes" :disabled="modelFileName.length == 0">
+                                            <input class="form-check-input me-1" type="checkbox" v-bind:value="{id: axis.id, name: axis.name}" v-model="selectedAxes" :disabled="modelFileName.length == 0">
                                             {{ axis.name }}
                                         </label>
                                     </div>
                                     <div class="col-auto">
-                                        <label v-for="axis in selectedAxes" :key="axis.name">
-                                            {{ (selectedAxes.indexOf(axis) + 1) + ". " + axis + ",  "}}
+                                        <label class="pe-2" v-for="axis in selectedAxes" :key="axis.id">
+                                            {{ (selectedAxes.indexOf(axis) + 1) + ". " + axis.name + ",\t"}}
                                         </label>
                                     </div>
                                 </div>
@@ -98,10 +98,12 @@
 <script>
 import { Modal } from 'bootstrap'
 import * as tf from '@tensorflow/tfjs';
+import createInstances from "../model/ModelFunctions";
 
 export default {
     name: "ImportModelModal",
     data() {
+        this.model = null;
         return {
             modal: null,
             modelFileName: "",
@@ -155,70 +157,32 @@ export default {
                 await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => this.modelLoaded(model, modelFile.name));
             }
         },
-        modelLoaded: function(model, modelFileName) {
+        modelLoaded: async function(model, modelFileName) {
             this.modelFileName = modelFileName;
-            const instance = [[[-3.3523560e-02,  9.8258060e+00, -3.1604004e-01, -4.2724610e-04, 2.6702880e-03, -4.4250488e-04],
-                                [-4.7882080e-02,  9.8162230e+00, -1.3407898e-01,  1.6937256e-03, -5.1879880e-04,  6.2561035e-04],
-                                [-4.3090820e-02,  9.8210140e+00, -1.9154358e-01, -1.4953613e-03, -1.5869141e-03, -4.4250488e-04],
-                                [-3.8314820e-02,  9.8162230e+00, -8.6196900e-02, -1.4953613e-03, -1.5869141e-03, -1.5106201e-03],
-                                [-3.8314820e-02,  9.8210140e+00, -1.5322876e-01, -1.4953613e-03, -5.1879880e-04, -4.4250488e-04],
-                                [-3.3523560e-02,  9.8162230e+00, -4.3090820e-02, -4.2724610e-04, -1.5869141e-03,  6.2561035e-04],
-                                [-3.8314820e-02,  9.8210140e+00, -3.3523560e-02, -2.5634766e-03,  1.6174316e-03, -4.4250488e-04],
-                                [-3.3523560e-02,  9.8210140e+00, -4.7912598e-03,  6.4086914e-04, -5.1879880e-04, -4.4250488e-04],
-                                [-2.8732300e-02,  9.8258060e+00, -6.2255860e-02, -4.2724610e-04, 5.4931640e-04, -4.4250488e-04],
-                                [-3.3523560e-02,  9.8258060e+00, -5.7464600e-02,  6.4086914e-04, 5.4931640e-04,  6.2561035e-04],
-                                [-3.8314820e-02,  9.8210140e+00, -7.6614380e-02, -4.2724610e-04, 5.4931640e-04, -4.4250488e-04],
-                                [-3.3523560e-02,  9.8258060e+00, -1.0534668e-01,  6.4086914e-04, -1.5869141e-03,  6.2561035e-04],
-                                [-3.8314820e-02,  9.8210140e+00, -1.3887024e-01, -4.2724610e-04, 5.4931640e-04, -4.4250488e-04],
-                                [-3.8314820e-02,  9.8210140e+00, -1.1492920e-01, -4.2724610e-04, 5.4931640e-04,  6.2561035e-04],
-                                [-3.8314820e-02,  9.8210140e+00, -1.6758728e-01, -4.2724610e-04, -5.1879880e-04,  6.2561035e-04],
-                                [-4.3090820e-02,  9.8210140e+00, -1.2449646e-01,  6.4086914e-04, -5.1879880e-04, -4.4250488e-04],
-                                [-4.7882080e-02,  9.8258060e+00, -1.3887024e-01, -1.4953613e-03, -1.5869141e-03, -4.4250488e-04],
-                                [-3.3523560e-02,  9.8258060e+00, -1.1013794e-01, -1.4953613e-03, -1.5869141e-03,  6.2561035e-04],
-                                [-4.3090820e-02,  9.8210140e+00, -6.7031860e-02, -1.4953613e-03, -5.1879880e-04,  6.2561035e-04],
-                                [-4.3090820e-02,  9.8210140e+00, -8.1405640e-02,  6.4086914e-04, -5.1879880e-04, -1.5106201e-03],
-                                [-2.8732300e-02,  9.8258060e+00, -8.1405640e-02, -4.2724610e-04, 5.4931640e-04, -4.4250488e-04],
-                                [-4.3090820e-02,  9.8210140e+00, -9.0972900e-02,  6.4086914e-04, 5.4931640e-04,  6.2561035e-04],
-                                [-3.3523560e-02,  9.8210140e+00, -8.1405640e-02,  6.4086914e-04, -5.1879880e-04,  6.2561035e-04],
-                                [-3.3523560e-02,  9.8305970e+00, -1.1492920e-01, -4.2724610e-04, -5.1879880e-04, -4.4250488e-04],
-                                [-2.8732300e-02,  9.8162230e+00, -1.1492920e-01, -4.2724610e-04, 5.4931640e-04,  6.2561035e-04],
-                                [-3.8314820e-02,  9.8258060e+00, -1.2449646e-01,  6.4086914e-04, 5.4931640e-04,  6.2561035e-04],
-                                [-3.3523560e-02,  9.8162230e+00, -1.0534668e-01, -4.2724610e-04, 5.4931640e-04, -4.4250488e-04],
-                                [-3.3523560e-02,  9.8210140e+00, -1.0055542e-01,  6.4086914e-04, -5.1879880e-04, -4.4250488e-04],
-                                [-2.8732300e-02,  9.8162230e+00, -1.0055542e-01,  6.4086914e-04, 5.4931640e-04, -4.4250488e-04],
-                                [-3.3523560e-02,  9.8114320e+00, -1.1013794e-01, -4.2724610e-04, 5.4931640e-04, -4.4250488e-04],
-                                [-3.8314820e-02,  9.8210140e+00, -1.0534668e-01,  1.6937256e-03, -5.1879880e-04,  6.2561035e-04],
-                                [-3.3523560e-02,  9.8258060e+00, -1.1492920e-01, -4.2724610e-04, -5.1879880e-04,  6.2561035e-04]]]
-                                
-            // const data = this.$store.state.data[0]?.dataPoint[3];
-            // if(data != null){
-            //     console.log(data.id);
-            //     console.log(data);
-            // }
-            // else{
-            //     const tensor = tf.tensor(instance);
-            //     let a = model.predict(tensor);
-            //     a.print();
-            // }
-            const tensor = tf.tensor(instance);
-            let a = model.predict(tensor);
-            a.print();
-            this.$store.commit("modelLoaded", model);
+            this.model = model;
         },
         submitForm: function() {
             document.getElementById("submitFormBtn").click();
         },
         onSubmit: function(e) {
             e.preventDefault();
-            if (this.modelFileName.length > 0 && this.overlapping >= this.slidingWindow) {
-                this.showInvalidFeedback = "Overlapping must be smaller than Sliding Window";
+            if (this.model == null) {
+                this.showInvalidFeedback = "Nothing to save here. No model uploaded yet!"
+                return;
+            }
+            if (this.overlapping >= this.slidingWindow) {
+                this.showInvalidFeedback = "Overlapping must be smaller than Sliding Window!";
+                return;
+            }
+            if (this.selectedAxes.length == 0) {
+                this.showInvalidFeedback = "At least one Axis has to be chosen!";
                 return;
             }
             this.saveBtnText = "Saved!"
         },
         loadDataIntoModel: function() {
             const data = this.$store.state.data;
-            if (this.modelFileName.length == 0) {
+            if (this.model == null) {
                 this.showInvalidFeedback = "No Model imported yet!"
                 return;
             }
@@ -232,9 +196,20 @@ export default {
                     slidingWindow: this.slidingWindow,
                     samplingRate: this.samplingRate,
                     overlapping: this.overlapping,
+                    selectedAxes: this.selectedAxes,
                 };
-                this.$store.commit("loadDataIntoModel", modelConfiguration);
-                this.modal.hide();
+
+                const instances = createInstances(this.$store.state, modelConfiguration);
+                try {
+                    const tensor = tf.tensor(instances);
+                    const a = this.model.predict(tensor);
+                    a.print();
+                    this.modal.hide();
+                } catch (error) {
+                    console.error(error.message);
+                    this.showInvalidFeedback = error.message;
+                }
+                
             }
         },
         closeModal: function() {
