@@ -52,15 +52,17 @@ function breakDownToSamplingrate(data, timestamps, samplingrate) {
         timestapplus = timestamp + 1000;
     }
     let slopes = [];
+    let allTimestamps = [];
     let oldsegment = 0;
     segmentlengths.forEach(segment => {
         segment = oldsegment + segment;
         let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
         const slopeArray = slope(newFrame);
         slopes.push(slopeArray[1]);
+        allTimestamps.push(timestamps[segment]);
         oldsegment = segment;
     });
-    return slopes;
+    return [slopes, allTimestamps];
 }
 function createInstances(state, modelConfiguration) {
     const slidingWindow = modelConfiguration.slidingWindow;
@@ -71,6 +73,7 @@ function createInstances(state, modelConfiguration) {
     const timestamps = state.data[state.currentSelectedData].timestamps;
     let allSegmentsWithCorrectSampling = []
     let allInstances = [];
+    let allTimestamps = [];
     // get slope or max,min etc in correct samplingrate for each selected axis
     selectedAxes.forEach(axis => {
         let dataPoints;
@@ -80,14 +83,19 @@ function createInstances(state, modelConfiguration) {
                 break;
             }
         }
-        const segment = breakDownToSamplingrate(dataPoints, timestamps, samplingrate);
-        allSegmentsWithCorrectSampling.push(segment);
+        const result = breakDownToSamplingrate(dataPoints, timestamps, samplingrate);
+        // console.log("breakdonw result:", result);
+        allSegmentsWithCorrectSampling.push(result[0]);
+        allTimestamps.push(result[1]);
     });
+
+    // console.log("allTimestamps that come with slope: ", allTimestamps);
 
     // put all those data in the segments of each axis into correct arrays considering the sliding window. Each instance is an array 
     const segmentLengths = allSegmentsWithCorrectSampling[0].length;
     const n = segmentLengths / valuesPerInstance; // n = number of instances that will be classified
     let currentValueIndex = 0;
+    let timestampsPerInstance = [];
     for (let i = 0; i < n; i++) {
         let instance = []
         for (let j = 0; j < valuesPerInstance; j++) {
@@ -98,9 +106,11 @@ function createInstances(state, modelConfiguration) {
             currentValueIndex ++;
             instance.push(arrayToPush);
         }
+        // console.log(currentValueIndex);
         allInstances.push(instance);
+        timestampsPerInstance.push(allTimestamps[0][currentValueIndex-1]);
     }
-    return allInstances;
+    return [allInstances, timestampsPerInstance];
 }
 
 export default createInstances

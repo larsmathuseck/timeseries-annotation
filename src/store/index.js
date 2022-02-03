@@ -279,6 +279,41 @@ export default createStore({
                 }
             }
         },
+        addAnnotationPointFromModel(state, payload) {
+            const timestamp = payload.timestamp;
+            const label = payload.label;
+            state.activeLabel = state.annotations[state.currAnn].labels[label];
+            let time = new Date(timestamp).getTime();
+            let annotations = state.annotations[state.currAnn].data;
+            let inserted = false;
+            let lastAddedAnnotation = state.annotations[state.currAnn].lastAddedAnnotation;
+            if (annotations.length == 0) {
+                const newAnn = {
+                    id: 0,
+                    label: state.activeLabel.id,
+                    timestamp: time,
+                };
+                annotations.push(newAnn);
+                state.annotations[state.currAnn].lastAddedAnnotation = newAnn;
+                return;
+            }
+            const newAnn = {
+                id: lastAddedAnnotation.id +1,
+                label: state.activeLabel.id,
+                timestamp: time,
+            };
+            state.annotations[state.currAnn].lastAddedAnnotation = newAnn;
+            for(let i = 0; i < annotations.length; i++){
+                if(annotations[i].timestamp > time){
+                    annotations.splice(i, 0, newAnn);
+                    inserted = true;
+                    break;
+                }
+            }
+            if(!inserted){
+                annotations.push(newAnn);
+            }
+        },
         addSelectedAxes: (state, axis) => {
             state.data[state.currentSelectedData].selectedAxes.push(axis.id);
         },

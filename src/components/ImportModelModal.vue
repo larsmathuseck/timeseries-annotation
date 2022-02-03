@@ -199,11 +199,28 @@ export default {
                     selectedAxes: this.selectedAxes,
                 };
 
-                const instances = createInstances(this.$store.state, modelConfiguration);
+                const result = createInstances(this.$store.state, modelConfiguration);
+                const instances = result[0];
+                const timeStampsForInstances = result[1];
+                console.log(instances)
+                console.log(timeStampsForInstances);
                 try {
                     const tensor = tf.tensor(instances);
                     const a = this.model.predict(tensor);
                     a.print();
+                    const predictedValues = a.arraySync();
+                    console.log(predictedValues);
+                   
+                    // annotate predicted values in the chart
+                    for (let i = 0; i < predictedValues.length; i++) {
+                        const value = predictedValues[i];
+                        const label = value.indexOf(Math.max(...value));
+                        console.log("add label: ", i+1)
+                        console.log(value);
+                        this.$store.commit("addAnnotationPointFromModel", {timestamp: timeStampsForInstances[i], label: label});
+                    }
+
+
                     this.modal.hide();
                 } catch (error) {
                     console.error(error.message);
