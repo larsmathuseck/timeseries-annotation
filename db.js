@@ -3,5 +3,8 @@ import Dexie from 'dexie';
 export const db = new Dexie('tfAnnotator');
 
 db.version(1).stores({
-  data: 'id++, name, dataPoints, timestamps, selectedAxes',
+  annotations: 'id++, name, lastAdded',
+  labels: 'id++, name, color, annoId, [annoId+name]',
+  annoData: 'id++, timestamp, labelId, annoId',
+  lastSelected: 'id++, annoId',
 });

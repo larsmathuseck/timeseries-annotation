@@ -17,6 +17,7 @@
 <script>
 import AddLabel from "./AddLabel.vue"
 import { Modal } from 'bootstrap'
+import { db } from "/db";
 
 export default {
     name: "LabelModal",
@@ -37,12 +38,13 @@ export default {
         closeModal: function() {
             this.modal.hide();
         },
-        onLabelCreated(label) {
-            this.$store.commit('addLabel', label);
+        async onLabelCreated(label) {
+            const currAnn = await db.lastSelected.where('id').equals(1).first();
+            db.labels.add({name: label.name, color: label.color, annoId: currAnn.annoId});
             this.modal.hide();
         },
         labelEdited(label) {
-            this.$store.commit('editLabel', label);
+            db.labels.update(label.id, {name: label.name, color: label.color});
             this.modal.hide();
         }
     },

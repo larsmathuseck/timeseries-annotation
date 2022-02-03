@@ -38,8 +38,7 @@ export default {
     },
     computed: {
         showGraph: function(){
-            // return this.$store.getters.showGraph;
-            return true;
+            return this.$store.getters.showGraph;
         }
     },
     methods: {

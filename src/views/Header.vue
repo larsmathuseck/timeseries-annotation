@@ -41,6 +41,7 @@
 <script>
 import TutorialModal from "../components/TutorialModal.vue";
 import ImportModel from "../components/ImportModel.vue";
+import { db } from "/db";
 
 export default {
     name: "Header",
@@ -64,6 +65,9 @@ export default {
             document.getElementById("multipleFileUpload").click();
         },
         onFileChange(e) {
+            db.annotations.clear();
+            db.annoData.clear();
+            db.labels.clear();
             const fileList = e.target.files;
             let filesToUpload = [];
             let fileNames = {};

@@ -64,6 +64,7 @@
 
 <script>
 import { Modal } from 'bootstrap'
+import { db } from "/db";
 
 export default {
     name: "AnnotationModal",
@@ -109,13 +110,15 @@ export default {
             }
             document.getElementById("annotationFileUpload").value = ""; // reset file input so when same file chosen again its an "onChange"
         },
-        onSubmit(e) {
+        async onSubmit(e) {
             e.preventDefault();
             if(!this.fileName.toLowerCase().includes("annotation") && !this.fileName.toLowerCase().includes("labels")) {
                 this.showInvalidFeedback = true;
                 return;
             }
-            this.$store.commit("addNewAnnotationFile", this.fileName);
+            const filename = this.fileName + '.csv';
+            const anno = await db.annotations.add({name: filename, lastAdded: null});
+            db.lastSelected.update(1, {annoId: anno});
             this.modal.hide();
         },
     },

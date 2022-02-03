@@ -29,7 +29,7 @@
     <div class="row">
         <label class="description-text" >Annotation Files</label>
         <div class="input-group">
-            <select v-model="lastSelectedAnnotation" class="form-select" @change="selectAnnotationFile()">
+            <select v-model="lastSelectedAnnotation" class="form-select" ref="annoSelect" @change="selectAnnotationFile()">
                 <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" v-bind:value="annotationFile.id">
                     {{ annotationFile.name }}
                 </option>
@@ -64,6 +64,9 @@ import ColorPicker from "./Colorpicker.vue"
 import Label from "./Label.vue"
 import AnnotationModal from "./AnnotationModal.vue"
 import LabelModal from "./LabelModal.vue"
+import { liveQuery } from "dexie";
+import { db } from "/db";
+import { useObservable } from "@vueuse/rxjs";
 
 export default {
     name: "LeftSidebar",
@@ -74,10 +77,23 @@ export default {
         AnnotationModal,
         LabelModal,
     },
+    setup: function(){
+        const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
+        const labels = useObservable(liveQuery(async () => {
+            const curr = await db.lastSelected.where('id').equals(1).first();
+            return db.labels.where('annoId').equals(parseInt(curr?.annoId || 1)).toArray();
+        }));
+        const annotationFiles = useObservable(liveQuery(() => db.annotations.toArray()));
+        return {
+            labels,
+            annotationFiles,
+            currAnn,
+        }
+    },
     data() {
         return {
             lastSelectedData: this.$store.state.currentSelectedData,
-            lastSelectedAnnotation: this.$store.state.currAnn,
+            lastSelectedAnnotation: 1,
             showColorPicker: false,
             toggleAnnotationModalVisibility: false,
             toggleLabelModalVisibility: false,
@@ -95,12 +111,11 @@ export default {
         selectedAxes: function() {
             return this.$store.getters.selectedAxes;
         },
-        labels: function() {
-            return this.$store.getters.getLabels;
-        },
-        annotationFiles: function() {
-            return this.$store.state.annotations;
-        },
+    },
+    watch: {
+        currAnn: function(){
+            this.lastSelectedAnnotation = this.currAnn?.annoId;
+        }
     },
     methods: {
         labelOnClick(label) {
@@ -126,7 +141,8 @@ export default {
             this.$store.commit("selectDataFile", this.lastSelectedData);
         },
         selectAnnotationFile() {
-            this.$store.commit("selectAnnotationFile", this.lastSelectedAnnotation);
+            db.lastSelected.update(1, {annoId: this.$refs.annoSelect.value});
+            // this.$store.commit("selectAnnotationFile", this.$refs.annoSelect.value);
         },
         chooseDataFile() {
             document.getElementById("dataFileUpload").click();

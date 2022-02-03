@@ -1,10 +1,7 @@
 import { createStore } from 'vuex'
-import { parse, stringify } from "@vanillaes/csv";
-import { DateTime } from "luxon";
+import { parse } from "@vanillaes/csv";
 import { DataFrame } from "danfojs";
-import { liveQuery } from "dexie";
 import { db } from "/db";
-import { useObservable } from "@vueuse/rxjs";
 
 function slope(df) {
     let max = df.values[0][1];
@@ -31,10 +28,8 @@ function slope(df) {
 
 export default createStore({
     state: {
-        data: useObservable(liveQuery(() => db.data.toArray())),
+        data: [],
         currentSelectedData: 0,
-        annotations: [],
-        currAnn: 0,
         activeLabel: null,
         colors: ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
     },
@@ -72,20 +67,13 @@ export default createStore({
                         dataJson[column].dataPoints.push([new Date(timestamps[row]).getTime(), data[row][column]]);   
                     }
                 }
-                // state.data.push({
-                //     id: state.data.length,
-                //     name: payload.name,
-                //     dataPoints: dataJson,
-                //     timestamps: timestamps,
-                //     selectedAxes: [dataJson[0].id],
-                // });
-                const id = await db.data.add({
+                state.data.push({
+                    id: state.data.length,
                     name: payload.name,
                     dataPoints: dataJson,
                     timestamps: timestamps,
                     selectedAxes: [dataJson[0].id],
-                })
-                console.log(id);
+                });
             }
         },
         testDanfo: (state) => {
@@ -192,13 +180,15 @@ export default createStore({
             state.data[0].selectedAxes.push("slope");
             console.log(state.data[0]);
         },
-        addAnnotationData: (state, payload) => {
+        addAnnotationData: async (state, payload) => {
             let data = parse(payload.result);
             let legende = data.shift();
-            let labels = {};
-            let newestLabelId = 0;
-            let dataArray = [];
             let lastAnn = {};
+
+            let anno = await db.annotations.add({
+                name: payload.name,
+                lastAdded: lastAnn,
+            })
 
             // Get Timestamp and Label location
             let timestampLocation = -1;
@@ -213,36 +203,26 @@ export default createStore({
             }
 
             for(let i = 0; i < data.length; i++){
-                let label = null;
-                for(let key in labels){
-                    if(labels[key].name === data[i][labelLocation]){
-                        label = labels[key];
-                    }
-                }
-                if(label == null){
-                    label = {
-                        id: newestLabelId,
+                let label = await db.labels.where('[annoId+name]').equals([anno, data[i][labelLocation]]).toArray();
+                if(label.length === 0){
+                    label = await db.labels.add({
                         name: data[i][labelLocation],
                         color: state.colors[i % state.colors.length],
-                    }
-                    labels[`${newestLabelId}`] = label;
-                    newestLabelId += 1;
+                        annoId: anno,
+                    })
                 }
-                const newAnn = {
-                    id: i,
-                    label: label.id,
+                else{
+                    label = label[0].id;
+                }
+                const newAnn = await db.annoData.add({
+                    labelId: label,
+                    annoId: anno,
                     timestamp: new Date(data[i][timestampLocation]).getTime(),
-                };
+                });
                 lastAnn = newAnn;
-                dataArray.push(newAnn);
             }
-            state.annotations.push({
-                id: state.annotations.length,
-                name: payload.name,
-                data: dataArray,
-                labels: labels,
-                lastAddedAnnotation: lastAnn,
-            });
+            await db.lastSelected.put({id: 1, annoId: anno});
+            anno = await db.annotations.update(anno, {lastAdded: lastAnn})
         },
         addNewAnnotationFile: (state, fileName) => {
             state.annotations.push({
@@ -314,21 +294,7 @@ export default createStore({
                 }
             }
         },
-        addLabel(state, label) {
-            const labelNumber = label.id;
-            state.annotations[state.currAnn].labels[labelNumber] = label;
-        },
-        editLabel(state, label) {
-            const labelNumber = label.id;
-            state.annotations[state.currAnn].labels[labelNumber] = label;
-        },
         toggleActiveLabel(state, label) {
-            // check if label isnt deleted already
-            const labels = state.annotations[state.currAnn].labels;
-            if (Object.keys(labels).indexOf((label.id).toString()) < 0) {
-                state.activeLabel = null;
-                return;
-            }
             state.activeLabel = label;
         },
         toggleActiveLabelByKey(state, key) {
@@ -346,46 +312,9 @@ export default createStore({
                 state.activeLabel = labels[key];
             }
         },
-        deleteLabel(state, label) {
-            let labels = state.annotations[state.currAnn].labels;
-            const key = Object.keys(labels).find(key => labels[key] === label);
-            this.commit("deleteAnnotationsWithLabel", key);
-            delete state.annotations[state.currAnn].labels[key];
-            if (state.activeLabel != null && label.id == state.activeLabel.id) {
-                state.activeLabel = null;
-            }
-        },
-        deleteAnnotation(state, annotation) {
-            let index = -1;
-            let annotations = state.annotations[state.currAnn].data;
-            for(let i = 0; i < annotations.length; i++){
-                if(annotations[i] === annotation){
-                    index = i;
-                    break;
-                }
-            }
-            if (index > -1) {
-                state.annotations[state.currAnn].data.splice(index, 1);
-            }
-        },
         selectDataFile(state, dataFileId){
             state.currentSelectedData = dataFileId;
         },
-        selectAnnotationFile(state, annotationFileId){
-            state.currAnn = annotationFileId;
-        },
-        deleteAnnotationsWithLabel(state, labelNumber) {
-            let annotations = state.annotations[state.currAnn].data;
-            let annotationsToDelete = [];
-            for (let i = 0; i < annotations.length; i++) {
-                if (annotations[i].label == labelNumber) {
-                    annotationsToDelete.push(annotations[i]);
-                }
-            }
-            for (let i = 0; i < annotationsToDelete.length; i++) {
-                this.commit("deleteAnnotation", annotationsToDelete[i]);
-            }
-        }
     },
     getters: {
         getData: state => {
@@ -393,31 +322,6 @@ export default createStore({
                 return state.data[state.currentSelectedData].dataPoints.filter(key => state.data[state.currentSelectedData].selectedAxes.includes(key.id));
             }
             return [];
-        },
-        getAnnotations: state => {
-            let data = [];
-            let annotations = state.annotations[state.currAnn];
-            let labels = annotations?.labels;
-            for(let key in annotations?.data){
-                data.push({
-                    id: annotations.data[key].id,
-                    label: annotations.data[key].label,
-                    timestamp: annotations.data[key].timestamp,
-                    name: labels[annotations.data[key].label].name,
-                    color: labels[annotations.data[key].label].color,
-                    annotationObject: annotations.data[key],
-                });
-            }
-            return data;
-        },
-        saveAnnotations: state => {
-            let annotations = state.annotations[state.currAnn];
-            let labels = annotations?.labels;
-            let data = [["Timestamp", "Label"]];
-            for(let key in annotations?.data){
-                data.push([DateTime.fromMillis(annotations.data[key].timestamp).toFormat('yyyy-MM-dd hh:mm:ss.SSS'), labels[annotations.data[key].label].name]);
-            }
-            return stringify(data);
         },
         getAxes: state => {
             if(state.data?.length > 0){
@@ -437,9 +341,6 @@ export default createStore({
             }
             return [];
         },
-        getLabels: state => {
-            return state.annotations[state.currAnn]?.labels;
-        },
         showGraph: state => {
             if(state.data?.length > 0){
                 return true;
@@ -448,8 +349,5 @@ export default createStore({
                 return false;
             }
         }
-    },
-    modules: {
-
     },
 })

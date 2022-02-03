@@ -1,7 +1,6 @@
 <template>
     <div ref="chartDiv" @mouseup="chartClicked" @mousedown="dragDetection">
         <v-chart ref="charts" class="chart" :option="option" @datazoom="zoom"/>
-        <button @click="bclicked"/>
     </div>
 </template>
 
@@ -44,9 +43,20 @@ export default {
         VChart,
     },
     setup: function(){
-        const data = useObservable(liveQuery(() => db.data.toArray()));
+        const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
+        const annoData = useObservable(liveQuery(async () => {
+            const curr = await db.lastSelected.where('id').equals(1).first();
+            const annotations = await db.annoData.where('annoId').equals(parseInt(curr?.annoId || 1)).toArray();
+            await Promise.all (annotations.map (async anno => {
+                [anno.label] = await Promise.all([
+                    db.labels.get(anno.labelId)
+                ]);
+            }));
+            return annotations;
+        }));
         return {
-            data,
+            currAnn,
+            annoData,
         }
     },
     data: function () {
@@ -65,11 +75,6 @@ export default {
         [THEME_KEY]: "light",
     },
     methods: {
-        bclicked: function() {
-            // const data = reactive(liveQuery(async () => {return await db.data.toArray()}));
-            console.log("hahaha");
-            console.log(this.data);
-        },
         chartClicked: function (event) {
             const diffX = Math.abs(event.pageX - this.clickX);
             const diffY = Math.abs(event.pageY - this.clickY);
@@ -77,8 +82,18 @@ export default {
                 let pointInPixel = [event.offsetX, event.offsetY];
                 if (this.$refs.charts.containPixel("grid", pointInPixel)) {
                     let pointInGrid = this.$refs.charts.convertFromPixel("grid", pointInPixel);
-                    this.$store.commit("addAnnotationPoint", Math.round(pointInGrid[0]));
+                    this.addAnnotationPoint(Math.round(pointInGrid[0]));
                 }
+            }
+        },
+        addAnnotationPoint: function (timestamp) {
+            let time = new Date(timestamp).getTime();
+            let label = this.$store.state.activeLabel;
+            let currAnn = this.currAnn;
+            console.log(currAnn);
+            console.log(label);
+            if(label != null && currAnn != undefined){
+                db.annoData.add({labelId: label.id, annoId: currAnn.annoId, timestamp: time});
             }
         },
         dragDetection: function (event) {
@@ -100,33 +115,38 @@ export default {
     },
     computed: {
         option: function () {
-            // let data = this.data;
-            // if(data != null){ data = data[0]}
-            // console.log("1");
-            // console.log(data);
             let series = [];
             let graphData = this.$store.getters.getData;
             let legende = [];
-            let annotations = this.$store.getters.getAnnotations;
-            let ann = annotations.map((x, i) => {
-                return {
-                    symbol: "pin",
-                    itemStyle: {
-                    color: x.color
-                    },
-                    name: (i + 1).toString() + " " + x.name,
-                    xAxis: new Date(x.timestamp),
-                    y: "75"
-                };
-            });
-            let ml = annotations.map(x => {
-                return {
-                    itemStyle: {
+            let annotations = this.annoData;
+            let ann;
+            let ml;
+            if(annotations != undefined){
+                for(let i = 0; i < annotations.length; i++){
+                    const label = annotations[i].label;
+                    annotations[i].name = label.name;
+                    annotations[i].color = label.color;
+                }
+                ann = annotations.map((x, i) => {
+                    return {
+                        symbol: "pin",
+                        itemStyle: {
                         color: x.color
-                    },
-                    xAxis: new Date(x.timestamp),
-                };
-            });
+                        },
+                        name: (i + 1).toString() + " " + x.name,
+                        xAxis: new Date(x.timestamp),
+                        y: "75"
+                    };
+                });
+                ml = annotations.map(x => {
+                    return {
+                        itemStyle: {
+                            color: x.color
+                        },
+                        xAxis: new Date(x.timestamp),
+                    };
+                });
+            }
             for(let key in graphData){
                 legende.push(graphData[key].name);
                 series.push({
