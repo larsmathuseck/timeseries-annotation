@@ -17,6 +17,7 @@ import {
     DataZoomComponent,
     MarkLineComponent,
     MarkPointComponent,
+    MarkAreaComponent,
 } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
 import { DateTime } from "luxon";
@@ -32,6 +33,7 @@ use([
     GridComponent,
     MarkLineComponent,
     MarkPointComponent,
+    MarkAreaComponent,
 ]);
 
 export default {
@@ -108,6 +110,19 @@ export default {
                     xAxis: new Date(x.timestamp),
                 };
             });
+            // let area = annotations.map(x => {
+            //     return [
+            //         {
+            //             xAxis: new Date(x.timestamp),
+            //             itemStyle: {
+            //                 color: x.color,
+            //             },
+            //         },
+            //         {
+            //             xAxis: new Date(x.timestamp + 3000),
+            //         }
+            //     ];
+            // });
             for(let key in graphData){
                 legende.push(graphData[key].name);
                 series.push({
@@ -145,6 +160,12 @@ export default {
                         label: { show: false},
                         data: ml,
                     },
+                    // markArea: {
+                    //     animation: true,
+                    //     silent: true,
+                    //     label: { show: false},
+                    //     data: area,
+                    // },
                     data: graphData[key].dataPoints,
                 });
             }
