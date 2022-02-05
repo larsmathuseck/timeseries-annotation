@@ -20,7 +20,7 @@ function slope(df) {
     if (timestampMax != timestampMin) {
         slope = (max - min) / (timestampMax - timestampMin);
     }
-    return [timestampMax, slope];
+    return slope;
 }
 
 function breakDownToSamplingrate(data, timestamps, samplingrate) {
@@ -40,12 +40,12 @@ function breakDownToSamplingrate(data, timestamps, samplingrate) {
         }
         let segmentlength = Math.floor(dataCount / samplingrate);
         let remainder = dataCount % samplingrate;
-        for(let i = 0; i < samplingrate; i++){
-            if(remainder > 0){
+        for(let i = 0; i < samplingrate; i++) {
+            if(remainder > 0) {
                 segmentlengths.push(segmentlength + 1);
                 remainder--;
             }
-            else{
+            else {
                 segmentlengths.push(segmentlength);
             }
         }
@@ -57,11 +57,15 @@ function breakDownToSamplingrate(data, timestamps, samplingrate) {
     segmentlengths.forEach(segment => {
         segment = oldsegment + segment;
         let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
-        const slopeArray = slope(newFrame);
-        slopes.push(slopeArray[1]);
-        allTimestamps.push(timestamps[segment]);
+        slopes.push(slope(newFrame));
+        const firstTimestamp = timestamps[oldsegment];
+        let secondTimestamp = timestamps[segment];
+        secondTimestamp == undefined ? secondTimestamp = timestamps.slice(-1)[0] : 'nothing';
+        allTimestamps.push([firstTimestamp, secondTimestamp]);
         oldsegment = segment;
     });
+    console.log("all timestamps: ", timestamps);
+    console.log("only segment timestamps: ", allTimestamps);
     return [slopes, allTimestamps];
 }
 function createInstances(state, modelConfiguration) {
@@ -98,6 +102,9 @@ function createInstances(state, modelConfiguration) {
     let timestampsPerInstance = [];
     for (let i = 0; i < n; i++) {
         let instance = []
+        console.log("iteration: ", i);
+        console.log("looking at timestamps: ", allTimestamps[0][currentValueIndex]);
+        const firstTimestamp = allTimestamps[0][currentValueIndex][0]
         for (let j = 0; j < valuesPerInstance; j++) {
             let arrayToPush = [];
             for (let k = 0; k < allSegmentsWithCorrectSampling.length; k++) {
@@ -108,7 +115,15 @@ function createInstances(state, modelConfiguration) {
         }
         // console.log(currentValueIndex);
         allInstances.push(instance);
-        timestampsPerInstance.push(allTimestamps[0][currentValueIndex-1]);
+        console.log("looking at timestamps: ", allTimestamps[0][currentValueIndex - 1]);
+        let secondTimestamp;
+        if (allTimestamps[0][currentValueIndex - 1]) {
+            secondTimestamp = allTimestamps[0][currentValueIndex -1 ][1];
+        } else {
+            console.log(allTimestamps[0].slice(-1));
+            secondTimestamp = allTimestamps[0].slice(-1)[0][1];
+        }
+        timestampsPerInstance.push([firstTimestamp, secondTimestamp]);
     }
     return [allInstances, timestampsPerInstance];
 }

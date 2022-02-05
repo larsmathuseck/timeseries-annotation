@@ -99,6 +99,7 @@
 import { Modal } from 'bootstrap'
 import * as tf from '@tensorflow/tfjs';
 import createInstances from "../model/ModelFunctions";
+import { db } from "/db";
 
 export default {
     name: "ImportModelModal",
@@ -180,7 +181,7 @@ export default {
             }
             this.saveBtnText = "Saved!"
         },
-        loadDataIntoModel: function() {
+        loadDataIntoModel: async function() {
             const data = this.$store.state.data;
             if (this.model == null) {
                 this.showInvalidFeedback = "No Model imported yet!"
@@ -202,31 +203,79 @@ export default {
                 const result = createInstances(this.$store.state, modelConfiguration);
                 const instances = result[0];
                 const timeStampsForInstances = result[1];
-                console.log(instances)
-                console.log(timeStampsForInstances);
+                console.log("instances:", instances)
+                console.log("timestamps for Instances: ", timeStampsForInstances);
+                let predictedValues;
                 try {
                     const tensor = tf.tensor(instances);
                     const a = this.model.predict(tensor);
                     a.print();
-                    const predictedValues = a.arraySync();
-                    console.log(predictedValues);
-                   
-                    // annotate predicted values in the chart
-                    for (let i = 0; i < predictedValues.length; i++) {
-                        const value = predictedValues[i];
-                        const label = value.indexOf(Math.max(...value));
-                        console.log("add label: ", i+1)
-                        console.log(value);
-                        this.$store.commit("addAnnotationPointFromModel", {timestamp: timeStampsForInstances[i], label: label});
-                    }
-
-
-                    this.modal.hide();
+                    predictedValues = a.arraySync();
+                    console.log("predicted Values: ", predictedValues);
                 } catch (error) {
                     console.error(error.message);
                     this.showInvalidFeedback = error.message;
+                    return;
+                } 
+                // create annotation file
+                const annotationId = await this.createNewAnnotationFile();
+                console.log("created annotationId: ", annotationId);
+                // create as many labels as needed
+                await this.createLabelsForAnnotation(annotationId, predictedValues[0].length);
+                // create all the areas
+                const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
+                console.log(allLabels);
+                for (let i = 0; i < predictedValues.length; i++) {
+                    const value = predictedValues[i];
+                    const labelNumber = value.indexOf(Math.max(...value));
+                    console.log("add label: ", i+1);
+                    console.log(value);
+                    const label = allLabels[labelNumber];
+                    console.log(label);
+                    db.areas.add({
+                        annoId: annotationId,
+                        labelId: label.id,
+                        firstTimestamp: timeStampsForInstances[i][0],
+                        secondTimestamp: timeStampsForInstances[i][1],
+                    });
                 }
-                
+                // // annotate predicted values in the chart
+                // for (let i = 0; i < predictedValues.length; i++) {
+                //     const value = predictedValues[i];
+                //     const label = value.indexOf(Math.max(...value));
+                //     console.log("add label: ", i+1)
+                //     console.log(value);
+                //     await this.addAnnotationPointFromModel(timeStampsForInstances[i], label);
+                // }
+                // this.modal.hide();
+            }
+        },
+        createNewAnnotationFile: async function() {
+            return await db.annotations.add({
+                name: "AnnotationCreatedByModel",
+                lastAdded: {},
+            });
+        },
+        createLabelsForAnnotation: async function(annotationId, amountOfLabels) {
+            for (let i = 0; i < amountOfLabels; i++) {
+                const label = await db.labels.add({
+                    name: "label_" + i,
+                    color: this.$store.state.colors[i % this.$store.state.colors.length],
+                    annoId: annotationId,
+                });
+                console.log("label id: ", label);
+            }
+        },
+        addAnnotationPointFromModel: async function(timestamp, label) {
+            console.log("in addAnnotationFromModel")
+            let time = new Date(timestamp).getTime();
+            const currAnn = await db.lastSelected.where('id').equals(1).first();
+            console.log(currAnn);
+            console.log(label);
+            if (label != null && currAnn != undefined) {
+                console.log("add to db: ", {labelId: label.id, annoId: currAnn.annoId, timestamp: time});
+                db.annoData.add({labelId: label.id, annoId: currAnn.annoId, timestamp: time});
+                console.log("added!")
             }
         },
         closeModal: function() {

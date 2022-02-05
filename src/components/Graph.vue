@@ -17,6 +17,7 @@ import {
     DataZoomComponent,
     MarkLineComponent,
     MarkPointComponent,
+    MarkAreaComponent,
 } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
 import { DateTime } from "luxon";
@@ -35,6 +36,7 @@ use([
     GridComponent,
     MarkLineComponent,
     MarkPointComponent,
+    MarkAreaComponent,
 ]);
 
 export default {
@@ -54,9 +56,20 @@ export default {
             }));
             return annotations;
         }));
+        const areaData = useObservable(liveQuery(async () => {
+            const curr = await db.lastSelected.where('id').equals(1).first();
+            const areas = await db.areas.where('annoId').equals(parseInt(curr?.annoId || 1)).toArray();
+            await Promise.all (areas.map (async area => {
+                [area.label] = await Promise.all([
+                    db.labels.get(area.labelId)
+                ]);
+            }));
+            return areas;
+        }));
         return {
             currAnn,
             annoData,
+            areaData,
         }
     },
     data: function () {
@@ -119,21 +132,19 @@ export default {
             let graphData = this.$store.getters.getData;
             let legende = [];
             let annotations = this.annoData;
+            let areas = this.areaData;
             let ann;
             let ml;
+            let area;
+            console.log(areas);
             if(annotations != undefined){
-                for(let i = 0; i < annotations.length; i++){
-                    const label = annotations[i].label;
-                    annotations[i].name = label.name;
-                    annotations[i].color = label.color;
-                }
                 ann = annotations.map((x, i) => {
                     return {
                         symbol: "pin",
                         itemStyle: {
-                        color: x.color
+                        color: x.label.color
                         },
-                        name: (i + 1).toString() + " " + x.name,
+                        name: (i + 1).toString() + " " + x.label.name,
                         xAxis: new Date(x.timestamp),
                         y: "75"
                     };
@@ -141,11 +152,26 @@ export default {
                 ml = annotations.map(x => {
                     return {
                         itemStyle: {
-                            color: x.color
+                            color: x.label.color
                         },
                         xAxis: new Date(x.timestamp),
                     };
                 });
+                if (areas.length != 0) {
+                    area = areas.map(x => {
+                        return [
+                            {
+                                xAxis: new Date(x.firstTimestamp),
+                                itemStyle: {
+                                    color: x.label.color,
+                                },
+                            },
+                            {
+                                xAxis: new Date(x.secondTimestamp),
+                            }
+                        ];
+                    });
+                }
             }
             for(let key in graphData){
                 legende.push(graphData[key].name);
@@ -183,6 +209,12 @@ export default {
                         symbol: "none",
                         label: { show: false},
                         data: ml,
+                    },
+                        markArea: {
+                        animation: true,
+                        silent: true,
+                        label: { show: false},
+                        data: area,
                     },
                     data: graphData[key].dataPoints,
                 });
