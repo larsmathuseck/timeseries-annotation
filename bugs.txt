@@ -1,2 +1,6 @@
-- select data not showing path
-- when deleting labels/annotations there can be duplicated keys in annotations --> not getting deleted properly
+- shortcuts not working
+- new annotation not added after changing annotation file/ after changing annotation also adding label does not work
+- annotations not sorted
+- after importing only data folder whole annotations are deleted
+- can not select more axes
+- cannot save annotation

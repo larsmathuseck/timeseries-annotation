@@ -54,7 +54,7 @@ export default {
             }
         }
     },
-    mounted: function() {
+    mounted: async function() {
         window.addEventListener("keypress", this.keyPressed);
     },
     beforeUnmount: function() {

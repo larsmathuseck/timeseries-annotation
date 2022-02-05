@@ -1,7 +1,7 @@
 <template>
     <div class="row justify-content-between">
         <div id="col-header-title" class="col col-lg-auto col-md-auto col-sm-12 col-12">
-            <label class="title">{{ title }}</label>
+            <h1>{{ title }}</h1>
         </div>
         <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
             <ul class="nav nav-pills">
@@ -45,6 +45,7 @@
 <script>
 import TutorialModal from "../components/TutorialModal.vue";
 import ImportModelModal from "../components/ImportModelModal.vue";
+import { db } from "/db";
 
 export default {
     name: "Header",
@@ -66,9 +67,12 @@ export default {
             this.$store.commit("testDanfo");
         },
         chooseFiles() {
-            document.getElementById("multipleFileUpload").click()
+            document.getElementById("multipleFileUpload").click();
         },
         onFileChange(e) {
+            db.annotations.clear();
+            db.annoData.clear();
+            db.labels.clear();
             const fileList = e.target.files;
             let filesToUpload = [];
             let fileNames = {};
@@ -159,7 +163,7 @@ button {
     font-size: 1vw;
 }
 
-.title {
+h1 {
     font-size: 2.5vw;
 }
 </style>

@@ -11,6 +11,8 @@
 </template>
 
 <script>
+import { db } from "/db";
+
 export default {
     name: "Annotation",
     props: {
@@ -18,7 +20,7 @@ export default {
     },
     methods: {
         deleteAnnotation(annotation) {
-            this.$store.commit("deleteAnnotation", annotation.annotationObject)
+            db.annoData.delete(annotation.id);
         }
     },
 }
