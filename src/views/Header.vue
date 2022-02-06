@@ -15,7 +15,7 @@
                 </li>
                 <li class="nav-item">
                     <input id="multipleFileUpload" type="file" webkitdirectory directory multiple v-on:change="onFileChange" hidden>
-                    <button @click="chooseFiles()" type="button" class="btn btn-light">
+                    <button type="button" @click="chooseFiles" class="btn btn-light" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-content="All unsaved changes will be lost">
                         <i class="fa fa-folder"></i>
                         Import Folder
                     </button>
@@ -44,6 +44,7 @@ import ImportModel from "../components/ImportModel.vue";
 import { db } from "/db";
 import { DateTime } from "luxon";
 import { stringify } from "@vanillaes/csv";
+import { Popover } from "bootstrap";
 
 export default {
     name: "Header",
@@ -153,6 +154,12 @@ export default {
             }
             return [];
         }
+    },
+    mounted() {
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        popoverTriggerList.map(function (popoverTriggerEl) {
+            return new Popover(popoverTriggerEl)
+        })
     },
 }
 </script>
