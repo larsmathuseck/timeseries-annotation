@@ -1,6 +1,2 @@
-- shortcuts not working
-- new annotation not added after changing annotation file/ after changing annotation also adding label does not work
-- annotations not sorted
-- after importing only data folder whole annotations are deleted
-- can not select more axes
+- after importing only data folder whole annotations are deleted - add alert
 - cannot save annotation

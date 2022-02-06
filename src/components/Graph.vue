@@ -46,7 +46,7 @@ export default {
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
         const annoData = useObservable(liveQuery(async () => {
             const curr = await db.lastSelected.where('id').equals(1).first();
-            const annotations = await db.annoData.where('annoId').equals(parseInt(curr?.annoId || 1)).toArray();
+            const annotations = await db.annoData.where('annoId').equals(parseInt(curr?.annoId || 1)).sortBy('timestamp');
             await Promise.all (annotations.map (async anno => {
                 [anno.label] = await Promise.all([
                     db.labels.get(anno.labelId)
@@ -90,8 +90,6 @@ export default {
             let time = new Date(timestamp).getTime();
             let label = this.$store.state.activeLabel;
             let currAnn = this.currAnn;
-            console.log(currAnn);
-            console.log(label);
             if(label != null && currAnn != undefined){
                 db.annoData.add({labelId: label.id, annoId: currAnn.annoId, timestamp: time});
             }

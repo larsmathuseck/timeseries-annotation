@@ -26,7 +26,7 @@ export default {
     setup: function(){
         const annoData = useObservable(liveQuery(async () => {
             const curr = await db.lastSelected.where('id').equals(1).first();
-            const annotations = await db.annoData.where('annoId').equals(parseInt(curr?.annoId || 1)).toArray();
+            const annotations = await db.annoData.where('annoId').equals(parseInt(curr?.annoId || 1)).sortBy('timestamp');
             await Promise.all (annotations.map (async anno => {
                 [anno.label] = await Promise.all([
                     db.labels.get(anno.labelId)
