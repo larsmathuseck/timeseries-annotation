@@ -42,6 +42,8 @@
 import TutorialModal from "../components/TutorialModal.vue";
 import ImportModel from "../components/ImportModel.vue";
 import { db } from "/db";
+import { DateTime } from "luxon";
+import { stringify } from "@vanillaes/csv";
 
 export default {
     name: "Header",
@@ -103,36 +105,54 @@ export default {
             }
         },
         async saveAnnotation() {
-            let content = this.$store.getters.saveAnnotations;
-            let name = this.$store.state.annotations[this.$store.state.currAnn]?.name;
-            if(content.length > 1 && name != undefined){
-                if (typeof showSaveFilePicker === 'undefined'){
-                    var a = document.createElement("a");
-                    a.href = window.URL.createObjectURL(new Blob([content], {type: "text/csv"}));
-                    a.download = name;
-                    a.click();
-                }
-                else{
-                    try{
-                        const fileHandle = await self.showSaveFilePicker({
-                            suggestedName: name,
-                            types: [{
-                                description: 'CSV documents',
-                                accept: {
-                                'text/csv': ['.csv'],
-                                },
-                            }],
-                        });
-                        console.log(fileHandle);
-                        const fileStream = await fileHandle.createWritable();
-                        await fileStream.write(new Blob([content], {type: "text/csv;charset=utf-8;"}));
-                        await fileStream.close();
-                    } catch(error){
-                        console.log(error);
+            const currAnn = await db.lastSelected.where('id').equals(1).first();
+            if (currAnn){
+                const content = await this.loadAnnotations(currAnn);
+                const annotationFile = await db.annotations.where('id').equals(currAnn.annoId).first();
+                if(content.length > 1 && annotationFile.name){
+                    if (typeof showSaveFilePicker === 'undefined'){
+                        var a = document.createElement("a");
+                        a.href = window.URL.createObjectURL(new Blob([content], {type: "text/csv"}));
+                        a.download = annotationFile.name;
+                        a.click();
+                    }
+                    else{
+                        try{
+                            const fileHandle = await self.showSaveFilePicker({
+                                suggestedName: annotationFile.name,
+                                types: [{
+                                    description: 'CSV documents',
+                                    accept: {
+                                    'text/csv': ['.csv'],
+                                    },
+                                }],
+                            });
+                            const fileStream = await fileHandle.createWritable();
+                            await fileStream.write(new Blob([content], {type: "text/csv;charset=utf-8;"}));
+                            await fileStream.close();
+                        } catch(error){
+                            console.log(error);
+                        }
                     }
                 }
             }
         },
+        async loadAnnotations(currAnn) {
+            if (currAnn) {
+                const annotations = await db.annoData.where('annoId').equals(parseInt(currAnn.annoId)).sortBy('timestamp');
+                await Promise.all (annotations.map (async anno => {
+                    [anno.label] = await Promise.all([
+                        db.labels.get(anno.labelId)
+                    ]);
+                }));
+                let data = [["Timestamp", "Label"]];
+                annotations.forEach(anno => {
+                    data.push([DateTime.fromMillis(anno.timestamp).toFormat('yyyy-MM-dd hh:mm:ss.SSS'), anno.label.name]);
+                });
+                return stringify(data);
+            }
+            return [];
+        }
     },
 }
 </script>

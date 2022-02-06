@@ -1,2 +1,1 @@
 - after importing only data folder whole annotations are deleted - add alert
-- cannot save annotation
