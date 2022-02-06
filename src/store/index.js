@@ -269,6 +269,9 @@ export default createStore({
                 }
             }
         },
+        addSelectedAxes: (state, axis) => {
+            state.data[state.currentSelectedData].selectedAxes.push(axis.id);
+        },
         addAnnotationPointFromModel(state, payload) {
             const timestamp = payload.timestamp;
             const label = payload.label;
@@ -304,16 +307,6 @@ export default createStore({
                 annotations.push(newAnn);
             }
         },
-        addSelectedAxes: async (state, axis) => {
-            let newAxis = [];
-            state.data[state.currentSelectedData].selectedAxes.forEach(a => newAxis.push(a));
-            console.log(newAxis);
-            newAxis.push(axis.id);
-            console.log(newAxis);
-            console.log(state.currentSelectedData);
-            await db.data.update(state.currentSelectedData+1, {selectedAxes: newAxis});
-            console.log(await db.data.toArray());
-        },
         deleteSelectedAxis(state, axis) {
             let selectedAxes = state.data[state.currentSelectedData].selectedAxes;
             const index = selectedAxes.indexOf(axis.id);
@@ -332,21 +325,6 @@ export default createStore({
         },
         toggleActiveLabel(state, label) {
             state.activeLabel = label;
-        },
-        toggleActiveLabelByKey(state, key) {
-            const annotations = state.annotations[state.currAnn];
-            if (annotations == undefined || annotations == null) {
-                return;
-            }
-            const labels = state.annotations[state.currAnn].labels;
-            if (labels == undefined || labels == null) {
-                return;
-            }
-            const keys = Object.keys(labels);
-            if (keys.length > 0 && keys.length > key) {
-                key = keys[key];
-                state.activeLabel = labels[key];
-            }
         },
         selectDataFile(state, dataFileId){
             state.currentSelectedData = dataFileId;

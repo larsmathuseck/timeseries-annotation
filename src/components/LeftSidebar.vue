@@ -94,6 +94,7 @@ export default {
             toggleLabelModalVisibility: false,
             labelToEdit: null,
             addLabelKey: 0,
+            acceptedKeys: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
         }
     },
     computed: {
@@ -136,8 +137,7 @@ export default {
             this.$store.commit("selectDataFile", this.lastSelectedData);
         },
         selectAnnotationFile() {
-            db.lastSelected.update(1, {annoId: this.$refs.annoSelect.value});
-            // this.$store.commit("selectAnnotationFile", this.$refs.annoSelect.value);
+            db.lastSelected.update(1, {annoId: parseInt(this.$refs.annoSelect.value)});
         },
         chooseDataFile() {
             document.getElementById("dataFileUpload").click();
@@ -160,6 +160,30 @@ export default {
                 }
             }
         },
+        keyPressed: function(e) {
+            let key = e.key;
+            if (this.acceptedKeys.indexOf(key) > -1) {
+                if (key == 0) { // modify key so that by pressing 1 its the first label, which has index 0, and by pressing 0 you reach label 10
+                    key = 10;
+                } else {
+                    key -= 1;
+                }
+                if (this.labels == undefined || this.labels == null) {
+                    return;
+                }
+                const keys = Object.keys(this.labels);
+                if (keys.length > 0 && keys.length > key) {
+                    key = keys[key];
+                    this.$store.state.activeLabel = this.labels[key];
+                }
+            }
+        }
+    },
+    mounted: async function() {
+        window.addEventListener("keypress", this.keyPressed);
+    },
+    beforeUnmount: function() {
+        window.removeEventListener('keypress', this.keyPressed);
     },
 }
 </script>

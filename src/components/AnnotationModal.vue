@@ -118,7 +118,8 @@ export default {
             }
             const filename = this.fileName + '.csv';
             const anno = await db.annotations.add({name: filename, lastAdded: null});
-            db.lastSelected.update(1, {annoId: anno});
+            db.lastSelected.put({id: 1, annoId: anno});
+            this.$store.state.activeLabel = null;
             this.modal.hide();
         },
     },
