@@ -34,32 +34,12 @@ export default {
     },
     data() {
         return {
-            acceptedKeys: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
         }
     },
     computed: {
         showGraph: function(){
             return this.$store.getters.showGraph;
         }
-    },
-    methods: {
-        keyPressed: function(e) {
-            let key = e.key;
-            if (this.acceptedKeys.indexOf(key) > -1) {
-                if (key == 0) { // modify key so that by pressing 1 its the first label, which has index 0, and by pressing 0 you reach label 10
-                    key = 10;
-                } else {
-                    key -= 1;
-                }
-                this.$store.commit("toggleActiveLabelByKey", key);
-            }
-        }
-    },
-    mounted: function() {
-        window.addEventListener("keypress", this.keyPressed);
-    },
-    beforeUnmount: function() {
-        window.removeEventListener('keypress', this.keyPressed);
     },
 };
 </script>

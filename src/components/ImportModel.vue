@@ -17,17 +17,38 @@ export default {
         },
         onFileChange: function(e) {
             const fileList = e.target.files;
+            let model;
+            const weights = [];
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
                 const file = fileList[i];
                 if(file.name[0] != '.' && (file.type.includes("json") && file.name.includes("model"))) {
-                    this.importModel(file);
-                    break;
+                    model = file;
+                }
+                else if(file.name[0] != '.') {
+                    weights.push(file);
                 }
             }
+            this.importModel(model, weights);
         },
-        importModel: async function(modelFile) {
+        importModel: async function(modelFile, weights) {
             tf.serialization.registerClass(L2);
-            await tf.loadLayersModel(modelFile.webkitRelativePath).then((model) => this.modelLoaded(model));
+            const reader = new FileReader();
+            reader.readAsText(modelFile);
+            reader.onload = async () => {
+                const model = JSON.parse(reader.result);
+                const layers = model?.modelTopology?.model_config?.config.layers;
+                if(layers != null){
+                    layers.forEach(layer => {
+                        let config = layer.config;
+                        delete config.activity_regularizer;
+                    })
+                }
+                let modelArray = [new File([JSON.stringify(model)], "model.json")];
+                weights.forEach(weight => {
+                    modelArray.push(weight);
+                });
+                await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => this.modelLoaded(model));
+            }
         },
         modelLoaded: function(model) {
             const instance = [[[-3.3523560e-02,  9.8258060e+00, -3.1604004e-01, -4.2724610e-04, 2.6702880e-03, -4.4250488e-04],

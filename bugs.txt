@@ -1,2 +1,0 @@
-- select data not showing path
-- when deleting labels/annotations there can be duplicated keys in annotations --> not getting deleted properly

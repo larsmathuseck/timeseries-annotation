@@ -42,6 +42,7 @@
 
 <script>
 import ColorPicker from "./Colorpicker.vue"
+import { db } from "/db"
 
 export default {
     name: "AddLabel",
@@ -63,33 +64,23 @@ export default {
         colorPicked(color) {
             this.labelColor = color
         },
-        onSubmit(e) {
+        async onSubmit(e) {
             e.preventDefault();
             if (this.labelToEdit === null) {
-                const labels = this.$store.getters.getLabels;
-                if (typeof labels == "undefined") { // no or false data uploaded --> no annotation file
-                    this.error = "Can't add Label. First add Annotation and Data files!"
+                const currAnn = await db.lastSelected.where('id').equals(1).first();
+                if (currAnn === undefined) { // no or false data uploaded --> no annotation file
+                    this.error = "Can't add Label. First add Annotation file!"
                     return;
-                } 
-                const labelKeys = Object.keys(labels);
-                const lastKey = labelKeys.at(-1);
-                const lastLabel = labels[lastKey];
-                let newId = 0
-                if (Object.values(labels).length != 0) {
-                    newId = lastLabel.id +1;
                 }
                 const label = {
-                    id: newId,
                     name: this.labelName,
                     color: this.labelColor,
                 }
                 this.$emit("labelCreated", label)
             } else {
-                const label = {
-                    id: this.labelToEdit.id,
-                    name: this.labelName,
-                    color: this.labelColor,
-                }
+                let label = this.labelToEdit;
+                label.name = this.labelName;
+                label.color = this.labelColor;
                 this.$emit("labelEdited", label)
             }
             this.labelName = "";

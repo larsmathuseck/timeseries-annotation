@@ -36,7 +36,7 @@ export default {
             selected: this.isSelected,
         }
     },
-    watcher: {
+    watch: {
         isSelected: function() {
             this.selected = this.isSelected
         }

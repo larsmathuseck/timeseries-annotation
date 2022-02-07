@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <p @click="test" class="description-text" >Data Files</p>
+        <label class="description-text" >Data Files</label>
         <div class="input-group">
             <select v-model="lastSelectedData" class="form-select" @change="selectDataFile()">
                 <option v-for="row in data" :key="row.id" v-bind:value="row.id">
@@ -16,7 +16,7 @@
         </div>
     </div>
     <div class="row">
-        <p class="description-text" >Y-Axes</p>
+        <label class="description-text" >Y-Axes</label>
         <div id="scroll-container-axes">
             <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
                 <Axis :axis="axis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
@@ -27,9 +27,9 @@
         </div>
     </div>
     <div class="row">
-        <p class="description-text" >Annotation Files</p>
+        <label class="description-text" >Annotation Files</label>
         <div class="input-group">
-            <select v-model="lastSelectedAnnotation" class="form-select" @change="selectAnnotationFile()">
+            <select v-model="lastSelectedAnnotation" class="form-select" ref="annoSelect" @change="selectAnnotationFile()">
                 <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" v-bind:value="annotationFile.id">
                     {{ annotationFile.name }}
                 </option>
@@ -64,7 +64,9 @@ import ColorPicker from "./Colorpicker.vue"
 import Label from "./Label.vue"
 import AnnotationModal from "./AnnotationModal.vue"
 import LabelModal from "./LabelModal.vue"
-
+import { liveQuery } from "dexie";
+import { db } from "/db";
+import { useObservable } from "@vueuse/rxjs";
 
 export default {
     name: "LeftSidebar",
@@ -75,15 +77,29 @@ export default {
         AnnotationModal,
         LabelModal,
     },
+    setup: function(){
+        const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
+        const labels = useObservable(liveQuery(async () => {
+            const curr = await db.lastSelected.where('id').equals(1).first();
+            return db.labels.where('annoId').equals(parseInt(curr?.annoId || 1)).toArray();
+        }));
+        const annotationFiles = useObservable(liveQuery(() => db.annotations.toArray()));
+        return {
+            labels,
+            annotationFiles,
+            currAnn,
+        }
+    },
     data() {
         return {
             lastSelectedData: this.$store.state.currentSelectedData,
-            lastSelectedAnnotation: this.$store.state.currAnn,
+            lastSelectedAnnotation: 1,
             showColorPicker: false,
             toggleAnnotationModalVisibility: false,
             toggleLabelModalVisibility: false,
             labelToEdit: null,
             addLabelKey: 0,
+            acceptedKeys: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
         }
     },
     computed: {
@@ -96,12 +112,11 @@ export default {
         selectedAxes: function() {
             return this.$store.getters.selectedAxes;
         },
-        labels: function() {
-            return this.$store.getters.getLabels;
-        },
-        annotationFiles: function() {
-            return this.$store.state.annotations;
-        },
+    },
+    watch: {
+        currAnn: function(){
+            this.lastSelectedAnnotation = this.currAnn?.annoId;
+        }
     },
     methods: {
         labelOnClick(label) {
@@ -127,26 +142,53 @@ export default {
             this.$store.commit("selectDataFile", this.lastSelectedData);
         },
         selectAnnotationFile() {
-            this.$store.commit("selectAnnotationFile", this.lastSelectedAnnotation);
+            db.lastSelected.update(1, {annoId: parseInt(this.$refs.annoSelect.value)});
         },
         chooseDataFile() {
-            document.getElementById("dataFileUpload").click()
+            document.getElementById("dataFileUpload").click();
         },
         onDataFileChange(e) {
             const fileList = e.target.files;
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const reader = new FileReader();
                 const file = fileList[i];
-                if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
-                    reader.readAsText(file);
-                    reader.onload = () => {
-                        if(file.name.includes("data")){
-                            this.$store.commit("addData", {result: reader.result, name: file.name});
-                        }
+                this.readFile(file);
+            }
+        },
+        readFile(file){
+            const reader = new FileReader();
+            if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
+                reader.readAsText(file);
+                reader.onload = () => {
+                    if(file.name.includes("data")){
+                        this.$store.commit("addData", {result: reader.result, name: file.name});
                     }
                 }
             }
         },
+        keyPressed: function(e) {
+            let key = e.key;
+            if (this.acceptedKeys.indexOf(key) > -1) {
+                if (key == 0) { // modify key so that by pressing 1 its the first label, which has index 0, and by pressing 0 you reach label 10
+                    key = 10;
+                } else {
+                    key -= 1;
+                }
+                if (this.labels == undefined || this.labels == null) {
+                    return;
+                }
+                const keys = Object.keys(this.labels);
+                if (keys.length > 0 && keys.length > key) {
+                    key = keys[key];
+                    this.$store.state.activeLabel = this.labels[key];
+                }
+            }
+        }
+    },
+    mounted: async function() {
+        window.addEventListener("keypress", this.keyPressed);
+    },
+    beforeUnmount: function() {
+        window.removeEventListener('keypress', this.keyPressed);
     },
 }
 </script>
