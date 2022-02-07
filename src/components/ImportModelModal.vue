@@ -53,9 +53,9 @@
                                         <label class="col-4 col-lg-3 col-form-label text-left">Hertz</label>
                                     </div>
                                     <div class="row mb-3 justify-content-center">
-                                        <label for="overlapValue" class="col-6 col-form-label">Overlaping</label>
+                                        <label for="overlapValue" class="col-6 col-form-label">Window Shift</label>
                                         <div class="col-2 col-lg-3">
-                                            <input v-model="overlapping" type="number" class="form-control" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0" required>
+                                            <input v-model="windowShift" type="number" class="form-control" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0" required>
                                         </div>
                                         <label class="col-4 col-lg-3 col-form-label text-left">Seconds</label>
                                     </div>
@@ -110,7 +110,7 @@ export default {
             modelFileName: "",
             slidingWindow: null,
             samplingRate: null,
-            overlapping: null,
+            windowShift: null,
             showInvalidFeedback: "",
             saveBtnText: "",
             selectedAxes: [],
@@ -171,8 +171,16 @@ export default {
                 this.showInvalidFeedback = "Nothing to save here. No model uploaded yet!"
                 return;
             }
-            if (this.overlapping >= this.slidingWindow) {
-                this.showInvalidFeedback = "Overlapping must be smaller than Sliding Window!";
+            if (this.windowShift >= this.slidingWindow) {
+                this.showInvalidFeedback = "Window Shift must be smaller than Sliding Window!";
+                return;
+            }
+            if (this.windowShift < 0) {
+                this.showInvalidFeedback = "Window Shift can not be a negative Number!";
+                return;
+            }
+            if (this.windowShift != 0 && this.slidingWindow % this.windowShift != 0) {
+                this.showInvalidFeedback = "Sliding Window must be a multiple from Window Shift!";
                 return;
             }
             if (this.selectedAxes.length == 0) {
@@ -196,7 +204,7 @@ export default {
                 const modelConfiguration = {
                     slidingWindow: this.slidingWindow,
                     samplingRate: this.samplingRate,
-                    overlapping: this.overlapping,
+                    windowShift: this.windowShift,
                     selectedAxes: this.selectedAxes,
                 };
 

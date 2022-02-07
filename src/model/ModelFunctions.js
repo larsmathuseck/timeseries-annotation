@@ -23,15 +23,19 @@ function slope(df) {
     return slope;
 }
 
-function breakDownToSamplingrate(data, timestamps, samplingrate) {
-    let df = new DataFrame(data);
-    //df.drop({ columns: ["0"], inplace: true })
-    df = df.asType("1", "float32");
+function breakDownToSamplingrate(dataPoints, timestamps, samplingrate) {
+    let dataFrames = [];
+    dataPoints.forEach(data => {
+        let df = new DataFrame(data);
+        //df.drop({ columns: ["0"], inplace: true })
+        df = df.asType("1", "float32");
+        dataFrames.push(df);
+    });
     let segmentlengths = [];
     let timestamp = timestamps[0];
     let timestapplus = timestamp + 1000;
     let i = 0;
-    while(i < data.length){
+    while(i < dataPoints[0].length){
         let dataCount = 0;
         while(timestamp < timestapplus){
             i++;
@@ -56,42 +60,77 @@ function breakDownToSamplingrate(data, timestamps, samplingrate) {
     let oldsegment = 0;
     segmentlengths.forEach(segment => {
         segment = oldsegment + segment;
-        let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
-        slopes.push(slope(newFrame));
+        let arrayToPush = [];
+        dataFrames.forEach(df => {
+            let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
+            arrayToPush.push(slope(newFrame));
+        })
+        slopes.push(arrayToPush);
         const firstTimestamp = timestamps[oldsegment];
         let secondTimestamp = timestamps[segment];
         secondTimestamp == undefined ? secondTimestamp = timestamps.slice(-1)[0] : 'nothing';
         allTimestamps.push([firstTimestamp, secondTimestamp]);
         oldsegment = segment;
     });
-    console.log("all timestamps: ", timestamps);
-    console.log("only segment timestamps: ", allTimestamps);
     return [slopes, allTimestamps];
 }
+
 function createInstances(state, modelConfiguration) {
     const slidingWindow = modelConfiguration.slidingWindow;
     const samplingrate = modelConfiguration.samplingRate;
     const selectedAxes = modelConfiguration.selectedAxes;
+    let windowShift = modelConfiguration.windowShift;
     const valuesPerInstance = slidingWindow * samplingrate;
     const allAxes = state.data[state.currentSelectedData].dataPoints;
     const timestamps = state.data[state.currentSelectedData].timestamps;
-    let allSegmentsWithCorrectSampling = []
     let allInstances = [];
-    let allTimestamps = [];
     // get slope or max,min etc in correct samplingrate for each selected axis
+    // selectedAxes.forEach(axis => {
+    //     let dataPoints;
+    //     for (let i = 0; i < allAxes.length; i++) {
+    //         if (allAxes[i].id == axis.id) {
+    //             dataPoints = allAxes[i].dataPoints
+    //             break;
+    //         }
+    //     }
+    //     const result = breakDownToSamplingrate(dataPoints, timestamps, samplingrate, slidingWindow, windowShift);
+    //     // console.log("breakdonw result:", result);
+    //     allSegmentsWithCorrectSampling.push(result[0]);
+    //     allTimestamps.push(result[1]);
+    // });
+    let dataPoints = [];
     selectedAxes.forEach(axis => {
-        let dataPoints;
         for (let i = 0; i < allAxes.length; i++) {
             if (allAxes[i].id == axis.id) {
-                dataPoints = allAxes[i].dataPoints
+                dataPoints.push(allAxes[i].dataPoints);
                 break;
             }
         }
-        const result = breakDownToSamplingrate(dataPoints, timestamps, samplingrate);
-        // console.log("breakdonw result:", result);
-        allSegmentsWithCorrectSampling.push(result[0]);
-        allTimestamps.push(result[1]);
-    });
+    })
+    const result = breakDownToSamplingrate(dataPoints, timestamps, samplingrate);
+    const allSegmentsWithCorrectSampling = result[0];
+    const allTimestamps = result[1];
+
+    console.log(allSegmentsWithCorrectSampling);
+    console.log(allTimestamps);
+
+    windowShift == 0 ? windowShift = slidingWindow : 'nothing';
+    const differentValues = slidingWindow / windowShift;
+    let array = [];
+    for (let i = 0; i < differentValues; i++) {
+        let tempArray = [];
+        let shift = i * windowShift * samplingrate;
+        let segmentStart = shift;
+        let segmentEnd = shift + valuesPerInstance;
+        while (segmentEnd <= allSegmentsWithCorrectSampling.length) {
+            tempArray.push(allSegmentsWithCorrectSampling.slice(segmentStart, segmentEnd));
+            segmentStart = segmentEnd;
+            segmentEnd += valuesPerInstance;
+        }
+        array.push(tempArray);
+    }
+    console.log(array);
+
 
     // console.log("allTimestamps that come with slope: ", allTimestamps);
 
@@ -102,8 +141,8 @@ function createInstances(state, modelConfiguration) {
     let timestampsPerInstance = [];
     for (let i = 0; i < n; i++) {
         let instance = []
-        console.log("iteration: ", i);
-        console.log("looking at timestamps: ", allTimestamps[0][currentValueIndex]);
+        // console.log("iteration: ", i);
+        // console.log("looking at timestamps: ", allTimestamps[0][currentValueIndex]);
         const firstTimestamp = allTimestamps[0][currentValueIndex][0]
         for (let j = 0; j < valuesPerInstance; j++) {
             let arrayToPush = [];
@@ -115,7 +154,7 @@ function createInstances(state, modelConfiguration) {
         }
         // console.log(currentValueIndex);
         allInstances.push(instance);
-        console.log("looking at timestamps: ", allTimestamps[0][currentValueIndex - 1]);
+        // console.log("looking at timestamps: ", allTimestamps[0][currentValueIndex - 1]);
         let secondTimestamp;
         if (allTimestamps[0][currentValueIndex - 1]) {
             secondTimestamp = allTimestamps[0][currentValueIndex -1 ][1];
