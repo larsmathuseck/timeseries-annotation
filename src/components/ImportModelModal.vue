@@ -210,52 +210,94 @@ export default {
 
                 const result = createInstances(this.$store.state, modelConfiguration);
                 const instances = result[0];
-                const timeStampsForInstances = result[1];
-                console.log("instances:", instances)
-                console.log("timestamps for Instances: ", timeStampsForInstances);
-                let predictedValues;
+                const slotsNumber = result[1]/modelConfiguration.samplingRate;
+                let predictedValues = [];
                 try {
-                    const tensor = tf.tensor(instances);
-                    const a = this.model.predict(tensor);
-                    a.print();
-                    predictedValues = a.arraySync();
+                    instances.forEach(instance => {
+                        const tensor = tf.tensor(instance.data);
+                        const a = this.model.predict(tensor);
+                        a.print();
+                        predictedValues.push({data: a.arraySync(), timestamps: instance.timestamps});
+                    });
                     console.log("predicted Values: ", predictedValues);
+                    
                 } catch (error) {
                     console.error(error.message);
                     this.showInvalidFeedback = error.message;
                     return;
-                } 
+                }
+                let currentPosition = [];
+                for(let i = 0; i < predictedValues.length; i++){
+                    currentPosition.push(null);
+                }
+                //let predictions = [];
+                for(let i = 0; i < slotsNumber; i++){
+                    let position = i%predictedValues.length;
+                    if(currentPosition[position] == null){
+                        currentPosition[position] = 0;
+                    }
+                    else{
+                        currentPosition[position] += 1;
+                        if(currentPosition[position] >= predictedValues[0].data.length){
+                            currentPosition[position] = null;
+                        }
+                    }
+                    let indices = {};
+                    for(let j = 0; j < predictedValues.length; j++){
+                        let data = predictedValues[j].data[currentPosition[j]];
+                        let index = data?.indexOf(Math.max(...data));
+                        if(index == null){
+                            break;
+                        }
+                        else if(data[index] < 0.9){
+                            if (!indices.undecided) {
+                                indices.undecided = 1;
+                            } else {
+                                indices.undecided += 1;
+                            }
+                        }
+                        else {
+                            if (!indices[index]) {
+                                indices[index] = 1;
+                            } else {
+                                indices[index] += 1;
+                            }
+                        }
+                    }
+                    // Hier weiter machen!
+                    let result = Object.keys(indices).reduce(function(a, b){ return indices[a] > indices[b] ? a : b });
+
+                    console.log(indices);
+                    console.log(result);
+
+                }
                 // create annotation file
                 const annotationId = await this.createNewAnnotationFile();
                 console.log("created annotationId: ", annotationId);
                 // create as many labels as needed
-                await this.createLabelsForAnnotation(annotationId, predictedValues[0].length);
+                await this.createLabelsForAnnotation(annotationId, predictedValues[0].data[0].length);
                 // create all the areas
                 const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
                 console.log(allLabels);
-                for (let i = 0; i < predictedValues.length; i++) {
-                    const value = predictedValues[i];
-                    const labelNumber = value.indexOf(Math.max(...value));
-                    console.log("add label: ", i+1);
-                    console.log(value);
-                    const label = allLabels[labelNumber];
-                    console.log(label);
-                    db.areas.add({
-                        annoId: annotationId,
-                        labelId: label.id,
-                        firstTimestamp: timeStampsForInstances[i][0],
-                        secondTimestamp: timeStampsForInstances[i][1],
-                    });
-                }
-                // // annotate predicted values in the chart
-                // for (let i = 0; i < predictedValues.length; i++) {
-                //     const value = predictedValues[i];
-                //     const label = value.indexOf(Math.max(...value));
-                //     console.log("add label: ", i+1)
-                //     console.log(value);
-                //     await this.addAnnotationPointFromModel(timeStampsForInstances[i], label);
-                // }
-                // this.modal.hide();
+                predictedValues.forEach(predictedValue =>{
+                    for (let i = 0; i < predictedValue.data.length; i++) {
+                        const value = predictedValue.data[i];
+                        const labelNumber = value.indexOf(Math.max(...value));
+                        if(value[labelNumber] > 0.9){
+                            console.log("add label: ", i+1);
+                            console.log(value);
+                            const label = allLabels[labelNumber];
+                            console.log(label);
+                            db.areas.add({
+                                annoId: annotationId,
+                                labelId: label.id,
+                                firstTimestamp: predictedValue.timestamps[i][0],
+                                secondTimestamp: predictedValue.timestamps[i][1],
+                            });
+                        }
+                    }
+                });
+                this.modal.hide();
             }
         },
         createNewAnnotationFile: async function() {

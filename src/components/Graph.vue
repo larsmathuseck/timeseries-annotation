@@ -163,7 +163,7 @@ export default {
                                 xAxis: new Date(x.firstTimestamp),
                                 itemStyle: {
                                     color: x.label.color,
-                                    opacity: 0.5,
+                                    opacity: 0.2,
                                     borderColor: "black",
                                     borderWidth: 0.2,
                                     borderType: "solid"

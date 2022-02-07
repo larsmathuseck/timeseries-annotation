@@ -79,25 +79,11 @@ function createInstances(state, modelConfiguration) {
     const slidingWindow = modelConfiguration.slidingWindow;
     const samplingrate = modelConfiguration.samplingRate;
     const selectedAxes = modelConfiguration.selectedAxes;
-    let windowShift = modelConfiguration.windowShift;
     const valuesPerInstance = slidingWindow * samplingrate;
     const allAxes = state.data[state.currentSelectedData].dataPoints;
     const timestamps = state.data[state.currentSelectedData].timestamps;
+    let windowShift = modelConfiguration.windowShift;
     let allInstances = [];
-    // get slope or max,min etc in correct samplingrate for each selected axis
-    // selectedAxes.forEach(axis => {
-    //     let dataPoints;
-    //     for (let i = 0; i < allAxes.length; i++) {
-    //         if (allAxes[i].id == axis.id) {
-    //             dataPoints = allAxes[i].dataPoints
-    //             break;
-    //         }
-    //     }
-    //     const result = breakDownToSamplingrate(dataPoints, timestamps, samplingrate, slidingWindow, windowShift);
-    //     // console.log("breakdonw result:", result);
-    //     allSegmentsWithCorrectSampling.push(result[0]);
-    //     allTimestamps.push(result[1]);
-    // });
     let dataPoints = [];
     selectedAxes.forEach(axis => {
         for (let i = 0; i < allAxes.length; i++) {
@@ -111,60 +97,27 @@ function createInstances(state, modelConfiguration) {
     const allSegmentsWithCorrectSampling = result[0];
     const allTimestamps = result[1];
 
-    console.log(allSegmentsWithCorrectSampling);
-    console.log(allTimestamps);
-
     windowShift == 0 ? windowShift = slidingWindow : 'nothing';
     const differentValues = slidingWindow / windowShift;
-    let array = [];
     for (let i = 0; i < differentValues; i++) {
-        let tempArray = [];
+        let dataArray = [];
+        let timeArray = [];
         let shift = i * windowShift * samplingrate;
         let segmentStart = shift;
         let segmentEnd = shift + valuesPerInstance;
         while (segmentEnd <= allSegmentsWithCorrectSampling.length) {
-            tempArray.push(allSegmentsWithCorrectSampling.slice(segmentStart, segmentEnd));
+            dataArray.push(allSegmentsWithCorrectSampling.slice(segmentStart, segmentEnd));
+            timeArray.push([allTimestamps[segmentStart][0], allTimestamps[segmentEnd-1][1]]);
             segmentStart = segmentEnd;
             segmentEnd += valuesPerInstance;
         }
-        array.push(tempArray);
+        allInstances.push({
+            data: dataArray,
+            timestamps: timeArray,
+        });
     }
-    console.log(array);
-
-
-    // console.log("allTimestamps that come with slope: ", allTimestamps);
-
-    // put all those data in the segments of each axis into correct arrays considering the sliding window. Each instance is an array 
-    const segmentLengths = allSegmentsWithCorrectSampling[0].length;
-    const n = segmentLengths / valuesPerInstance; // n = number of instances that will be classified
-    let currentValueIndex = 0;
-    let timestampsPerInstance = [];
-    for (let i = 0; i < n; i++) {
-        let instance = []
-        // console.log("iteration: ", i);
-        // console.log("looking at timestamps: ", allTimestamps[0][currentValueIndex]);
-        const firstTimestamp = allTimestamps[0][currentValueIndex][0]
-        for (let j = 0; j < valuesPerInstance; j++) {
-            let arrayToPush = [];
-            for (let k = 0; k < allSegmentsWithCorrectSampling.length; k++) {
-                arrayToPush.push(allSegmentsWithCorrectSampling[k][currentValueIndex]);
-            }
-            currentValueIndex ++;
-            instance.push(arrayToPush);
-        }
-        // console.log(currentValueIndex);
-        allInstances.push(instance);
-        // console.log("looking at timestamps: ", allTimestamps[0][currentValueIndex - 1]);
-        let secondTimestamp;
-        if (allTimestamps[0][currentValueIndex - 1]) {
-            secondTimestamp = allTimestamps[0][currentValueIndex -1 ][1];
-        } else {
-            console.log(allTimestamps[0].slice(-1));
-            secondTimestamp = allTimestamps[0].slice(-1)[0][1];
-        }
-        timestampsPerInstance.push([firstTimestamp, secondTimestamp]);
-    }
-    return [allInstances, timestampsPerInstance];
+    console.log(allInstances);
+    return [allInstances, allSegmentsWithCorrectSampling.length];
 }
 
 export default createInstances
