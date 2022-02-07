@@ -11,9 +11,6 @@
                     </button>
                 </li>
                 <li class="nav-item">
-                    <ImportModel/>
-                </li>
-                <li class="nav-item">
                     <input id="multipleFileUpload" type="file" webkitdirectory directory multiple v-on:change="onFileChange" hidden>
                     <button type="button" @click="chooseFiles" class="btn btn-light" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-content="All unsaved changes will be lost">
                         <i class="fa fa-folder"></i>
@@ -27,7 +24,14 @@
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button type="button" class="btn btn-light" @click="showModal = true; toggleModalVisibility=!toggleModalVisibility">
+                    <button @click="toggleModelModalVisibility  = !toggleModelModalVisibility" type="button" class="btn btn-light">
+                        <i class="fa fa-wrench"></i>
+                        Model
+                    </button>
+                    <ImportModelModal :toggleModelModalVisibility="toggleModelModalVisibility" />
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="btn btn-light" @click="showModal = true; toggleTutorialModalVisibility  = !toggleTutorialModalVisibility">
                         <i class="fa fa-file"></i>
                         Tutorial
                     </button>
@@ -51,14 +55,15 @@ export default {
     name: "Header",
     components: {
         TutorialModal,
-        ImportModel,
+        ImportModelModal,
     },
     props: {
         title: String,
     },
     data() {
         return {
-            toggleModalVisibility: false,
+            toggleTutorialModalVisibility: false,
+            toggleModelModalVisibility: false,
             showModal: false,
         }
     },

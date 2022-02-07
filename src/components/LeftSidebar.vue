@@ -20,9 +20,7 @@
         <div id="scroll-container-axes">
             <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
                 <Axis :axis="axis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
-                <div class="colorpicker-container">
-                    <ColorPicker v-show="showColorPicker" />
-                </div>
+                
             </div>
         </div>
     </div>
@@ -60,7 +58,6 @@
 
 <script>
 import Axis from "./Axis.vue"
-import ColorPicker from "./Colorpicker.vue"
 import Label from "./Label.vue"
 import AnnotationModal from "./AnnotationModal.vue"
 import LabelModal from "./LabelModal.vue"
@@ -72,7 +69,6 @@ export default {
     name: "LeftSidebar",
     components: {
         Axis,
-        ColorPicker,
         Label,
         AnnotationModal,
         LabelModal,
@@ -94,7 +90,6 @@ export default {
         return {
             lastSelectedData: this.$store.state.currentSelectedData,
             lastSelectedAnnotation: 1,
-            showColorPicker: false,
             toggleAnnotationModalVisibility: false,
             toggleLabelModalVisibility: false,
             labelToEdit: null,
@@ -212,14 +207,6 @@ export default {
 #scroll-container-axes::-webkit-scrollbar {
     width: 0;
     height: 0;
-}
-
-.colorpicker-container {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: stretch;
-    width: 100%;
 }
 
 .input-group {

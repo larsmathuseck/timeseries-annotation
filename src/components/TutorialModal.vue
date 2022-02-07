@@ -33,7 +33,7 @@ export default {
         VueperSlide
     },
     props: {
-        toggleModalVisibility: Boolean
+        toggleTutorialModalVisibility: Boolean
     },
     data() {
         return {
@@ -57,7 +57,7 @@ export default {
         },
     },
     watch: {
-        toggleModalVisibility: function() {
+        toggleTutorialModalVisibility: function() {
             this.modal.show();
         },
     },
