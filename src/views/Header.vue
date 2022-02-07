@@ -76,6 +76,7 @@ export default {
             db.annotations.clear();
             db.annoData.clear();
             db.labels.clear();
+            db.areas.clear();
             const fileList = e.target.files;
             let filesToUpload = [];
             let fileNames = {};

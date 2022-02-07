@@ -46,6 +46,17 @@
                 <i class="fa fa-plus"></i>
             </button>
         </span>
+        <div class="row justify-content-start align-items-center">
+            <div class="col-auto area-visibility-container">
+                <p class="area-p">Areas visible</p>
+            </div>
+            <div class="col-auto area-visibility-container ps-0">
+                <label class="switch">
+                    <input type="checkbox" v-show="false">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
         <div id="scroll-container-labels">
             <div class="row label-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
                 <Label :label="label" @editLabel="editLabel" />
@@ -298,6 +309,70 @@ export default {
 .fa-edit:hover, .fa-times:hover {
     opacity: 1;
     cursor: pointer;
+}
+
+.area-p {
+    margin-bottom: 0;
+}
+
+.area-visibility-container {
+    height: fit-content;
+    display: inline-flex;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 3vw;
+  height: 1.5vw;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.15vw;
+  width: 1.15vw;
+  left: 0.25vw;
+  bottom: 0.2vw;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(1.25vw);
+  -ms-transform: translateX(1.25vw);
+  transform: translateX(1.3vw);
+}
+
+.slider.round {
+  border-radius: 1vw;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
 
 </style>

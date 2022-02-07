@@ -134,7 +134,6 @@ export default {
             let ann;
             let ml;
             let area;
-            console.log(areas);
             if(annotations != undefined){
                 ann = annotations.map((x, i) => {
                     return {
@@ -155,6 +154,8 @@ export default {
                         xAxis: new Date(x.timestamp),
                     };
                 });
+            }
+            if (areas != undefined) {
                 if (areas.length != 0) {
                     area = areas.map(x => {
                         return [
@@ -162,6 +163,10 @@ export default {
                                 xAxis: new Date(x.firstTimestamp),
                                 itemStyle: {
                                     color: x.label.color,
+                                    opacity: 0.5,
+                                    borderColor: "black",
+                                    borderWidth: 0.2,
+                                    borderType: "solid"
                                 },
                             },
                             {
@@ -208,7 +213,7 @@ export default {
                         label: { show: false},
                         data: ml,
                     },
-                        markArea: {
+                    markArea: {
                         animation: true,
                         silent: true,
                         label: { show: false},
