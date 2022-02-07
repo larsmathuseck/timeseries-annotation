@@ -271,7 +271,7 @@ export default createStore({
         },
         addSelectedAxes: (state, axis) => {
             state.data[state.currentSelectedData].selectedAxes.push(axis.id);
-        }
+        },
         addAnnotationPointFromModel(state, payload) {
             const timestamp = payload.timestamp;
             const label = payload.label;

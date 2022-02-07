@@ -45,7 +45,7 @@
 <script>
 import { defineAsyncComponent } from 'vue'
 const TutorialModal = defineAsyncComponent(() => import("@/components/TutorialModal.vue"))
-import ImportModel from "../components/ImportModel.vue";
+import ImportModelModal from "../components/ImportModelModal.vue";
 import { db } from "/db";
 import { DateTime } from "luxon";
 import { stringify } from "@vanillaes/csv";
