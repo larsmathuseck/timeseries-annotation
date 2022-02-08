@@ -55,7 +55,7 @@
                                     <div class="row mb-3 justify-content-center">
                                         <label for="overlapValue" class="col-6 col-form-label">Window Shift</label>
                                         <div class="col-2 col-lg-3">
-                                            <input v-model="windowShift" type="number" class="form-control" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0" required>
+                                            <input v-model="windowShift" class="form-control" type="text" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0" required>
                                         </div>
                                         <label class="col-4 col-lg-3 col-form-label text-left">Seconds</label>
                                     </div>
@@ -196,7 +196,7 @@ export default {
                 return;
             }
             if (data.length == 0) {
-                this.showInvalidFeedback = "Please Upload data first!"
+                this.showInvalidFeedback = "Please upload data first!"
                 return;
             }
             document.getElementById("saveBtn").click();
@@ -208,21 +208,24 @@ export default {
                     selectedAxes: this.selectedAxes,
                 };
 
-                const result = createInstances(this.$store.state, modelConfiguration);
-                const instances = result[0];
-                const slotsNumber = result[1]/modelConfiguration.samplingRate;
+                const instances = createInstances(this.$store.state, modelConfiguration);
+                let slotsNumber;
+                if(modelConfiguration.windowShift == 0){
+                    slotsNumber = instances[0].length;
+                }
+                else{
+                    slotsNumber = instances[0].length*modelConfiguration.slidingWindow/modelConfiguration.windowShift;
+                }
                 let predictedValues = [];
                 try {
                     instances.forEach(instance => {
-                        const tensor = tf.tensor(instance.data);
+                        const tensor = tf.tensor(instance);
                         const a = this.model.predict(tensor);
-                        a.print();
                         predictedValues.push({data: a.arraySync(), timestamps: instance.timestamps});
                     });
                     console.log("predicted Values: ", predictedValues);
                     
                 } catch (error) {
-                    console.error(error.message);
                     this.showInvalidFeedback = error.message;
                     return;
                 }
@@ -230,7 +233,7 @@ export default {
                 for(let i = 0; i < predictedValues.length; i++){
                     currentPosition.push(null);
                 }
-                //let predictions = [];
+                let predictions = [];
                 for(let i = 0; i < slotsNumber; i++){
                     let position = i%predictedValues.length;
                     if(currentPosition[position] == null){
@@ -247,9 +250,9 @@ export default {
                         let data = predictedValues[j].data[currentPosition[j]];
                         let index = data?.indexOf(Math.max(...data));
                         if(index == null){
-                            break;
+                            continue;
                         }
-                        else if(data[index] < 0.9){
+                        else if(data[index] < 0.8){
                             if (!indices.undecided) {
                                 indices.undecided = 1;
                             } else {
@@ -264,38 +267,56 @@ export default {
                             }
                         }
                     }
-                    // Hier weiter machen!
-                    let result = Object.keys(indices).reduce(function(a, b){ return indices[a] > indices[b] ? a : b });
-
-                    console.log(indices);
-                    console.log(result);
-
+                    let result = Object.keys(indices).reduce(function(a, b){ 
+                        if(indices[a] == indices[b]){
+                            // if(a == 'undecided'){
+                            //     return b;
+                            // }
+                            // else if(b == 'undecided'){
+                            //     return a;
+                            // }
+                            // else{
+                                return [a, b];
+                            // }
+                        }
+                        else if(indices[a] > indices[b]){
+                            return a;
+                        }
+                        else{
+                            return b; 
+                        }
+                    });
+                    predictions.push(result);
                 }
                 // create annotation file
                 const annotationId = await this.createNewAnnotationFile();
-                console.log("created annotationId: ", annotationId);
                 // create as many labels as needed
-                await this.createLabelsForAnnotation(annotationId, predictedValues[0].data[0].length);
+                const labelAmount = predictedValues[0].data[0].length + 1;
+                await this.createLabelsForAnnotation(annotationId, labelAmount);
                 // create all the areas
                 const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
-                console.log(allLabels);
-                predictedValues.forEach(predictedValue =>{
-                    for (let i = 0; i < predictedValue.data.length; i++) {
-                        const value = predictedValue.data[i];
-                        const labelNumber = value.indexOf(Math.max(...value));
-                        if(value[labelNumber] > 0.9){
-                            console.log("add label: ", i+1);
-                            console.log(value);
-                            const label = allLabels[labelNumber];
-                            console.log(label);
-                            db.areas.add({
-                                annoId: annotationId,
-                                labelId: label.id,
-                                firstTimestamp: predictedValue.timestamps[i][0],
-                                secondTimestamp: predictedValue.timestamps[i][1],
-                            });
-                        }
+                let timestamp = data[this.$store.state.currentSelectedData].timestamps[0];
+                let nextTimestamp;
+                predictions.forEach(prediction => {
+                    if(modelConfiguration.windowShift == 0){
+                        nextTimestamp = timestamp + 1000*modelConfiguration.slidingWindow;
                     }
+                    else{
+                        nextTimestamp = timestamp + 1000*modelConfiguration.windowShift
+                    }
+                    if(prediction != 'undecided'){
+                        if(Array.isArray(prediction)){
+                            prediction = labelAmount-1;
+                        }
+                        const label = allLabels[prediction];
+                        db.areas.add({
+                            annoId: annotationId,
+                            labelId: label.id,
+                            firstTimestamp: timestamp,
+                            secondTimestamp: nextTimestamp,
+                        });
+                    }
+                    timestamp = nextTimestamp;
                 });
                 this.modal.hide();
             }
@@ -308,24 +329,11 @@ export default {
         },
         createLabelsForAnnotation: async function(annotationId, amountOfLabels) {
             for (let i = 0; i < amountOfLabels; i++) {
-                const label = await db.labels.add({
+                await db.labels.add({
                     name: "label_" + i,
                     color: this.$store.state.colors[i % this.$store.state.colors.length],
                     annoId: annotationId,
                 });
-                console.log("label id: ", label);
-            }
-        },
-        addAnnotationPointFromModel: async function(timestamp, label) {
-            console.log("in addAnnotationFromModel")
-            let time = new Date(timestamp).getTime();
-            const currAnn = await db.lastSelected.where('id').equals(1).first();
-            console.log(currAnn);
-            console.log(label);
-            if (label != null && currAnn != undefined) {
-                console.log("add to db: ", {labelId: label.id, annoId: currAnn.annoId, timestamp: time});
-                db.annoData.add({labelId: label.id, annoId: currAnn.annoId, timestamp: time});
-                console.log("added!")
             }
         },
         closeModal: function() {

@@ -55,8 +55,7 @@ function breakDownToSamplingrate(dataPoints, timestamps, samplingrate) {
         }
         timestapplus = timestamp + 1000;
     }
-    let slopes = [];
-    let allTimestamps = [];
+    let result = [];
     let oldsegment = 0;
     segmentlengths.forEach(segment => {
         segment = oldsegment + segment;
@@ -65,14 +64,10 @@ function breakDownToSamplingrate(dataPoints, timestamps, samplingrate) {
             let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
             arrayToPush.push(slope(newFrame));
         })
-        slopes.push(arrayToPush);
-        const firstTimestamp = timestamps[oldsegment];
-        let secondTimestamp = timestamps[segment];
-        secondTimestamp == undefined ? secondTimestamp = timestamps.slice(-1)[0] : 'nothing';
-        allTimestamps.push([firstTimestamp, secondTimestamp]);
+        result.push(arrayToPush);
         oldsegment = segment;
     });
-    return [slopes, allTimestamps];
+    return result;
 }
 
 function createInstances(state, modelConfiguration) {
@@ -93,31 +88,24 @@ function createInstances(state, modelConfiguration) {
             }
         }
     })
-    const result = breakDownToSamplingrate(dataPoints, timestamps, samplingrate);
-    const allSegmentsWithCorrectSampling = result[0];
-    const allTimestamps = result[1];
+    const allSegmentsWithCorrectSampling = breakDownToSamplingrate(dataPoints, timestamps, samplingrate);
 
     windowShift == 0 ? windowShift = slidingWindow : 'nothing';
     const differentValues = slidingWindow / windowShift;
     for (let i = 0; i < differentValues; i++) {
         let dataArray = [];
-        let timeArray = [];
         let shift = i * windowShift * samplingrate;
         let segmentStart = shift;
         let segmentEnd = shift + valuesPerInstance;
         while (segmentEnd <= allSegmentsWithCorrectSampling.length) {
             dataArray.push(allSegmentsWithCorrectSampling.slice(segmentStart, segmentEnd));
-            timeArray.push([allTimestamps[segmentStart][0], allTimestamps[segmentEnd-1][1]]);
             segmentStart = segmentEnd;
             segmentEnd += valuesPerInstance;
         }
-        allInstances.push({
-            data: dataArray,
-            timestamps: timeArray,
-        });
+        allInstances.push(dataArray);
     }
     console.log(allInstances);
-    return [allInstances, allSegmentsWithCorrectSampling.length];
+    return allInstances;
 }
 
 export default createInstances
