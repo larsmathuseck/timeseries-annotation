@@ -31,11 +31,6 @@
                                     <div class="separator"></div>
                                 </div>
                             </div>
-                            <div class="row justify-content-center">
-                                <div class="col-auto">
-                                    <h5>Model Options:</h5>
-                                </div>
-                            </div>
                             <div class="row">
                                 <div class="col-12 col-lg-6">
                                     <div class="row mb-3 justify-content-center">
@@ -58,6 +53,13 @@
                                             <input v-model="windowShift" class="form-control" type="text" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0" required>
                                         </div>
                                         <label class="col-4 col-lg-3 col-form-label text-left">Seconds</label>
+                                    </div>
+                                    <div class="row mb-3 justify-content-center">
+                                        <label for="acceptedPercent" class="col-6 col-form-label">Percent Acceptance</label>
+                                        <div class="col-2 col-lg-3">
+                                            <input v-model="acceptedPercent" class="form-control" type="text" id="acceptedPercent" placeholder="80" :disabled="modelFileName.length == 0" required>
+                                        </div>
+                                        <label class="col-4 col-lg-3 col-form-label text-left">Percent</label>
                                     </div>
                                 </div>
                                 <div class="col-12 col-lg-6">
@@ -111,6 +113,7 @@ export default {
             slidingWindow: null,
             samplingRate: null,
             windowShift: null,
+            acceptedPercent: null,
             showInvalidFeedback: "",
             saveBtnText: "",
             selectedAxes: [],
@@ -171,16 +174,32 @@ export default {
                 this.showInvalidFeedback = "Nothing to save here. No model uploaded yet!"
                 return;
             }
+            if (isNaN(this.windowShift)) {
+                this.showInvalidFeedback ="Window Shift must be a number!";
+                return;
+            }
             if (this.windowShift >= this.slidingWindow) {
-                this.showInvalidFeedback = "Window Shift must be smaller than Sliding Window!";
+                this.showInvalidFeedback = "Window Shift must be less than Sliding Window!";
                 return;
             }
             if (this.windowShift < 0) {
                 this.showInvalidFeedback = "Window Shift can not be a negative Number!";
                 return;
             }
-            if (this.windowShift != 0 && this.slidingWindow % this.windowShift != 0) {
+            if (this.windowShift != 0 && this.modulo(this.slidingWindow, this.windowShift) != 0) {
                 this.showInvalidFeedback = "Sliding Window must be a multiple from Window Shift!";
+                return;
+            }
+            if (isNaN(this.acceptedPercent)) {
+                this.showInvalidFeedback = "Accepted Percent must be a number!";
+                return;
+            }
+            if (this.acceptedPercent < 0) {
+                this.showInvalidFeedback = "Accepted Percent must be greater than 0%!";
+                return;
+            }
+            if (this.acceptedPercent > 100) {
+                this.showInvalidFeedback = "Accepted Percent must be less than 101%!"
                 return;
             }
             if (this.selectedAxes.length == 0) {
@@ -252,7 +271,7 @@ export default {
                         if(index == null){
                             continue;
                         }
-                        else if(data[index] < 0.8){
+                        else if(data[index] < this.acceptedPercent * 0.01){
                             if (!indices.undecided) {
                                 indices.undecided = 1;
                             } else {
@@ -338,6 +357,12 @@ export default {
         },
         closeModal: function() {
             this.modal.hide();
+        },
+        modulo: function(a, b) {
+            // this function is needed, since the normal Javascript modulo seem to not work like expected. With this we only check if the result of division is an float by searching for a comma.
+            const temp = (a/b).toString();
+            const commaIndex = temp.indexOf(".");
+            return commaIndex == -1 ? 0 : commaIndex;
         }
     },
     watch: {
