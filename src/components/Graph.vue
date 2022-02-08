@@ -155,7 +155,7 @@ export default {
                     };
                 });
             }
-            if (areas != undefined) {
+            if (this.areaVisible && areas != undefined) {
                 if (areas.length != 0) {
                     area = areas.map(x => {
                         return [
@@ -287,6 +287,9 @@ export default {
                 ],
             };
         },
+        areaVisible: function() {
+            return this.$store.state.areaVisible;
+        }
     },
     watch:{
         option: function(){

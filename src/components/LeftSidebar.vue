@@ -52,7 +52,7 @@
             </div>
             <div class="col-auto area-visibility-container ps-0">
                 <label class="switch">
-                    <input type="checkbox" v-show="false">
+                    <input type="checkbox" v-model="areasVisible" v-show="false" @change="toggleAreaVisibility">
                     <span class="slider round"></span>
                 </label>
             </div>
@@ -106,6 +106,7 @@ export default {
             labelToEdit: null,
             addLabelKey: 0,
             acceptedKeys: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+            areasVisible: this.$store.state.areaVisible,
         }
     },
     computed: {
@@ -149,6 +150,9 @@ export default {
         },
         selectAnnotationFile() {
             db.lastSelected.update(1, {annoId: parseInt(this.$refs.annoSelect.value)});
+        },
+        toggleAreaVisibility() {
+            this.$store.commit("toggleAreaVisibility");
         },
         chooseDataFile() {
             document.getElementById("dataFileUpload").click();

@@ -31,7 +31,7 @@ export default createStore({
         data: [],
         currentSelectedData: 0,
         activeLabel: null,
-        model: {},
+        areaVisible: false,
         colors: ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
     },
     mutations: {
@@ -272,41 +272,6 @@ export default createStore({
         addSelectedAxes: (state, axis) => {
             state.data[state.currentSelectedData].selectedAxes.push(axis.id);
         },
-        addAnnotationPointFromModel(state, payload) {
-            const timestamp = payload.timestamp;
-            const label = payload.label;
-            state.activeLabel = state.annotations[state.currAnn].labels[label];
-            let time = new Date(timestamp).getTime();
-            let annotations = state.annotations[state.currAnn].data;
-            let inserted = false;
-            let lastAddedAnnotation = state.annotations[state.currAnn].lastAddedAnnotation;
-            if (annotations.length == 0) {
-                const newAnn = {
-                    id: 0,
-                    label: state.activeLabel.id,
-                    timestamp: time,
-                };
-                annotations.push(newAnn);
-                state.annotations[state.currAnn].lastAddedAnnotation = newAnn;
-                return;
-            }
-            const newAnn = {
-                id: lastAddedAnnotation.id +1,
-                label: state.activeLabel.id,
-                timestamp: time,
-            };
-            state.annotations[state.currAnn].lastAddedAnnotation = newAnn;
-            for(let i = 0; i < annotations.length; i++){
-                if(annotations[i].timestamp > time){
-                    annotations.splice(i, 0, newAnn);
-                    inserted = true;
-                    break;
-                }
-            }
-            if(!inserted){
-                annotations.push(newAnn);
-            }
-        },
         deleteSelectedAxis(state, axis) {
             let selectedAxes = state.data[state.currentSelectedData].selectedAxes;
             const index = selectedAxes.indexOf(axis.id);
@@ -329,6 +294,11 @@ export default createStore({
         selectDataFile(state, dataFileId){
             state.currentSelectedData = dataFileId;
         },
+        toggleAreaVisibility (state) {
+            console.log("enter: ", state.areaVisible);
+            state.areaVisible = !state.areaVisible;
+            console.log("after: ", state.areaVisible);
+        }
     },
     getters: {
         getData: state => {
