@@ -5,9 +5,9 @@
         </div>
         <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
             <ul class="nav nav-pills">
-                <li class="nav-item" v-if="!debug">
-                    <button type="button" class="btn btn-light" @click="testDanfo">
-                            Test Danfo
+                <li class="nav-item">
+                    <button type="button" class="btn btn-light" @click="changePage">
+                            {{ buttonText }}
                     </button>
                 </li>
                 <li class="nav-item">
@@ -66,9 +66,24 @@ export default {
             toggleModelModalVisibility: false,
         }
     },
+    computed: {
+        buttonText: function(){
+            if(!this.debug){
+                return "Debbuger";
+            }
+            else{
+                return "Main";
+            }
+        }
+    },
     methods: {
-        testDanfo: function() {
-            this.$store.commit("testDanfo");
+        changePage() {
+            if(!this.debug){
+                this.$router.push('/debug');
+            }
+            else{
+                this.$router.push('/');
+            }
         },
         chooseFiles() {
             document.getElementById("multipleFileUpload").click();

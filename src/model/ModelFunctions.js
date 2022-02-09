@@ -1,13 +1,13 @@
 
-const features = {
-    min: {name: "Minimum", func: (df) => min(df)},
-    max: {name: "Maximum", func: (df) => max(df)},
-    mean: {name: "Mean", func: (df) => mean(df)},
-    median: {name: "Median", func: (df) => median(df)},
-    std: {name: "Standard Deviation", func: (df) => std(df)},
-    var: {name: "Varianz", func: (df) => varianz(df)},
-    slope: {name: "Slope", func: (df) => slope(df)},
-}
+const features = [
+    {id: 0, name: "Minimum", func: (df) => min(df)},
+    {id: 1, name: "Maximum", func: (df) => max(df)},
+    {id: 2, name: "Mean", func: (df) => mean(df)},
+    {id: 3, name: "Median", func: (df) => median(df)},
+    {id: 4, name: "Standard Deviation", func: (df) => std(df)},
+    {id: 5, name: "Varianz", func: (df) => varianz(df)},
+    {id: 6, name: "Slope", func: (df) => slope(df)},
+]
 
 function min(df){
     return df.min({ axis: 0 }).values[1];

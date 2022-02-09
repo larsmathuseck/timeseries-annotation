@@ -32,7 +32,7 @@
 <script>
 import { Modal } from 'bootstrap'
 import * as tf from '@tensorflow/tfjs';
-import createInstances from "../model/ModelInstances";
+import { createInstances } from "../model/ModelInstances";
 import { db } from "/db";
 import ModelConfiguration from "./ModelConfiguration.vue";
 //import FeatureConfiguration from "./FeatureConfiguration.vue";
