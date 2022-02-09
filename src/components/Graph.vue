@@ -163,7 +163,7 @@ export default {
                                 xAxis: new Date(x.firstTimestamp),
                                 itemStyle: {
                                     color: x.label.color,
-                                    opacity: 0.2,
+                                    opacity: 0.5,
                                     borderColor: "black",
                                     borderWidth: 0.2,
                                     borderType: "solid"
@@ -186,42 +186,43 @@ export default {
                         scale: false,
                         lineStyle: {
                             width: 1.5,
+                            color: graphData[key].color,
                         },
                     },
                     lineStyle: {
                         color: graphData[key].color,
                         width: 1.5,
                     },
-                    markPoint: {
-                        animation: true,
-                        symbol: "pin",
-                        label: {
-                            show: true,
-                            padding: 5,
-                            distance: 5,
-                            formatter: (value) => {
-                                return value.name.split(" ")[0];
-                            },
-                            color: "white"
-                        },
-                        data: ann,
-                    },
-                    markLine: {
-                        animation: true,
-                        silent: true,
-                        symbol: "none",
-                        label: { show: false},
-                        data: ml,
-                    },
-                    markArea: {
-                        animation: true,
-                        silent: true,
-                        label: { show: false},
-                        data: area,
-                    },
                     data: graphData[key].dataPoints,
                 });
             }
+            series[0].markPoint = {
+                                animation: true,
+                                symbol: "pin",
+                                label: {
+                                    show: true,
+                                    padding: 5,
+                                    distance: 5,
+                                    formatter: (value) => {
+                                        return value.name.split(" ")[0];
+                                    },
+                                    color: "white"
+                                },
+                                data: ann,
+                            };
+            series[0].markLine = {
+                                animation: true,
+                                silent: true,
+                                symbol: "none",
+                                label: { show: false},
+                                data: ml,
+                            };
+            series[0].markArea = {
+                                animation: true,
+                                silent: true,
+                                label: { show: false},
+                                data: area,
+                            };
             return {
                 height: this.sizeOfGraph,
                 animation: false,
@@ -267,7 +268,7 @@ export default {
                         throttle: 100,
                         dataBackground: {
                             lineStyle: {
-                                color: "green",
+                                color: "#79bdf2",
                                 width: 1.5,
                             },
                             areaStyle: {
