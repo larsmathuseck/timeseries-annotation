@@ -100,7 +100,7 @@
 <script>
 import { Modal } from 'bootstrap'
 import * as tf from '@tensorflow/tfjs';
-import createInstances from "../model/ModelInstances";
+import { createInstances } from "../model/ModelInstances";
 import { db } from "/db";
 
 export default {

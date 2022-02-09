@@ -23,7 +23,7 @@
                     <label class="description-text" >Feature</label>
                     <div class="input-group">
                         <select v-model="currentFeature" ref="selectFeature" class="form-select">
-                            <option v-for="row in axes" :key="row.id" v-bind:value="row.id">
+                            <option v-for="row in features" :key="row.id" :value="row.id">
                                 {{ row.name }}
                             </option>
                         </select>
@@ -60,7 +60,7 @@
             </div>
             <div class="col col-lg-8 col-md-8 col-sm-12 col-12">
                 <div class="graphDiv">
-                    <graph ref="graphRef" v-if="showGraph" class="chart"  :data="dataPoints"/>
+                    <graph ref="graphRef" v-if="showGraph" class="chart"  :data="graphData"/>
                 </div>
             </div>
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
@@ -74,6 +74,8 @@
 import graph from "../components/DebugGraph.vue"
 import Header from "./Header.vue"
 import FileSelect from "../components/FileSelect.vue"
+import features from "../model/ModelFunctions"
+import { breakDownToSamplingrate } from "../model/ModelInstances";
 
 export default {  
     name: "Debugger",
@@ -84,12 +86,13 @@ export default {
     },
     data() {
         return {
+            features: features,
             lastSelectedData: this.$store.state.currentSelectedData,
             currentSelectedAxis: 1,
-            currentFeature: 1,
-            slidingWindow: null,
-            samplingRate: null,
-            windowShift: null,
+            currentFeature: 0,
+            slidingWindow: 4,
+            samplingRate: 8,
+            windowShift: 0,
         }
     },
     computed: {
@@ -102,9 +105,21 @@ export default {
         axes: function() {
             return this.$store.getters.getAxes;
         },
-        dataPoints: function() {
+        graphData: function() {
             const currentData = this.data?.[this.$store.state.currentSelectedData];
-            return [currentData?.dataPoints[this.currentSelectedAxis-1]];
+            const dataPoints = [currentData?.dataPoints[this.currentSelectedAxis-1]];
+            const featureCalc = breakDownToSamplingrate([dataPoints[0].dataPoints], currentData.timestamps, this.samplingRate, this.currentFeature);
+            let featureArray = [];
+            for(let i = 0; i < featureCalc[0].length; i++){
+                featureArray.push([featureCalc[1][i], featureCalc[0][i][0]]);
+            }
+            dataPoints.push({
+                id: this.features[this.currentFeature].id,
+                name: this.features[this.currentFeature].name,
+                dataPoints: featureArray,
+                color: "blue",
+            });
+            return dataPoints;
         },
     },
     watch: {

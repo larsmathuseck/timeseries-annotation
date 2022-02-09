@@ -37,13 +37,23 @@ export default createStore({
                     timestamps.push(new Date(row[timestampLocation]).getTime());
                     row.splice(timestampLocation, 1);
                 });
-            
+                
+                // Delete last not full second
+                const lastTimestamp = timestamps[timestamps.length-1] - (timestamps[timestamps.length-1] - timestamps[0])%1000;
+                if(lastTimestamp < timestamps[timestamps.length-1]){
+                    let time = timestamps.pop();
+                    while(time > lastTimestamp){
+                        time = timestamps.pop();
+                    }
+                }
+                
                 // Get dimensions in own arrays
-                for(let row = 0; row < data.length; row++){
+                for(let row = 0; row < timestamps.length; row++){
                     for(let column = 0; column < data[row].length; column++){
                         dataJson[column].dataPoints.push([new Date(timestamps[row]).getTime(), data[row][column]]);   
                     }
                 }
+                
                 state.data.push({
                     id: state.data.length,
                     name: payload.name,

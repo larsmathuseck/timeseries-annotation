@@ -1,7 +1,7 @@
 import { DataFrame } from "danfojs/dist/danfojs-base";
 import features from "./ModelFunctions"
 
-function breakDownToSamplingrate(dataPoints, timestamps, samplingrate, feature) {
+export function breakDownToSamplingrate(dataPoints, timestamps, samplingrate, feature) {
     let dataFrames = [];
     dataPoints.forEach(data => {
         let df = new DataFrame(data);
@@ -10,18 +10,21 @@ function breakDownToSamplingrate(dataPoints, timestamps, samplingrate, feature) 
     });
     let segmentlengths = [];
     let timestamp = timestamps[0];
-    let timestapplus = timestamp + 1000;
+    let timestampForPoint = timestamps[0] + (1000/samplingrate/2);
+    let nextSecond;
     let i = 0;
+    let newTimestamps = [];
     while(i < dataPoints[0].length){
         let dataCount = 0;
-        while(timestamp < timestapplus){
+        nextSecond = timestamp + 1000;
+        while(timestamps[i] < nextSecond){
             i++;
             dataCount++;
-            timestamp = timestamps[i];
         }
         let segmentlength = Math.floor(dataCount / samplingrate);
         let remainder = dataCount % samplingrate;
         for(let i = 0; i < samplingrate; i++) {
+            newTimestamps.push(timestampForPoint + i * (1000/samplingrate));
             if(remainder > 0) {
                 segmentlengths.push(segmentlength + 1);
                 remainder--;
@@ -30,7 +33,8 @@ function breakDownToSamplingrate(dataPoints, timestamps, samplingrate, feature) 
                 segmentlengths.push(segmentlength);
             }
         }
-        timestapplus = timestamp + 1000;
+        timestamp = nextSecond;
+        timestampForPoint += 1000;
     }
     let result = [];
     let oldsegment = 0;
@@ -45,10 +49,10 @@ function breakDownToSamplingrate(dataPoints, timestamps, samplingrate, feature) 
         result.push(arrayToPush);
         oldsegment = segment;
     });
-    return result;
+    return [result, newTimestamps];
 }
 
-function createInstances(state, modelConfiguration) {
+export function createInstances(state, modelConfiguration) {
     const slidingWindow = modelConfiguration.slidingWindow;
     const samplingrate = modelConfiguration.samplingRate;
     const selectedAxes = modelConfiguration.selectedAxes;
@@ -66,7 +70,7 @@ function createInstances(state, modelConfiguration) {
             }
         }
     })
-    const allSegmentsWithCorrectSampling = breakDownToSamplingrate(dataPoints, timestamps, samplingrate, "max");
+    const allSegmentsWithCorrectSampling = breakDownToSamplingrate(dataPoints, timestamps, samplingrate, 6)[0];
 
     windowShift == 0 ? windowShift = slidingWindow : 'nothing';
     const differentValues = slidingWindow / windowShift;
@@ -85,5 +89,3 @@ function createInstances(state, modelConfiguration) {
     console.log(allInstances);
     return allInstances;
 }
-
-export default createInstances
