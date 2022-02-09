@@ -2,17 +2,7 @@
     <div class="row">
         <label class="description-text" >Data Files</label>
         <div class="input-group">
-            <select v-model="lastSelectedData" class="form-select" @change="selectDataFile()">
-                <option v-for="row in data" :key="row.id" v-bind:value="row.id">
-                    {{ row.name }}
-                </option>
-            </select>
-            <div class="input-group-apend">
-                <input id="dataFileUpload" type="file" accept=".csv" multiple v-on:change="onDataFileChange" hidden>
-                <button type="button" class="btn btn-default btn-circle" @click="chooseDataFile">
-                    <i class="fa fa-plus"></i>
-                </button>
-            </div>
+            <FileSelect type="data" :data="data" :selected="lastSelectedData" />
         </div>
     </div>
     <div class="row">
@@ -20,23 +10,13 @@
         <div id="scroll-container-axes">
             <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
                 <Axis :axis="axis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
-                
             </div>
         </div>
     </div>
     <div class="row">
         <label class="description-text" >Annotation Files</label>
         <div class="input-group">
-            <select v-model="lastSelectedAnnotation" class="form-select" ref="annoSelect" @change="selectAnnotationFile()">
-                <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" v-bind:value="annotationFile.id">
-                    {{ annotationFile.name }}
-                </option>
-            </select>
-            <div class="input-group-apend">
-                <button type="button" class="btn btn-default btn-circle" @click="showAnnotationModal">
-                    <i class="fa fa-plus"></i>
-                </button>
-            </div>
+            <FileSelect type="annotation" :data="annotationFiles" :selected="lastSelectedAnnotation" @annoModal="showAnnotationModal" />
         </div>
     </div>
     <div class="row">
@@ -72,6 +52,7 @@ import Axis from "./Axis.vue"
 import Label from "./Label.vue"
 import AnnotationModal from "./AnnotationModal.vue"
 import LabelModal from "./LabelModal.vue"
+import FileSelect from "./FileSelect.vue"
 import { liveQuery } from "dexie";
 import { db } from "/db";
 import { useObservable } from "@vueuse/rxjs";
@@ -83,6 +64,7 @@ export default {
         Label,
         AnnotationModal,
         LabelModal,
+        FileSelect,
     },
     setup: function(){
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
@@ -123,7 +105,7 @@ export default {
     watch: {
         currAnn: function(){
             this.lastSelectedAnnotation = this.currAnn?.annoId;
-        }
+        },
     },
     methods: {
         labelOnClick(label) {
@@ -145,35 +127,8 @@ export default {
             this.labelToEdit = null;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
         },
-        selectDataFile() {
-            this.$store.commit("selectDataFile", this.lastSelectedData);
-        },
-        selectAnnotationFile() {
-            db.lastSelected.update(1, {annoId: parseInt(this.$refs.annoSelect.value)});
-        },
         toggleAreaVisibility() {
             this.$store.commit("toggleAreaVisibility");
-        },
-        chooseDataFile() {
-            document.getElementById("dataFileUpload").click();
-        },
-        onDataFileChange(e) {
-            const fileList = e.target.files;
-            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const file = fileList[i];
-                this.readFile(file);
-            }
-        },
-        readFile(file){
-            const reader = new FileReader();
-            if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
-                reader.readAsText(file);
-                reader.onload = () => {
-                    if(file.name.includes("data")){
-                        this.$store.commit("addData", {result: reader.result, name: file.name});
-                    }
-                }
-            }
         },
         keyPressed: function(e) {
             let key = e.key;
