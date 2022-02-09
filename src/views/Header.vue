@@ -5,7 +5,7 @@
         </div>
         <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
             <ul class="nav nav-pills">
-                <li class="nav-item">
+                <li class="nav-item" v-if="!debug">
                     <button type="button" class="btn btn-light" @click="testDanfo">
                             Test Danfo
                     </button>
@@ -17,20 +17,20 @@
                         Import Folder
                     </button>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" v-if="!debug">
                     <button type="button" class="btn btn-light" @click="saveAnnotation">
                         <i class="fa fa-download"></i>
                         Save Annotation
                     </button>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" v-if="!debug">
                     <button @click="toggleModelModalVisibility  = !toggleModelModalVisibility" type="button" class="btn btn-light">
                         <i class="fa fa-wrench"></i>
                         Model
                     </button>
                     <ImportModelModal :toggleModelModalVisibility="toggleModelModalVisibility" />
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" v-if="!debug">
                     <button type="button" class="btn btn-light" @click="toggleTutorialModalVisibility  = !toggleTutorialModalVisibility">
                         <i class="fa fa-file"></i>
                         Tutorial
@@ -58,6 +58,7 @@ export default {
     },
     props: {
         title: String,
+        debug: Boolean,
     },
     data() {
         return {
