@@ -56,6 +56,7 @@ export function createInstances(state, modelConfiguration) {
     const slidingWindow = modelConfiguration.slidingWindow;
     const samplingrate = modelConfiguration.samplingRate;
     const selectedAxes = modelConfiguration.selectedAxes;
+    const feature = modelConfiguration.feature;
     const valuesPerInstance = slidingWindow * samplingrate;
     const allAxes = state.data[state.currentSelectedData].dataPoints;
     const timestamps = state.data[state.currentSelectedData].timestamps;
@@ -70,7 +71,14 @@ export function createInstances(state, modelConfiguration) {
             }
         }
     })
-    const allSegmentsWithCorrectSampling = breakDownToSamplingrate(dataPoints, timestamps, samplingrate, 6)[0];
+    let featureIndex;
+    for (let i = 0; i < features.length; i++) {
+        if (features[i].id === feature.id) {
+            featureIndex = i;
+            break;
+        }
+    }
+    const allSegmentsWithCorrectSampling = breakDownToSamplingrate(dataPoints, timestamps, samplingrate, featureIndex)[0];
 
     windowShift == 0 ? windowShift = slidingWindow : 'nothing';
     const differentValues = slidingWindow / windowShift;
@@ -86,6 +94,5 @@ export function createInstances(state, modelConfiguration) {
         }
         allInstances.push(dataArray);
     }
-    console.log(allInstances);
     return allInstances;
 }

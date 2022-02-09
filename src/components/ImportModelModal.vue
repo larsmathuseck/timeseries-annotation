@@ -55,8 +55,6 @@ export default {
     },
     methods: {
         loadDataIntoModel: async function(modelConfiguration) {
-            console.log("emit success:", modelConfiguration);
-            console.log("model: ", modelConfiguration.model)
             const data = this.$store.state.data;
             const model = modelConfiguration.model;
 
@@ -74,9 +72,7 @@ export default {
                     const tensor = tf.tensor(instance);
                     const a = model.predict(tensor);
                     predictedValues.push({data: a.arraySync(), timestamps: instance.timestamps});
-                });
-                console.log("predicted Values: ", predictedValues);
-                
+                });                
             } catch (error) {
                 this.showInvalidFeedback = error.message;
                 return;

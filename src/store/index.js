@@ -177,9 +177,7 @@ export default createStore({
             state.currentSelectedData = dataFileId;
         },
         toggleAreaVisibility (state) {
-            console.log("enter: ", state.areaVisible);
             state.areaVisible = !state.areaVisible;
-            console.log("after: ", state.areaVisible);
         }
     },
     getters: {

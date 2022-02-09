@@ -15,7 +15,7 @@
                     </button>
                 </div>
                 <div class="col-auto p-0 mx-2" id="importedModelDiv">
-                    <label id="importedModelLabel" class="col-form-label p-0"> {{ modelFileName.length > 0 ? modelFileName : 'No Model selected yet' }}</label>
+                    <p id="importedModelLabel" class="col-form-label m-0 p-0"> {{ modelFileName.length > 0 ? modelFileName : 'No Model selected yet' }}</p>
                 </div>
             </div>
             <div class="row-justify-content-center">
@@ -53,6 +53,17 @@
                         </div>
                         <label class="col-4 col-lg-3 col-form-label text-left">Percent</label>
                     </div>
+                    <div class="row mb-3 justify-content-center">
+                        <label for="acceptedPercent" class="col-6 col-form-label">Feature to use</label>
+                        <div class="col-5 col-lg-6">
+                            <select v-model="selectedFeature" ref="select" class="form-select">
+                                <option v-for="feature in features" :key="feature.id" v-bind:value="feature" >
+                                    {{ feature.name }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-1 col-lg-0"></div>
+                    </div>
                 </div>
                 <div class="col-12 col-lg-6">
                     <p>Axis Selection</p>
@@ -70,13 +81,6 @@
                 </div>
             </div>
         </div>
-        <!-- <div class="row justify-content-center" v-show="invalidFeedback.length > 0">
-            <div class="col-12">
-                <div class="alert alert-danger p-1" role="alert">
-                    {{ invalidFeedback }}
-                </div>
-            </div>
-        </div> -->
         <button type="submit" id="submitFormBtn" hidden></button>
         <div class="row justify-content-center">
             <div class="col-auto">
@@ -88,6 +92,7 @@
 
 <script>
 import * as tf from '@tensorflow/tfjs';
+import features from "../model/ModelFunctions";
 
 export default {
     name: "ModelConfiguration",
@@ -101,6 +106,8 @@ export default {
             acceptedPercent: null,
             inputsFilledOut: false,
             selectedAxes: [],
+            features: features,
+            selectedFeature: features[0],
         }
     },
     methods: {
@@ -161,15 +168,14 @@ export default {
             if (!this.validateInputs()) {
                 return;
             }
-            console.log(this.model);
             const modelConfiguration = {
                     model: this.model,
                     slidingWindow: this.slidingWindow,
                     samplingRate: this.samplingRate,
                     windowShift: this.windowShift,
                     selectedAxes: this.selectedAxes,
+                    feature: this.selectedFeature,
             };
-            console.log("emit: ", modelConfiguration);
             this.$emit("loadDataIntoModel", modelConfiguration)
         },
         validateInputs: function() {
