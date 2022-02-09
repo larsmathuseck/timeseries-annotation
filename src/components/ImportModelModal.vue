@@ -100,7 +100,7 @@
 <script>
 import { Modal } from 'bootstrap'
 import * as tf from '@tensorflow/tfjs';
-import createInstances from "../model/ModelFunctions";
+import createInstances from "../model/ModelInstances";
 import { db } from "/db";
 
 export default {
@@ -186,7 +186,7 @@ export default {
                 this.showInvalidFeedback = "Window Shift can not be a negative Number!";
                 return;
             }
-            if (this.windowShift != 0 && this.modulo(this.slidingWindow, this.windowShift) != 0) {
+            if (this.windowShift != 0 && this.isMultiple(this.slidingWindow, this.windowShift) != 0) {
                 this.showInvalidFeedback = "Sliding Window must be a multiple from Window Shift!";
                 return;
             }
@@ -288,15 +288,7 @@ export default {
                     }
                     let result = Object.keys(indices).reduce(function(a, b){ 
                         if(indices[a] == indices[b]){
-                            // if(a == 'undecided'){
-                            //     return b;
-                            // }
-                            // else if(b == 'undecided'){
-                            //     return a;
-                            // }
-                            // else{
-                                return [a, b];
-                            // }
+                            return [a, b];
                         }
                         else if(indices[a] > indices[b]){
                             return a;
@@ -358,7 +350,7 @@ export default {
         closeModal: function() {
             this.modal.hide();
         },
-        modulo: function(a, b) {
+        isMultiple: function(a, b) {
             // this function is needed, since the normal Javascript modulo seem to not work like expected. With this we only check if the result of division is an float by searching for a comma.
             const temp = (a/b).toString();
             const commaIndex = temp.indexOf(".");
