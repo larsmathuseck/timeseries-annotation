@@ -2,6 +2,9 @@ import { DataFrame } from "danfojs/dist/danfojs-base";
 import features from "./ModelFunctions"
 
 export function breakDownToSamplingrate(dataPoints, timestamps, samplingrate, feature) {
+    if(!Array.isArray(dataPoints)){
+        return [];
+    }
     let dataFrames = [];
     dataPoints.forEach(data => {
         let df = new DataFrame(data);
@@ -17,24 +20,29 @@ export function breakDownToSamplingrate(dataPoints, timestamps, samplingrate, fe
     while(i < dataPoints[0].length){
         let dataCount = 0;
         nextSecond = timestamp + 1000;
-        while(timestamps[i] < nextSecond){
-            i++;
-            dataCount++;
-        }
-        let segmentlength = Math.floor(dataCount / samplingrate);
-        let remainder = dataCount % samplingrate;
-        for(let i = 0; i < samplingrate; i++) {
-            newTimestamps.push(timestampForPoint + i * (1000/samplingrate));
-            if(remainder > 0) {
-                segmentlengths.push(segmentlength + 1);
-                remainder--;
+        if(nextSecond < timestamps[timestamps.length-1]){
+            while(timestamps[i] < nextSecond){
+                i++;
+                dataCount++;
             }
-            else {
-                segmentlengths.push(segmentlength);
+            let segmentlength = Math.floor(dataCount / samplingrate);
+            let remainder = dataCount % samplingrate;
+            for(let i = 0; i < samplingrate; i++) {
+                newTimestamps.push(timestampForPoint + i * (1000/samplingrate));
+                if(remainder > 0) {
+                    segmentlengths.push(segmentlength + 1);
+                    remainder--;
+                }
+                else {
+                    segmentlengths.push(segmentlength);
+                }
             }
+            timestamp = nextSecond;
+            timestampForPoint += 1000;
         }
-        timestamp = nextSecond;
-        timestampForPoint += 1000;
+        else{
+            break;
+        }
     }
     let result = [];
     let oldsegment = 0;

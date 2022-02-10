@@ -33,7 +33,7 @@
                     <div class="input-group" id="inputLine">
                         <label for="slidingWindowInput" class="col-6 col-form-label">Sliding Window</label>
                         <div class="col-2 col-lg-3">
-                            <input v-model="slidingWindow" type="number" class="form-control" id="slidingWindowInput" placeholder="4" required>
+                            <input v-model="slidingWindow" type="number" class="form-control" id="slidingWindowInput" required>
                         </div>
                         <label class="col-4 col-lg-3 col-form-label text-left">Seconds</label>
                     </div>
@@ -42,7 +42,7 @@
                     <div class="input-group" id="inputLine">
                         <label for="samplingRateInput" class="col-6 col-form-label">Sampling Rate</label>
                         <div class="col-2 col-lg-3">
-                            <input v-model="samplingRate" type="number" class="form-control" id="samplingRateInput" placeholder="8" required>
+                            <input v-model="samplingRate" type="number" class="form-control" id="samplingRateInput" required>
                         </div>
                         <label class="col-4 col-lg-3 col-form-label text-left">Hertz</label>
                     </div>
@@ -51,7 +51,7 @@
                     <div class="input-group" id="inputLine">
                         <label for="overlapValue" class="col-6 col-form-label">Window Shift</label>
                         <div class="col-2 col-lg-3">
-                            <input v-model="windowShift" class="form-control" type="text" id="overlapValue" placeholder="1" required>
+                            <input v-model="windowShift" class="form-control" type="text" id="overlapValue" required>
                         </div>
                         <label class="col-4 col-lg-3 col-form-label text-left">Seconds</label>
                     </div>
@@ -60,7 +60,7 @@
             </div>
             <div class="col col-lg-8 col-md-8 col-sm-12 col-12">
                 <div class="graphDiv">
-                    <graph ref="graphRef" v-if="showGraph" class="chart"  :data="graphData"/>
+                    <graph ref="graphRef" v-if="showGraph" class="chart" :data="graphData" :areaData="areaData"/>
                 </div>
             </div>
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
@@ -108,22 +108,63 @@ export default {
         graphData: function() {
             const currentData = this.data?.[this.$store.state.currentSelectedData];
             const dataPoints = [currentData?.dataPoints[this.currentSelectedAxis-1]];
-            const featureCalc = breakDownToSamplingrate([dataPoints[0].dataPoints], currentData.timestamps, this.samplingRate, this.currentFeature);
-            let featureArray = [];
-            for(let i = 0; i < featureCalc[0].length; i++){
-                featureArray.push([featureCalc[1][i], featureCalc[0][i][0]]);
+            if(dataPoints[0] != undefined){
+                const featureCalc = breakDownToSamplingrate([dataPoints[0]?.dataPoints], currentData?.timestamps, this.samplingRate, this.currentFeature);
+                let featureArray = [];
+                for(let i = 0; i < featureCalc[0].length; i++){
+                    featureArray.push([featureCalc[1][i], featureCalc[0][i][0]]);
+                }
+                dataPoints.push({
+                    id: this.features[this.currentFeature].id,
+                    name: this.features[this.currentFeature].name,
+                    dataPoints: featureArray,
+                    color: "blue",
+                });
+                return dataPoints;
             }
-            dataPoints.push({
-                id: this.features[this.currentFeature].id,
-                name: this.features[this.currentFeature].name,
-                dataPoints: featureArray,
-                color: "blue",
-            });
-            return dataPoints;
+            return [];
+            
         },
+        areaData: function () {
+            let areas = [];
+            const timestamps = this.data?.[this.$store.state.currentSelectedData].timestamps;
+            let repeat = this.slidingWindow/this.windowShift;
+            if(this.windowShift == 0){
+                repeat = 1;
+            }
+            const heigth = 84/repeat;
+            let currentHeight = 3;
+            for(let i = 0; i < repeat; i++){
+                let timestamp = timestamps[0] + i*this.windowShift*1000;
+                while(timestamp +this.slidingWindow*1000 < timestamps[timestamps.length-1]){
+                    areas.push({
+                        annoId: i,
+                        color: this.$store.state.colors[i % this.$store.state.colors.length],
+                        firstTimestamp: timestamp,
+                        secondTimestamp: timestamp + this.slidingWindow*1000,
+                        y1: currentHeight,
+                        y2: currentHeight + heigth,
+                    });
+                    timestamp += this.slidingWindow*1000;
+                }
+                currentHeight += heigth;
+            }
+            return areas;
+        }
     },
     watch: {
-        
+        samplingRate: function(){
+            if(this.samplingRate%1 != 0){
+                this.samplingRate = 8;
+            }
+        },
+        windowShift: function(){
+            const temp = (this.slidingWindow/this.windowShift).toString();
+            const commaIndex = temp.indexOf(".");
+            if(isNaN(this.windowShift) || commaIndex != -1 || this.windowShift == this.slidingWindow){
+                this.windowShift = 0;
+            }
+        }
     }
 };
 </script>
