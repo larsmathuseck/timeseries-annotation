@@ -7,15 +7,15 @@
                 </div>
             </div>
             <div class="row justify-content-center">
-                <div class="col-auto p-0 mx-2">
+                <div class="col-auto">
                     <input id="modelFileInput" type="file" webkitdirectory directory v-on:change="onFileChange" hidden>
                     <button @click="importButtonOnClick" type="button" class="btn btn-light styled-btn">
                         <i class="fa fa-folder"></i>
                         Choose Directory
                     </button>
                 </div>
-                <div class="col-auto p-0 mx-2" id="importedModelDiv">
-                    <p id="importedModelLabel" class="col-form-label m-0 p-0"> {{ modelFileName.length > 0 ? modelFileName : 'No Model selected yet' }}</p>
+                <div class="col-auto my-auto">
+                    <p class="m-0"> {{ modelFileName.length > 0 ? modelFileName : 'No Model selected yet' }}</p>
                 </div>
             </div>
             <div class="row-justify-content-center">
@@ -54,9 +54,9 @@
                         <label class="col-4 col-lg-3 col-form-label text-left">Percent</label>
                     </div>
                     <div class="row mb-3 justify-content-center">
-                        <label for="acceptedPercent" class="col-6 col-form-label">Feature to use</label>
+                        <label for="selectedFeature" class="col-6 col-form-label">Feature to use</label>
                         <div class="col-5 col-lg-6">
-                            <select v-model="selectedFeature" ref="select" class="form-select">
+                            <select v-model="selectedFeature" id="selectedFeature" ref="select" class="form-select" :disabled="modelFileName.length == 0">
                                 <option v-for="feature in features" :key="feature.id" v-bind:value="feature" >
                                     {{ feature.name }}
                                 </option>
@@ -184,6 +184,12 @@ export default {
             if (this.model == null) {
                 invalidFeedback = "No Model imported yet!";
             }
+            else if (this.slidingWindow < 0) {
+                invalidFeedback = "Sliding Window can not be a negative Number!";
+            }
+            else if (this.samplingRate < 0) {
+                invalidFeedback = "Sampling Rate can not be a negative Number!";
+            }
             else if (isNaN(this.windowShift)) {
                 invalidFeedback ="Window Shift must be a number!";
             }
@@ -242,22 +248,8 @@ class L2 {
 </script>
 
 <style scoped>
-p {
-    margin-bottom: 0.5rem;
-}
-
 .styled-btn {
     background-color: #e1e1e5;
-    font-size: 0.9rem;
-}
-
-#importedModelDiv {
-    padding: 0;
-    margin: auto;
-}
-
-#importedModelLabel {
-    font-size: 1rem;
 }
 
 .text-left {
@@ -288,20 +280,6 @@ input {
 .list-group-item {
     border: 1px solid rgba(0,0,0,.125) !important;
     border-radius: 0rem;
-}
-
-.styled-btn {
-    background-color: #e1e1e5;
-    font-size: 0.9rem;
-}
-
-#importedModelDiv {
-    padding: 0;
-    margin: auto;
-}
-
-#importedModelLabel {
-    font-size: 1rem;
 }
 
 .separator {

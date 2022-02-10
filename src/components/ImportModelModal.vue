@@ -3,16 +3,16 @@
         <div class="modal-dialog modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">{{ showModelConfiguration == true ? "Model Configuration" : "Feature Configuration"}}</h4>
+                    <h4 class="modal-title">Feature Configuration</h4>
                     <label class="switch">
-                        <input type="checkbox" v-model="showModelConfiguration" v-show="false">
+                        <input type="checkbox" v-model="showFeatureConfiguration" v-show="false">
                         <span class="slider round"></span>
                     </label>
                     <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <ModelConfiguration v-show="showModelConfiguration" @loadDataIntoModel="loadDataIntoModel" @setInvalidFeedback="setInvalidFeedback" />
-                    <!-- <FeatureConfiguration v-show="!showModelConfiguration" /> -->
+                    <ModelConfiguration v-show="!showFeatureConfiguration" @loadDataIntoModel="loadDataIntoModel" @setInvalidFeedback="setInvalidFeedback" />
+                    <FeatureConfiguration v-show="showFeatureConfiguration" @setInvalidFeedback="setInvalidFeedback"/>
                     <div class="row justify-content-center" v-show="showInvalidFeedback.length > 0">
                         <div class="col-12">
                             <div class="alert alert-danger p-1 m-3" role="alert">
@@ -35,18 +35,18 @@ import * as tf from '@tensorflow/tfjs';
 import { createInstances } from "../model/ModelInstances";
 import { db } from "/db";
 import ModelConfiguration from "./ModelConfiguration.vue";
-//import FeatureConfiguration from "./FeatureConfiguration.vue";
+import FeatureConfiguration from "./FeatureConfiguration.vue";
 
 export default {
     name: "ImportModelModal",
     components: {
         ModelConfiguration,
-        //FeatureConfiguration,
+        FeatureConfiguration,
     },
     data() {
         return {
             modal: null,
-            showModelConfiguration: true,
+            showFeatureConfiguration: false,
             showInvalidFeedback: "",
         }
     },
@@ -195,6 +195,9 @@ export default {
             this.showInvalidFeedback = "";
             this.modal.show();
         },
+        showFeatureConfiguration: function() {
+            this.showInvalidFeedback = "";
+        }
     },
     computed: {
         axes: function() {
