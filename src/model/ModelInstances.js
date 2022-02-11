@@ -60,7 +60,7 @@ export function breakDownToSamplingrate(dataPoints, timestamps, samplingrate, fe
     return [result, newTimestamps];
 }
 
-export function createInstances(state, modelConfiguration) {
+export function createInstances(state, modelConfiguration, feature) {
     const slidingWindow = modelConfiguration.slidingWindow;
     const samplingrate = modelConfiguration.samplingRate;
     const selectedAxes = modelConfiguration.selectedAxes;
@@ -78,7 +78,7 @@ export function createInstances(state, modelConfiguration) {
             }
         }
     })
-    const allSegmentsWithCorrectSampling = breakDownToSamplingrate(dataPoints, timestamps, samplingrate, 6)[0];
+    const allSegmentsWithCorrectSampling = breakDownToSamplingrate(dataPoints, timestamps, samplingrate, feature)[0];
 
     windowShift == 0 ? windowShift = slidingWindow : 'nothing';
     const differentValues = slidingWindow / windowShift;
@@ -87,13 +87,22 @@ export function createInstances(state, modelConfiguration) {
         let shift = i * windowShift * samplingrate;
         let segmentStart = shift;
         let segmentEnd = shift + valuesPerInstance;
-        while (segmentEnd <= allSegmentsWithCorrectSampling.length) {
-            dataArray.push(allSegmentsWithCorrectSampling.slice(segmentStart, segmentEnd));
-            segmentStart = segmentEnd;
-            segmentEnd += valuesPerInstance;
+        if(selectedAxes.length > 1){
+            while (segmentEnd <= allSegmentsWithCorrectSampling.length) {
+                dataArray.push(allSegmentsWithCorrectSampling.slice(segmentStart, segmentEnd));
+                segmentStart = segmentEnd;
+                segmentEnd += valuesPerInstance;
+            }
+            allInstances.push(dataArray);
         }
-        allInstances.push(dataArray);
+        else{
+            while (segmentEnd <= allSegmentsWithCorrectSampling.length) {
+                allInstances.push(allSegmentsWithCorrectSampling.slice(segmentStart, segmentEnd));
+                segmentStart = segmentEnd;
+                segmentEnd += valuesPerInstance;
+            }
+        }
+        
     }
-    console.log(allInstances);
     return allInstances;
 }

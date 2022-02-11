@@ -61,6 +61,12 @@
                                         </div>
                                         <label class="col-4 col-lg-3 col-form-label text-left">Percent</label>
                                     </div>
+                                    <div class="row mb-3 justify-content-center">
+                                        <button @click="testClicked" type="button" class="btn btn-light styled-btn">
+                                            <i class="fa fa-folder"></i>
+                                            Test
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="col-12 col-lg-6">
                                     <p>Axis Selection</p>
@@ -207,6 +213,27 @@ export default {
                 return;
             }
             this.saveBtnText = "Saved!"
+        },
+        testClicked: function(){
+            const instance1 = createInstances(this.$store.state, {slidingWindow: 4, samplingRate: 8, windowShift:0, selectedAxes: [{id: 5, name: "GYR-Y"}]}, 4);
+            const instance2 = createInstances(this.$store.state, {slidingWindow: 4.5, samplingRate: 8, windowShift:0, selectedAxes: [{id: 3, name: "ACC-Z"}]}, 2);
+            const instance3 = createInstances(this.$store.state, {slidingWindow: 2.5, samplingRate: 8, windowShift:0, selectedAxes: [{id: 1, name: "ACC-X"}]}, 1);
+            const instance4 = createInstances(this.$store.state, {slidingWindow: 4.5, samplingRate: 8, windowShift:0, selectedAxes: [{id: 4, name: "GYR-X"}]}, 4);
+            const instance5 = createInstances(this.$store.state, {slidingWindow: 0.5, samplingRate: 8, windowShift:0, selectedAxes: [{id: 1, name: "ACC-X"}]}, 1);
+            const instance6 = createInstances(this.$store.state, {slidingWindow: 0.5, samplingRate: 8, windowShift:0, selectedAxes: [{id: 2, name: "ACC-Y"}]}, 0);
+            console.log(instance1);
+            console.log(instance6);
+            let newInstance = [];
+            for(let i = 0; i < 9; i++){
+                newInstance.push(instance6[i][0][0]);
+            }
+            console.log(newInstance);
+            const allInstances = [instance1[0][0][0], instance2[0][0][0], instance3[0][0][0], instance4[0][0][0], instance5[0][0][0], newInstance];
+            console.log(allInstances);
+            const tensor = tf.tensor([allInstances, allInstances]);
+            const a = this.model.predict(tensor);
+            let predictedValues = a.arraySync();
+            console.log(predictedValues);
         },
         loadDataIntoModel: async function() {
             const data = this.$store.state.data;
