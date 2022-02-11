@@ -175,6 +175,7 @@ export default {
                     windowShift: this.windowShift,
                     selectedAxes: this.selectedAxes,
                     feature: this.selectedFeature,
+                    acceptedPercent: this.acceptedPercent,
             };
             this.$emit("loadDataIntoModel", modelConfiguration)
         },

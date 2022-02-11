@@ -8,7 +8,7 @@ export default createStore({
         currentSelectedData: 0,
         activeLabel: null,
         areasVisible: false,
-        colors: ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
+        colors: ["red", "orange", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
     },
     mutations: {
         addData: async (state, payload) => {
@@ -177,9 +177,7 @@ export default createStore({
             state.currentSelectedData = dataFileId;
         },
         toggleAreasVisibility: (state) => {
-            console.log("in store before: ", state.areasVisible);
             state.areasVisible = !state.areasVisible;
-            console.log("after toggle in store: ", state.areasVisible);
         },
     },
     getters: {

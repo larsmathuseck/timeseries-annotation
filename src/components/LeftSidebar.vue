@@ -30,7 +30,7 @@
             <div class="col-auto area-visibility-container">
                 <p class="area-p">Areas visible</p>
             </div>
-            <div class="col-auto area-visibility-container ps-0">
+            <div class="col-auto area-visibility-container px-0">
                 <label class="switch">
                     <input type="checkbox" v-model="areasVisible" v-show="false">
                     <span class="slider round"></span>

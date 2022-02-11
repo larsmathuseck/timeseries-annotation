@@ -100,7 +100,7 @@ export default {
                     if(index == null){
                         continue;
                     }
-                    else if(data[index] < this.acceptedPercent * 0.01){
+                    else if(data[index] < modelConfiguration.acceptedPercent * 0.01){
                         if (!indices.undecided) {
                             indices.undecided = 1;
                         } else {
@@ -124,6 +124,7 @@ export default {
                         //     return a;
                         // }
                         // else{
+                            //createLabel("undecided_" + a + "_" + b, annotationId);
                             return [a, b];
                         // }
                     }
@@ -138,34 +139,51 @@ export default {
             }
             // create annotation file
             const annotationId = await this.createNewAnnotationFile();
-            // create as many labels as needed
-            const labelAmount = predictedValues[0].data[0].length + 1;
-            await this.createLabelsForAnnotation(annotationId, labelAmount);
             // create all the areas
-            const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
             let timestamp = data[this.$store.state.currentSelectedData].timestamps[0];
             let nextTimestamp;
-            predictions.forEach(prediction => {
+            for (let index = 0; index < predictions.length; index++) {
+                let prediction = predictions[index];
                 if(modelConfiguration.windowShift == 0){
                     nextTimestamp = timestamp + 1000*modelConfiguration.slidingWindow;
                 }
                 else{
                     nextTimestamp = timestamp + 1000*modelConfiguration.windowShift
                 }
-                if(prediction != 'undecided'){
-                    if(Array.isArray(prediction)){
-                        prediction = labelAmount-1;
+                if (prediction != 'undecided') {
+                    let labelName = "";
+                    let labelId;
+                    if (Array.isArray(prediction)) {
+                        const labelArray = [];
+                        for (let i = 0; i < prediction.length; i++) {
+                            labelArray.push(prediction[i]);
+                        }
+                        labelName = "undecided_";
+                        for (let i = 0; i < labelArray.length; i++) {
+                            if (labelArray[i] == "undecided") {
+                                labelName = "undecided_label";
+                                break;
+                            }
+                            labelName += parseInt(labelArray[i]) + 1;
+                            if (i != labelArray.length-1) {
+                                labelName += "_";
+                            }
+                        }
+                        labelId = await this.getOrCreateLabel(labelName, annotationId);
                     }
-                    const label = allLabels[prediction];
+                    else {
+                        labelName = "prediction_" + (parseInt(prediction) + 1);
+                        labelId = await this.getOrCreateLabel(labelName, annotationId);
+                    }
                     db.areas.add({
                         annoId: annotationId,
-                        labelId: label.id,
+                        labelId: labelId,
                         firstTimestamp: timestamp,
                         secondTimestamp: nextTimestamp,
                     });
                 }
                 timestamp = nextTimestamp;
-            });
+            }
             db.lastSelected.update(1, {annoId: parseInt(annotationId)});
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
@@ -180,7 +198,6 @@ export default {
                     counter ++;
                 }
             });
-            console.log(annotations);
             let name = "ModelAnnotation";
             if (counter != 0) {
                 name += "(" + counter + ")";
@@ -192,11 +209,28 @@ export default {
         },
         createLabelsForAnnotation: async function(annotationId, amountOfLabels) {
             for (let i = 0; i < amountOfLabels; i++) {
+                let name = "prediction_" + i;
+                if (i == amountOfLabels -1 ) {
+                    name = "undecided_1_2";
+                }
                 await db.labels.add({
-                    name: "label_" + i,
+                    name: name,
                     color: this.$store.state.colors[i % this.$store.state.colors.length],
                     annoId: annotationId,
                 });
+            }
+        },
+        getOrCreateLabel: async function(labelName, annotationId) {
+            const amountOfLabels = await db.labels.where("annoId").equals(annotationId).toArray();
+            const labelsWithName = await db.labels.where("[annoId+name]").equals([annotationId, labelName]).toArray();
+            if (labelsWithName.length == 0) {
+                return await db.labels.add({
+                    name: labelName,
+                    color: this.$store.state.colors[amountOfLabels.length % this.$store.state.colors.length],
+                    annoId: annotationId,
+                });
+            } else {
+                return labelsWithName[0].id;
             }
         },
         setInvalidFeedback: function(invalidFeedback) {

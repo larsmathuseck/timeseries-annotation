@@ -78,7 +78,6 @@ export default {
             addFeatureVisible: false,
             samplingrate: null,
             features: [],
-            drag: false,
         }
     },
     methods: {
