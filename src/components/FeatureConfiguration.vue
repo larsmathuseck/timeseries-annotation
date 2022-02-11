@@ -64,6 +64,7 @@
 import * as tf from '@tensorflow/tfjs';
 import draggable from "vuedraggable";
 import AddFeature from "./AddFeature.vue";
+import { createFeatureInstances } from "../model/ModelInstances";
 
 export default {
     name: "FeatureConfiguration",
@@ -141,6 +142,8 @@ export default {
             }
             // TODO load data into model via this.$emit in ImportModelModal
             console.log(this.features);
+            const instances = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, 1, this.samplingrate);
+            console.log(instances);
         },
         validateInputs: function() {
             let invalidFeedback = "";
