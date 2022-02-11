@@ -32,7 +32,7 @@
             </div>
             <div class="col-auto area-visibility-container ps-0">
                 <label class="switch">
-                    <input type="checkbox" v-model="areasVisible" v-show="false" @change="toggleAreaVisibility">
+                    <input type="checkbox" v-model="areasVisible" v-show="false">
                     <span class="slider round"></span>
                 </label>
             </div>
@@ -88,7 +88,6 @@ export default {
             labelToEdit: null,
             addLabelKey: 0,
             acceptedKeys: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
-            areasVisible: this.$store.state.areaVisible,
         }
     },
     computed: {
@@ -100,6 +99,14 @@ export default {
         },
         selectedAxes: function() {
             return this.$store.getters.selectedAxes;
+        },
+        areasVisible: {
+            get() {
+                return this.$store.state.areasVisible;
+            },
+            set() {
+                this.$store.commit("toggleAreasVisibility");
+            }
         },
     },
     watch: {
@@ -126,9 +133,6 @@ export default {
             }
             this.labelToEdit = null;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
-        },
-        toggleAreaVisibility() {
-            this.$store.commit("toggleAreaVisibility");
         },
         keyPressed: function(e) {
             let key = e.key;

@@ -7,7 +7,7 @@ export default createStore({
         data: [],
         currentSelectedData: 0,
         activeLabel: null,
-        areaVisible: false,
+        areasVisible: false,
         colors: ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
     },
     mutations: {
@@ -154,14 +154,14 @@ export default createStore({
         addSelectedAxes: (state, axis) => {
             state.data[state.currentSelectedData].selectedAxes.push(axis.id);
         },
-        deleteSelectedAxis(state, axis) {
+        deleteSelectedAxis: (state, axis) => {
             let selectedAxes = state.data[state.currentSelectedData].selectedAxes;
             const index = selectedAxes.indexOf(axis.id);
             if (index > -1) {
                 selectedAxes.splice(index, 1);
             }
         },
-        changeAxisColor(state, changedAxis) {
+        changeAxisColor: (state, changedAxis) => {
             let axes = state.data[state.currentSelectedData].dataPoints;
             for (let i in axes) {
                 if (axes[i].id === changedAxis.id) {
@@ -170,15 +170,17 @@ export default createStore({
                 }
             }
         },
-        toggleActiveLabel(state, label) {
+        toggleActiveLabel: (state, label) => {
             state.activeLabel = label;
         },
-        selectDataFile(state, dataFileId){
+        selectDataFile: (state, dataFileId) => {
             state.currentSelectedData = dataFileId;
         },
-        toggleAreaVisibility (state) {
-            state.areaVisible = !state.areaVisible;
-        }
+        toggleAreasVisibility: (state) => {
+            console.log("in store before: ", state.areasVisible);
+            state.areasVisible = !state.areasVisible;
+            console.log("after toggle in store: ", state.areasVisible);
+        },
     },
     getters: {
         getData: state => {

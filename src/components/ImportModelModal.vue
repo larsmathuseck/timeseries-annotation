@@ -166,11 +166,27 @@ export default {
                 }
                 timestamp = nextTimestamp;
             });
+            db.lastSelected.update(1, {annoId: parseInt(annotationId)});
+            if (!this.$store.state.areasVisible) {
+                this.$store.commit("toggleAreasVisibility");
+            }
             this.modal.hide();
         },
         createNewAnnotationFile: async function() {
+            const annotations = await db.annotations.toArray();
+            let counter = 0;
+            annotations.forEach(annotation => {
+                if (annotation.name.includes("ModelAnnotation")) {
+                    counter ++;
+                }
+            });
+            console.log(annotations);
+            let name = "ModelAnnotation";
+            if (counter != 0) {
+                name += "(" + counter + ")";
+            }
             return await db.annotations.add({
-                name: "AnnotationCreatedByModel",
+                name: name,
                 lastAdded: {},
             });
         },
