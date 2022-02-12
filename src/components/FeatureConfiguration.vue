@@ -143,8 +143,9 @@ export default {
                 return;
             }
             // TODO load data into model via this.$emit in ImportModelModal
-            const instances = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, 1, this.samplingrate);
-            console.log(instances);
+            const result = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, 1, this.samplingrate);
+            const instances = result[0];
+            const offsetInSeconds = result[1];
             let predictedValues = [];
             try {
                 const tensor = tf.tensor(instances);
@@ -155,7 +156,6 @@ export default {
                 this.$emit("setInvalidFeedback", error.messageback);
                 return;
             }
-            console.log(predictedValues);
              // create annotation file
             const annotationId = await this.createNewAnnotationFile();
             // create as many labels as needed
@@ -163,14 +163,13 @@ export default {
             await this.createLabelsForAnnotation(annotationId, labelAmount);
             // create all the areas
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
-            let timestamp = this.$store.state.data[this.$store.state.currentSelectedData].timestamps[0];
+            let timestamp = this.$store.state.data[this.$store.state.currentSelectedData].timestamps[0] + 1000*offsetInSeconds;
             let nextTimestamp;
             predictedValues[0].data.forEach(prediction => {
                 nextTimestamp = timestamp + 1000*this.slidingWindow;
                 let max = Math.max(...prediction);
-                if(max > 0.9){
+                if(max){
                     let index = prediction.indexOf(max);
-                    console.log(index);
                     const label = allLabels[index];
                     db.areas.add({
                         annoId: annotationId,

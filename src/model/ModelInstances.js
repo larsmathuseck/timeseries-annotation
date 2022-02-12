@@ -163,33 +163,38 @@ function breakDownToSamplingrate2(dataPoints, timestamps, samplingrate, feature)
 export function createFeatureInstances(data, selectedFeatures, slidingWindow, samplingRate){
     let instances = [];
     let dataPoints = [];
+    let largestFeatureWindow = 0;
     // Downsample dataPoints of selected axis
     selectedFeatures.forEach(feature => {
-        console.log(feature.axis.id);
+        if(parseInt(feature.slidingWindow) > largestFeatureWindow){
+            largestFeatureWindow = parseInt(feature.slidingWindow);
+        }
         data.dataPoints.forEach(axis => {
             if(axis.id == feature.axis.id){
                 dataPoints.push(breakDownToSamplingrate2(axis.dataPoints, data.timestamps, samplingRate, 3));
             }
         })
     })
+    const dataPointsLength = dataPoints[0].length;
+    let i = parseInt(largestFeatureWindow);
     // calculate the feature for every slidingWindow and selectedFeature
-    for(let i = 0; i < Math.floor(dataPoints[0].length/samplingRate/slidingWindow); i++){
+    while(i < dataPointsLength){
         const result = [];
         selectedFeatures.forEach((feature) => {
             const axisData = dataPoints[feature.id];
-            console.log([i*samplingRate, i*samplingRate + parseInt(feature.slidingWindow)]);
-            result.push(calcFeature(axisData.slice(i*samplingRate, i*samplingRate + parseInt(feature.slidingWindow)), feature.feature));
+            result.push(calcFeature(axisData.slice(i - parseInt(feature.slidingWindow), i), feature.feature));
         });
         instances.push(result);
+        i = i + parseInt(slidingWindow*samplingRate);
     }
-    return(instances);
+    let offset = largestFeatureWindow/samplingRate - slidingWindow;
+    offset = offset < 0 ? 0 : offset;
+    return([instances, offset]);
 }
 
 function calcFeature(data, feature){
-    console.log(data);
     let df = new DataFrame(data);
     df = df.asType("1", "float32");
-    console.log(feature.func(df));
     return feature.func(df);
 }
 
