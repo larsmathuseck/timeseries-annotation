@@ -65,6 +65,7 @@ import * as tf from '@tensorflow/tfjs';
 import draggable from "vuedraggable";
 import AddFeature from "./AddFeature.vue";
 import { createFeatureInstances } from "../model/ModelInstances";
+import { db } from "/db";
 
 export default {
     name: "FeatureConfiguration",
@@ -80,6 +81,7 @@ export default {
             samplingrate: null,
             features: [],
             drag: false,
+            slidingWindow: 1,
         }
     },
     methods: {
@@ -135,15 +137,66 @@ export default {
         checkMove: function(e) {
             window.console.log("Future index: " + e.draggedContext.futureIndex);
         },
-        onSubmit: function(e) {
+        onSubmit: async function(e) {
             e.preventDefault();
             if (!this.validateInputs()) {
                 return;
             }
             // TODO load data into model via this.$emit in ImportModelModal
-            console.log(this.features);
             const instances = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, 1, this.samplingrate);
             console.log(instances);
+            let predictedValues = [];
+            try {
+                const tensor = tf.tensor(instances);
+                const a = this.model.predict(tensor);
+                predictedValues.push({data: a.arraySync()});               
+            } catch (error) {
+                console.log(error);
+                this.$emit("setInvalidFeedback", error.messageback);
+                return;
+            }
+            console.log(predictedValues);
+             // create annotation file
+            const annotationId = await this.createNewAnnotationFile();
+            // create as many labels as needed
+            const labelAmount = predictedValues[0].data[0].length;
+            await this.createLabelsForAnnotation(annotationId, labelAmount);
+            // create all the areas
+            const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
+            let timestamp = this.$store.state.data[this.$store.state.currentSelectedData].timestamps[0];
+            let nextTimestamp;
+            predictedValues[0].data.forEach(prediction => {
+                nextTimestamp = timestamp + 1000*this.slidingWindow;
+                let max = Math.max(...prediction);
+                if(max > 0.9){
+                    let index = prediction.indexOf(max);
+                    console.log(index);
+                    const label = allLabels[index];
+                    db.areas.add({
+                        annoId: annotationId,
+                        labelId: label.id,
+                        firstTimestamp: timestamp,
+                        secondTimestamp: nextTimestamp,
+                    });
+                }
+                timestamp = nextTimestamp;
+            });
+            //this.modal.hide();
+        },
+        createNewAnnotationFile: async function() {
+            return await db.annotations.add({
+                name: "AnnotationCreatedByModel",
+                lastAdded: {},
+            });
+        },
+        createLabelsForAnnotation: async function(annotationId, amountOfLabels) {
+            for (let i = 0; i < amountOfLabels; i++) {
+                await db.labels.add({
+                    name: "label_" + i,
+                    color: this.$store.state.colors[i % this.$store.state.colors.length],
+                    annoId: annotationId,
+                });
+            }
         },
         validateInputs: function() {
             let invalidFeedback = "";

@@ -146,7 +146,6 @@ function breakDownToSamplingrate2(dataPoints, timestamps, samplingrate, feature)
     }
     let result = [];
     let oldsegment = 0;
-    console.log(segmentlengths);
     segmentlengths.forEach(segment => {
         segment = oldsegment + segment;
         let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
@@ -157,26 +156,33 @@ function breakDownToSamplingrate2(dataPoints, timestamps, samplingrate, feature)
     return result;
 }
 
+/* function to get feature instances for supplied data
+ * data = data object with all axes
+ * selectedFeatures = features with axis data
+*/ 
 export function createFeatureInstances(data, selectedFeatures, slidingWindow, samplingRate){
     let instances = [];
     let dataPoints = [];
-    console.log(data);
+    // Downsample dataPoints of selected axis
     selectedFeatures.forEach(feature => {
         console.log(feature.axis.id);
-        dataPoints.push(breakDownToSamplingrate2(data.dataPoints[feature.axis.id].dataPoints, data.timestamps, samplingRate, 3));
+        data.dataPoints.forEach(axis => {
+            if(axis.id == feature.axis.id){
+                dataPoints.push(breakDownToSamplingrate2(axis.dataPoints, data.timestamps, samplingRate, 3));
+            }
+        })
     })
-    console.log(dataPoints);
+    // calculate the feature for every slidingWindow and selectedFeature
     for(let i = 0; i < Math.floor(dataPoints[0].length/samplingRate/slidingWindow); i++){
         const result = [];
         selectedFeatures.forEach((feature) => {
             const axisData = dataPoints[feature.id];
-            console.log(axisData);
             console.log([i*samplingRate, i*samplingRate + parseInt(feature.slidingWindow)]);
             result.push(calcFeature(axisData.slice(i*samplingRate, i*samplingRate + parseInt(feature.slidingWindow)), feature.feature));
         });
         instances.push(result);
     }
-    console.log(instances);
+    return(instances);
 }
 
 function calcFeature(data, feature){
