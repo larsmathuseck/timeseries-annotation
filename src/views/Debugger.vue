@@ -109,15 +109,12 @@ export default {
             const currentData = this.data?.[this.$store.state.currentSelectedData];
             const dataPoints = [currentData?.dataPoints[this.currentSelectedAxis-1]];
             if(dataPoints[0] != undefined){
-                const featureCalc = breakDownToSamplingrate([dataPoints[0]?.dataPoints], currentData?.timestamps, this.samplingRate, this.currentFeature);
-                let featureArray = [];
-                for(let i = 0; i < featureCalc[0].length; i++){
-                    featureArray.push([featureCalc[1][i], featureCalc[0][i][0]]);
-                }
+                let featureCalc = breakDownToSamplingrate([dataPoints[0]?.dataPoints], currentData?.timestamps, this.samplingRate, this.currentFeature);
+                featureCalc = featureCalc[1].map((x) => { return [featureCalc[0][featureCalc[1].indexOf(x)], x[0]]; });
                 dataPoints.push({
                     id: this.features[this.currentFeature].id,
                     name: this.features[this.currentFeature].name,
-                    dataPoints: featureArray,
+                    dataPoints: featureCalc,
                     color: "blue",
                 });
                 return dataPoints;
