@@ -54,7 +54,7 @@
                         <label class="col-4 col-lg-3 col-form-label text-left">Percent</label>
                     </div>
                     <div class="row mb-3 justify-content-center">
-                        <label for="selectedFeature" class="col-6 col-form-label">Feature to use</label>
+                        <label for="selectedFeature" class="col-6 col-form-label">Downsampling Method</label>
                         <div class="col-5 col-lg-6">
                             <select v-model="selectedFeature" id="selectedFeature" ref="select" class="form-select" :disabled="modelFileName.length == 0">
                                 <option v-for="feature in features" :key="feature.id" v-bind:value="feature" >
@@ -81,10 +81,9 @@
                 </div>
             </div>
         </div>
-        <button type="submit" id="submitFormBtn" hidden></button>
         <div class="row justify-content-center">
             <div class="col-auto">
-                <button type="button" class="btn btn-primary" @click="loadDataIntoModel">Load Data in Model</button>
+                <button type="submit" class="btn btn-primary">Load Data in Model</button>
             </div>
         </div>
     </form>
@@ -93,6 +92,8 @@
 <script>
 import * as tf from '@tensorflow/tfjs';
 import features from "../model/ModelFunctions";
+import { createInstances } from "../model/ModelInstances";
+import { db } from "/db";
 
 export default {
     name: "ModelConfiguration",
@@ -153,18 +154,8 @@ export default {
             this.modelFileName = modelFileName;
             this.model = model;
         },
-        submitForm: function() {
-            document.getElementById("submitFormBtn").click();
-        },
         onSubmit: function(e) {
             e.preventDefault();
-            this.inputsFilledOut = true;
-        },
-        loadDataIntoModel: function() {
-            this.submitForm();
-            if (!this.inputsFilledOut) {
-                return;
-            }
             if (!this.validateInputs()) {
                 return;
             }
@@ -175,8 +166,9 @@ export default {
                     windowShift: this.windowShift,
                     selectedAxes: this.selectedAxes,
                     feature: this.selectedFeature,
+                    acceptedPercent: this.acceptedPercent,
             };
-            this.$emit("loadDataIntoModel", modelConfiguration)
+            this.loadDataIntoModel(modelConfiguration);
         },
         validateInputs: function() {
             let invalidFeedback = "";
@@ -224,18 +216,188 @@ export default {
                 return false;
             }
         },
+        loadDataIntoModel: async function(modelConfiguration) {
+            const data = this.$store.state.data;
+            const model = modelConfiguration.model;
+
+            const instances = createInstances(this.$store.state, modelConfiguration);
+            console.log(instances);
+            let slotsNumber;
+            if(modelConfiguration.windowShift == 0){
+                slotsNumber = instances[0].length;
+            }
+            else{
+                slotsNumber = instances[0].length*modelConfiguration.slidingWindow/modelConfiguration.windowShift;
+            }
+            let predictedValues = [];
+            try {
+                instances.forEach(instance => {
+                    const tensor = tf.tensor(instance);
+                    const a = model.predict(tensor);
+                    predictedValues.push({data: a.arraySync(), timestamps: instance.timestamps});
+                });                
+            } catch (error) {
+                this.showInvalidFeedback = error.message;
+                return;
+            }
+            console.log(predictedValues);
+            let currentPosition = [];
+            for(let i = 0; i < predictedValues.length; i++){
+                currentPosition.push(null);
+            }
+            let predictions = [];
+            for(let i = 0; i < slotsNumber; i++){
+                let position = i%predictedValues.length;
+                if(currentPosition[position] == null){
+                    currentPosition[position] = 0;
+                }
+                else{
+                    currentPosition[position] += 1;
+                    if(currentPosition[position] >= predictedValues[0].data.length){
+                        currentPosition[position] = null;
+                    }
+                }
+                let indices = {};
+                for(let j = 0; j < predictedValues.length; j++){
+                    let data = predictedValues[j].data[currentPosition[j]];
+                    let index = data?.indexOf(Math.max(...data));
+                    if(index == null){
+                        continue;
+                    }
+                    else if(data[index] < modelConfiguration.acceptedPercent * 0.01){
+                        if (!indices.undecided) {
+                            indices.undecided = 1;
+                        } else {
+                            indices.undecided += 1;
+                        }
+                    }
+                    else {
+                        if (!indices[index]) {
+                            indices[index] = 1;
+                        } else {
+                            indices[index] += 1;
+                        }
+                    }
+                }
+                console.log(indices);
+                let result = Object.keys(indices).reduce(function(a, b){ 
+                    if(indices[a] == indices[b]){
+                        // if(a == 'undecided'){
+                            //     return b;
+                        // }
+                        // else if(b == 'undecided'){
+                        //     return a;
+                        // }
+                        // else{
+                            //createLabel("undecided_" + a + "_" + b, annotationId);
+                            return [a, b];
+                        // }
+                    }
+                    else if(indices[a] > indices[b]){
+                        return a;
+                    }
+                    else{
+                        return b; 
+                    }
+                });
+                predictions.push(result);
+            }
+            // create annotation file
+            const annotationId = await this.createNewAnnotationFile();
+            // create all the areas
+            let timestamp = data[this.$store.state.currentSelectedData].timestamps[0];
+            let nextTimestamp;
+            for (let index = 0; index < predictions.length; index++) {
+                let prediction = predictions[index];
+                if(modelConfiguration.windowShift == 0){
+                    nextTimestamp = timestamp + 1000*modelConfiguration.slidingWindow;
+                }
+                else{
+                    nextTimestamp = timestamp + 1000*modelConfiguration.windowShift
+                }
+                if (prediction != 'undecided') {
+                    let labelName = "";
+                    let labelId;
+                    if (Array.isArray(prediction)) {
+                        const labelArray = [];
+                        for (let i = 0; i < prediction.length; i++) {
+                            labelArray.push(prediction[i]);
+                        }
+                        labelName = "undecided_";
+                        for (let i = 0; i < labelArray.length; i++) {
+                            if (labelArray[i] == "undecided") {
+                                labelName = "undecided_label";
+                                break;
+                            }
+                            labelName += parseInt(labelArray[i]) + 1;
+                            if (i != labelArray.length-1) {
+                                labelName += "_";
+                            }
+                        }
+                        labelId = await this.getOrCreateLabel(labelName, annotationId);
+                    }
+                    else {
+                        labelName = "prediction_" + (parseInt(prediction) + 1);
+                        labelId = await this.getOrCreateLabel(labelName, annotationId);
+                    }
+                    db.areas.add({
+                        annoId: annotationId,
+                        labelId: labelId,
+                        firstTimestamp: timestamp,
+                        secondTimestamp: nextTimestamp,
+                    });
+                }
+                timestamp = nextTimestamp;
+            }
+            db.lastSelected.update(1, {annoId: parseInt(annotationId)});
+            if (!this.$store.state.areasVisible) {
+                this.$store.commit("toggleAreasVisibility");
+            }
+            this.$emit("closeModal");
+        },
+        createNewAnnotationFile: async function() {
+            const annotations = await db.annotations.toArray();
+            let counter = 0;
+            annotations.forEach(annotation => {
+                if (annotation.name.includes("ModelAnnotation")) {
+                    counter ++;
+                }
+            });
+            let name = "ModelAnnotation";
+            if (counter != 0) {
+                name += "(" + counter + ")";
+            }
+            return await db.annotations.add({
+                name: name,
+                lastAdded: {},
+            });
+        },
+        getOrCreateLabel: async function(labelName, annotationId) {
+            const amountOfLabels = await db.labels.where("annoId").equals(annotationId).toArray();
+            const labelsWithName = await db.labels.where("[annoId+name]").equals([annotationId, labelName]).toArray();
+            if (labelsWithName.length == 0) {
+                return await db.labels.add({
+                    name: labelName,
+                    color: this.$store.state.colors[amountOfLabels.length % this.$store.state.colors.length],
+                    annoId: annotationId,
+                });
+            } else {
+                return labelsWithName[0].id;
+            }
+        },
         isMultiple: function(a, b) {
             // this function is needed, since the normal Javascript modulo seem to not work like expected. With this we only check if the result of division is an float by searching for a comma.
             const temp = (a/b).toString();
             const commaIndex = temp.indexOf(".");
             return commaIndex == -1 ? 0 : commaIndex;
-        }
+        },
     },
     computed: {
         axes: function() {
             return this.$store.getters.getAxes;
         },
     },
+    emits: ["closeModal", "setInvalidFeedback"],
 }
 
 class L2 {

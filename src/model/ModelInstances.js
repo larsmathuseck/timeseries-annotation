@@ -120,8 +120,8 @@ export function createFeatureInstances(data, selectedFeatures, slidingWindow, sa
     let largestFeatureWindow = 0;
     // Downsample dataPoints of selected axis
     selectedFeatures.forEach(feature => {
-        if(parseInt(feature.slidingWindow) > largestFeatureWindow){
-            largestFeatureWindow = parseInt(feature.slidingWindow);
+        if(parseInt(feature.dataPointsPerInstance) > largestFeatureWindow){
+            largestFeatureWindow = parseInt(feature.dataPointsPerInstance);
         }
         data.dataPoints.forEach(axis => {
             if(axis.id == feature.axis.id){
@@ -138,7 +138,7 @@ export function createFeatureInstances(data, selectedFeatures, slidingWindow, sa
         const result = [];
         selectedFeatures.forEach((feature) => {
             const axisData = dataPoints[feature.id];
-            result.push(calcFeature(axisData.slice(i - parseInt(feature.slidingWindow), i), feature.feature));
+            result.push(calcFeature(axisData.slice(i - parseInt(feature.dataPointsPerInstance), i), feature.feature));
         });
         instances.push(result);
         i = i + parseInt(slidingWindow*samplingRate);

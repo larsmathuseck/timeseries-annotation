@@ -4,11 +4,15 @@
             {{ row.name }}
         </option>
     </select>
-    <div class="input-group-apend">
+    <div class="input-group-apend my-auto">
         <input id="fileUpload" type="file" accept=".csv" multiple v-on:change="onFileChange" hidden>
+        <button v-if="type =='annotation'" type="button" class="btn btn-default btn-circle trash-btn me-1" @click="deleteFile()">
+            <i class="fa fa-trash"></i>
+        </button>
         <button type="button" class="btn btn-default btn-circle" @click="chooseFile()">
             <i class="fa fa-plus"></i>
         </button>
+        
     </div>
 </template>
 
@@ -17,9 +21,6 @@ import { db } from "/db"
 
 export default {
     name: "FileSelect",
-    components: {
-        
-    },
     props: {
         type: String,
         data: Array,
@@ -66,6 +67,19 @@ export default {
                 }
             }
         },
+        async deleteFile() {
+            const anno = await db.lastSelected.where('id').equals(1).first();
+            const annoId = anno.annoId;
+            console.log(annoId);
+            await db.annotations.delete(annoId);
+            db.annoData.where("annoId").equals(annoId).delete();
+            db.labels.where("annoId").equals(annoId).delete();
+            db.areas.where("annoId").equals(annoId).delete();
+            const annotations = await db.annotations.toArray();
+            if (annotations.length != 0) {
+                db.lastSelected.update(1, {annoId: parseInt(annotations[0].id)});
+            }
+        }
     },
     watch: {
         selected: function() {
@@ -76,15 +90,20 @@ export default {
 </script>
 
 <style scoped>
+.form-select {
+    margin-right: 0.7vw;
+}
+
 .btn-circle {
-    height: 2.5vw;
-    width: 2.5vw;
-    border-radius: 1.25vw;
+    height: 2vw;
+    width: 2vw;
+    border-radius: 1vw;
     text-align: center;
-    font-size: 1vw;
+    font-size: 0.7vw;
     background-color: #bbb;
     opacity: 0.7;
-    margin-left: 1vw;
+    margin-top: auto;
+    margin-bottom: auto;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -93,6 +112,10 @@ export default {
 
 .btn-circle:hover { 
     opacity: 1;
+}
+
+.trash-btn {
+    font-size: 1vw;
 }
 
 .fa-plus {
