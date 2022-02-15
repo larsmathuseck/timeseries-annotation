@@ -145,13 +145,13 @@ export default {
         setInvalidFeedback: function(invalidFeedback) {
             this.$emit('setInvalidFeedback', invalidFeedback)
         },
-        onSubmit: function(e) {
+        onSubmit: async function(e) {
             e.preventDefault();
             if (!this.validateInputs()) {
                 return;
             }
             // TODO load data into model via this.$emit in ImportModelModal
-            const result = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, 1, this.samplingrate);
+            const result = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, this.slidingWindow, this.samplingrate);
             const instances = result[0];
             const offsetInSeconds = result[1];
             let predictedValues = [];

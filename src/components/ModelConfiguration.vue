@@ -221,6 +221,7 @@ export default {
             const model = modelConfiguration.model;
 
             const instances = createInstances(this.$store.state, modelConfiguration);
+            console.log(instances);
             let slotsNumber;
             if(modelConfiguration.windowShift == 0){
                 slotsNumber = instances[0].length;
@@ -239,6 +240,7 @@ export default {
                 this.showInvalidFeedback = error.message;
                 return;
             }
+            console.log(predictedValues);
             let currentPosition = [];
             for(let i = 0; i < predictedValues.length; i++){
                 currentPosition.push(null);
@@ -277,6 +279,7 @@ export default {
                         }
                     }
                 }
+                console.log(indices);
                 let result = Object.keys(indices).reduce(function(a, b){ 
                     if(indices[a] == indices[b]){
                         // if(a == 'undecided'){
