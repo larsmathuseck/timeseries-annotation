@@ -62,7 +62,6 @@ export default createStore({
                     timestamps: timestamps,
                     selectedAxes: [dataJson[0].id],
                 });
-                console.log(state.data);
             }
         },
         addAnnotationData: async (state, payload) => {
