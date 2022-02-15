@@ -39,12 +39,13 @@ export default createStore({
                 });
                 
                 // Delete last not full second
-                const lastTimestamp = timestamps[timestamps.length-1] - (timestamps[timestamps.length-1] - timestamps[0])%1000;
-                if(lastTimestamp < timestamps[timestamps.length-1]){
-                    let time = timestamps.pop();
-                    while(time > lastTimestamp){
-                        time = timestamps.pop();
+                const lastTimestamp = (timestamps[timestamps.length-1] - (timestamps[timestamps.length-1] - timestamps[0])%1000);
+                let time = timestamps[timestamps.length-1];
+                while(time > lastTimestamp){
+                    if(timestamps[timestamps.length-2] <= lastTimestamp){
+                        break;
                     }
+                    time = timestamps.pop();
                 }
                 
                 // Get dimensions in own arrays
@@ -61,6 +62,7 @@ export default createStore({
                     timestamps: timestamps,
                     selectedAxes: [dataJson[0].id],
                 });
+                console.log(state.data);
             }
         },
         addAnnotationData: async (state, payload) => {

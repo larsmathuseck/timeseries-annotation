@@ -41,7 +41,7 @@ export default {
     components: {
         VChart,
     },
-    props: ['data'],
+    props: ['data', 'areaData'],
     data: function () {
         return {
             dataZoomStart: 0,
@@ -52,7 +52,6 @@ export default {
             sizeOfGraph: 0,
             clickX: 0,
             clickY: 0,
-            areaData: [],
         };
     },
     provide: {
@@ -86,15 +85,17 @@ export default {
                             {
                                 xAxis: new Date(x.firstTimestamp),
                                 itemStyle: {
-                                    color: x.label.color,
-                                    opacity: 0.5,
+                                    color: x.color,
+                                    opacity: 0.2,
                                     borderColor: "black",
-                                    borderWidth: 0.2,
+                                    borderWidth: 1,
                                     borderType: "solid"
                                 },
+                                y: x.y1 + '%',
                             },
                             {
                                 xAxis: new Date(x.secondTimestamp),
+                                y: x.y2 + '%',
                             }
                         ];
                     });
@@ -109,13 +110,13 @@ export default {
                     emphasis: {
                         scale: false,
                         lineStyle: {
-                            width: 1.5,
+                            width: 2,
                             color: graphData[key].color,
                         },
                     },
                     lineStyle: {
                         color: graphData[key].color,
-                        width: 1.5,
+                        width: 2,
                     },
                     data: graphData[key].dataPoints,
                 });
