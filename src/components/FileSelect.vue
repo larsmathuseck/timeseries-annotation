@@ -6,12 +6,13 @@
     </select>
     <div class="input-group-apend my-auto">
         <input id="fileUpload" type="file" accept=".csv" multiple v-on:change="onFileChange" hidden>
+        <button v-if="type =='annotation'" type="button" class="btn btn-default btn-circle trash-btn me-1" @click="deleteFile()">
+            <i class="fa fa-trash"></i>
+        </button>
         <button type="button" class="btn btn-default btn-circle" @click="chooseFile()">
             <i class="fa fa-plus"></i>
         </button>
-        <button v-if="type =='annotation'" type="button" class="btn btn-default btn-circle trash-btn" @click="deleteFile()">
-            <i class="fa fa-trash"></i>
-        </button>
+        
     </div>
 </template>
 
@@ -89,6 +90,10 @@ export default {
 </script>
 
 <style scoped>
+.form-select {
+    margin-right: 0.7vw;
+}
+
 .btn-circle {
     height: 2vw;
     width: 2vw;
@@ -97,7 +102,6 @@ export default {
     font-size: 0.7vw;
     background-color: #bbb;
     opacity: 0.7;
-    margin-left: 1vw;
     margin-top: auto;
     margin-bottom: auto;
     display: inline-flex;
