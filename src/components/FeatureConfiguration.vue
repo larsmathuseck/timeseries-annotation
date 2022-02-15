@@ -28,6 +28,15 @@
                     <AddFeature @addFeature="addFeature" @setInvalidFeedback="setInvalidFeedback"/>
                     <div class="row mb-3 justify-content-center">
                         <div class="col-2"></div>
+                        <label for="slidingWindowInput" class="col-4 col-form-label">Sliding Window</label>
+                        <div class="col-2">
+                            <input v-model="slidingWindow" type="number" class="form-control" id="slidingWindowInput" placeholder="4" :disabled="featureModelFileName.length == 0" required>
+                        </div>
+                        <label class="col-2 col-lg-3 col-form-label text-start">Seconds</label>
+                        <div class="col-2 col-lg-1"></div>
+                    </div>
+                    <div class="row mb-3 justify-content-center">
+                        <div class="col-2"></div>
                         <label for="samplingRateInput" class="col-4 col-form-label">Sampling Rate</label>
                         <div class="col-2">
                             <input v-model="samplingrate" type="number" class="form-control" id="samplingRateInput" placeholder="8" :disabled="featureModelFileName.length == 0" required>
@@ -44,7 +53,10 @@
                         <draggable :disbaled="false " :list="features" item-key="id" class="list-group" ghost-class="ghost" >
                             <template #item="{ element  }">
                                 <div class="list-group-item"> 
-                                    {{ element.axis.name + "-" + element.feature.name + "-" + element.slidingWindow}}
+                                    {{ element.axis.name + "-" + element.feature.name + "-" + element.dataPointsPerInstance}}
+                                    <button type="button" class="btn btn-default btn-circle trash-btn me-1" @click="deleteFeature(element)">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
                                 </div>
                             </template>
                         </draggable>
@@ -77,6 +89,7 @@ export default {
             featureModelFileName: "",
             addFeatureVisible: false,
             samplingrate: null,
+            slidingWindow: null,
             features: [],
         }
     },
@@ -130,9 +143,6 @@ export default {
         setInvalidFeedback: function(invalidFeedback) {
             this.$emit('setInvalidFeedback', invalidFeedback)
         },
-        checkMove: function(e) {
-            window.console.log("Future index: " + e.draggedContext.futureIndex);
-        },
         onSubmit: function(e) {
             e.preventDefault();
             if (!this.validateInputs()) {
@@ -146,6 +156,12 @@ export default {
             if (this.model == null) {
                 invalidFeedback = "No Model imported yet!";
             }
+            else if (isNaN(this.slidingWindow)) {
+                invalidFeedback = "Sliding Window must be a number!";
+            }
+            else if (this.slidingWindow < 0) {
+                invalidFeedback = "Sliding Window can not be a negative Number!";
+            }
             else if (this.samplingrate < 0) {
                 invalidFeedback = "Sampling Rate can not be a negative Number!";
             }
@@ -158,6 +174,14 @@ export default {
                 this.$emit("setInvalidFeedback", invalidFeedback)
                 return false;
             }
+        },
+        deleteFeature: function(feature) {
+            console.log(feature);
+            console.log(this.features);
+            const index = this.features.indexOf(feature);
+            console.log(index);
+            this.features.splice(index, 1);
+            console.log(this.features);
         }
     }
 }
@@ -215,5 +239,24 @@ input {
     cursor: grabbing;
     cursor: -moz-grabbing;
     cursor: -webkit-grabbing;
+}
+
+.btn-circle {
+    height: 1.5rem;
+    width: 1.5rem;
+    border-radius: 50%;
+    text-align: center;
+    background-color: #bbb;
+    opacity: 0.7;
+    margin-top: auto;
+    margin-bottom: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0px;
+}
+
+.btn-circle:hover { 
+    opacity: 1;
 }
 </style>
