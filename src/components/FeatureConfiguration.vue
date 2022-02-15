@@ -176,12 +176,8 @@ export default {
             }
         },
         deleteFeature: function(feature) {
-            console.log(feature);
-            console.log(this.features);
             const index = this.features.indexOf(feature);
-            console.log(index);
             this.features.splice(index, 1);
-            console.log(this.features);
         }
     }
 }

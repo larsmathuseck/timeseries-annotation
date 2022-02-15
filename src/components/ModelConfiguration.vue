@@ -369,19 +369,6 @@ export default {
                 lastAdded: {},
             });
         },
-        createLabelsForAnnotation: async function(annotationId, amountOfLabels) {
-            for (let i = 0; i < amountOfLabels; i++) {
-                let name = "prediction_" + i;
-                if (i == amountOfLabels -1 ) {
-                    name = "undecided_1_2";
-                }
-                await db.labels.add({
-                    name: name,
-                    color: this.$store.state.colors[i % this.$store.state.colors.length],
-                    annoId: annotationId,
-                });
-            }
-        },
         getOrCreateLabel: async function(labelName, annotationId) {
             const amountOfLabels = await db.labels.where("annoId").equals(annotationId).toArray();
             const labelsWithName = await db.labels.where("[annoId+name]").equals([annotationId, labelName]).toArray();
