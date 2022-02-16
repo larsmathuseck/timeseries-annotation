@@ -1,10 +1,10 @@
 <template>
-    <div class="row h-100">
+    <div class="row">
         <label class="description-text">
             Annotations
         </label>
         <div id="scroll-container-annotations">
-            <div class="annotation-container" v-for="annotation in annotations" :key="annotation.id">
+            <div class="d-flex justify-content-between annotation-container" v-for="annotation in annotations" :key="annotation.id">
                 <Annotation :annotation="annotation" />
             </div>
         </div>
@@ -14,19 +14,43 @@
 <script>
 import Annotation from "./Annotation.vue"
 import { DateTime } from "luxon"
+import { liveQuery } from "dexie";
+import { db } from "/db";
+import { useObservable } from "@vueuse/rxjs";
 
 export default {
     name: "RightSidebar",
     components: {
         Annotation,
     },
+    setup: function(){
+        const annoData = useObservable(liveQuery(async () => {
+            const curr = await db.lastSelected.where('id').equals(1).first();
+            const annotations = await db.annoData.where('annoId').equals(parseInt(curr?.annoId || 1)).sortBy('timestamp');
+            await Promise.all (annotations.map (async anno => {
+                [anno.label] = await Promise.all([
+                    db.labels.get(anno.labelId)
+                ]);
+            }));
+            return annotations;
+        }));
+        return {
+            annoData,
+        }
+    },
     computed: {
         annotations: function() {
-            let ann = this.$store.getters.getAnnotations;
-            for(let i = 0; i < ann.length; i++){
-                ann[i].timestamp = DateTime.fromMillis(ann[i].timestamp).toFormat('hh:mm:ss SSS');
+            let annoData = this.annoData;
+            if(annoData != undefined){
+                for(let i = 0; i < annoData.length; i++){
+                    const label = annoData[i].label;
+                    annoData[i].name = label.name;
+                    annoData[i].color = label.color;
+                    annoData[i].timestamp = DateTime.fromMillis(annoData[i].timestamp).toFormat('hh:mm:ss SSS');
+                }
             }
-            return ann;
+            
+            return annoData;
         }
     },
 }
@@ -43,9 +67,8 @@ export default {
 }
 
 .annotation-container {
-    padding: 12px 12px 12px 0px;
+    padding: 0.3vw 0.3vw 0.3vw 0vw;
     border-bottom: 0.1vw solid rgb(128, 128, 128, 0.5);
-    
 }
 
 .annotation-container:hover {

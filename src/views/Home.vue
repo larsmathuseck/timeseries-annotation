@@ -23,7 +23,6 @@ import Header from "./Header.vue"
 import LeftSidebar from "../components/LeftSidebar.vue"
 import RightSidebar from "../components/RightSidebar.vue"
 
-
 export default {  
     name: "Home",
     components: {
@@ -32,11 +31,15 @@ export default {
         LeftSidebar,
         RightSidebar,
     },
+    data() {
+        return {
+        }
+    },
     computed: {
         showGraph: function(){
             return this.$store.getters.showGraph;
         }
-    }
+    },
 };
 </script>
 

@@ -11,6 +11,8 @@
 </template>
 
 <script>
+import { db } from "/db";
+
 export default {
     name: "Annotation",
     props: {
@@ -18,8 +20,7 @@ export default {
     },
     methods: {
         deleteAnnotation(annotation) {
-            console.log("before commit: ", annotation)
-            this.$store.commit("deleteAnnotation", annotation.annotationObject)
+            db.annoData.delete(annotation.id);
         }
     },
 }
@@ -33,13 +34,16 @@ export default {
     margin: 0px;
     margin-left: 0px;
     float:left;
-    padding: 5px 10px 5px 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .annotation-name {
     font-family: Tahoma;
-    font-size: 1vw;
+    font-size: 0.8vw;
     color: white;
+    padding: 0.3vw;
     margin: 0px;
 }
 
@@ -48,11 +52,11 @@ export default {
     display: block;
     color: rgb(128, 128, 128, 0.5);
     margin-top: 0;
-    margin-bottom: 1vw;
+    margin-bottom: 0.25vw;   
 }
 
 i {
-    margin-left: 5px;
+    margin-left: 0.01vw;
 }
 
 </style>
