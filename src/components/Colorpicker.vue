@@ -15,7 +15,7 @@ export default {
     },
     data() {
         return {
-            colors: ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
+            colors: this.$store.state.colors,
         }
     },
     methods: {

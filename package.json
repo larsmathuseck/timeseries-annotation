@@ -23,7 +23,8 @@
         "vue-class-component": "^8.0.0-0",
         "vue-echarts": "^6.0.0",
         "vue-router": "^4.0.0-0",
-        "vueperslides": "^3.3.2",
+        "vuedraggable": "^4.1.0",
+        "vueperslides": "^2.15.2",
         "vuex": "^4.0.0-0"
     },
     "devDependencies": {

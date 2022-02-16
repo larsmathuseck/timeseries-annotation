@@ -7,10 +7,31 @@
                     <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="col-auto">
-                        <vueper-slides fade :touchable="false" fixed-height="500px">
-                            <vueper-slide v-for="(slide, i) in slides" :key="i" :title="slide.title" :image="slide.image" />
-                        </vueper-slides>
+                    <div id="carouselExampleDark" ref="exampleCarousel" class="carousel carousel-dark slide" data-bs-interval="false" data-bs-ride="carousel">
+                        <div class="carousel-indicators">
+                            <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                            <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                            <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                        </div>
+                        <div class="carousel-inner">
+                            <div class="carousel-item active" data-bs-interval="10000">
+                                <img src="img/tutorial/ImportData.jpg" class="d-block w-100">
+                            </div>
+                            <div class="carousel-item" data-bs-interval="2000">
+                                <img src="img/tutorial/ExampleChooseDataWithText.jpg" class="d-block w-100">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="img/tutorial/ExampleChooseAnnotation.jpg" class="d-block w-100">
+                            </div>
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -22,33 +43,17 @@
 </template>
 
 <script>
-import { Modal } from 'bootstrap'
-import { VueperSlides, VueperSlide } from 'vueperslides'
-import 'vueperslides/dist/vueperslides.css'
+import { Modal, Carousel } from 'bootstrap'
 
 export default {
     name: "TutorialModal",
-    components: {
-        VueperSlides,
-        VueperSlide
-    },
     props: {
         toggleTutorialModalVisibility: Boolean
     },
     data() {
         return {
             modal: null,
-            slides: [
-                {
-                    image: require('../../public/img/tutorial/ImportData.jpg')
-                },
-                {
-                    image: require('../../public/img/tutorial/ExampleChooseDataWithText.jpg')
-                }, 
-                {
-                    image: require('../../public/img/tutorial/ExampleChooseAnnotation.jpg')
-                }
-            ]
+            carousel: null,
         }
     },
     methods: {
@@ -66,32 +71,7 @@ export default {
         if(this.toggleModalVisibility){
             this.modal.show();
         }
+        this.carousel = new Carousel(this.$refs.exampleCarousel);
     },
 }
 </script>
-
-<style scoped>
-.modal-body {
-    padding: 0px;
-}
-
-
-</style>
-
-<style>
-.vueperslides__arrow {
-    color: grey
-}
-
-.vueperslides__bullet .default {
-  background-color: rgb(218, 218, 218);
-  border: none;
-  box-shadow: none;
-  transition: 0.3s;
-}
-
-.vueperslides__bullet--active .default {
-    background-color: grey;
-}
-
-</style>

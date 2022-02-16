@@ -21,9 +21,6 @@ import {
 } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
 import { DateTime } from "luxon";
-import { liveQuery } from "dexie";
-import { db } from "/db";
-import { useObservable } from "@vueuse/rxjs";
 
 use([
     CanvasRenderer,
@@ -40,38 +37,11 @@ use([
 ]);
 
 export default {
-    name: "Graph",
+    name: "DebugGraph",
     components: {
         VChart,
     },
-    setup: function(){
-        const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
-        const annoData = useObservable(liveQuery(async () => {
-            const curr = await db.lastSelected.where('id').equals(1).first();
-            const annotations = await db.annoData.where('annoId').equals(parseInt(curr?.annoId || 1)).sortBy('timestamp');
-            await Promise.all (annotations.map (async anno => {
-                [anno.label] = await Promise.all([
-                    db.labels.get(anno.labelId)
-                ]);
-            }));
-            return annotations;
-        }));
-        const areaData = useObservable(liveQuery(async () => {
-            const curr = await db.lastSelected.where('id').equals(1).first();
-            const areas = await db.areas.where('annoId').equals(parseInt(curr?.annoId || 1)).toArray();
-            await Promise.all (areas.map (async area => {
-                [area.label] = await Promise.all([
-                    db.labels.get(area.labelId)
-                ]);
-            }));
-            return areas;
-        }));
-        return {
-            currAnn,
-            annoData,
-            areaData,
-        }
-    },
+    props: ['data', 'areaData'],
     data: function () {
         return {
             dataZoomStart: 0,
@@ -88,29 +58,6 @@ export default {
         [THEME_KEY]: "light",
     },
     methods: {
-        chartClicked: function (event) {
-            const diffX = Math.abs(event.pageX - this.clickX);
-            const diffY = Math.abs(event.pageY - this.clickY);
-            if(diffX < 3 && diffY < 3){
-                let pointInPixel = [event.offsetX, event.offsetY];
-                if (this.$refs.charts.containPixel("grid", pointInPixel)) {
-                    let pointInGrid = this.$refs.charts.convertFromPixel("grid", pointInPixel);
-                    this.addAnnotationPoint(Math.round(pointInGrid[0]));
-                }
-            }
-        },
-        addAnnotationPoint: function (timestamp) {
-            let time = new Date(timestamp).getTime();
-            let label = this.$store.state.activeLabel;
-            let currAnn = this.currAnn;
-            if(label != null && currAnn != undefined){
-                db.annoData.add({labelId: label.id, annoId: currAnn.annoId, timestamp: time});
-            }
-        },
-        dragDetection: function (event) {
-            this.clickX = event.pageX;
-            this.clickY = event.pageY;
-        },
         zoom: function (event) {
             if (event.start !== undefined && event.end !== undefined) {
                 this.tempDataZoomStart = event.start;
@@ -127,50 +74,28 @@ export default {
     computed: {
         option: function () {
             let series = [];
-            let graphData = this.$store.getters.getData;
+            let graphData = this.data;
             let legende = [];
-            let annotations = this.annoData;
             let areas = this.areaData;
-            let ann;
-            let ml;
             let area;
-            if(annotations != undefined){
-                ann = annotations.map((x, i) => {
-                    return {
-                        symbol: "pin",
-                        itemStyle: {
-                        color: x.label.color
-                        },
-                        name: (i + 1).toString() + " " + x.label.name,
-                        xAxis: new Date(x.timestamp),
-                        y: "75"
-                    };
-                });
-                ml = annotations.map(x => {
-                    return {
-                        itemStyle: {
-                            color: x.label.color
-                        },
-                        xAxis: new Date(x.timestamp),
-                    };
-                });
-            }
-            if (this.areasVisible && areas != undefined) {
+            if (areas != undefined) {
                 if (areas.length != 0) {
                     area = areas.map(x => {
                         return [
                             {
                                 xAxis: new Date(x.firstTimestamp),
                                 itemStyle: {
-                                    color: x.label.color,
-                                    opacity: 0.5,
+                                    color: x.color,
+                                    opacity: 0.2,
                                     borderColor: "black",
-                                    borderWidth: 0.2,
+                                    borderWidth: 1,
                                     borderType: "solid"
                                 },
+                                y: x.y1 + '%',
                             },
                             {
                                 xAxis: new Date(x.secondTimestamp),
+                                y: x.y2 + '%',
                             }
                         ];
                     });
@@ -185,44 +110,23 @@ export default {
                     emphasis: {
                         scale: false,
                         lineStyle: {
-                            width: 1.5,
+                            width: 2,
                             color: graphData[key].color,
                         },
                     },
                     lineStyle: {
                         color: graphData[key].color,
-                        width: 1.5,
+                        width: 2,
                     },
                     data: graphData[key].dataPoints,
                 });
             }
-            series[0].markPoint = {
-                                animation: true,
-                                symbol: "pin",
-                                label: {
-                                    show: true,
-                                    padding: 5,
-                                    distance: 5,
-                                    formatter: (value) => {
-                                        return value.name.split(" ")[0];
-                                    },
-                                    color: "white"
-                                },
-                                data: ann,
-                            };
-            series[0].markLine = {
-                                animation: true,
-                                silent: true,
-                                symbol: "none",
-                                label: { show: false},
-                                data: ml,
-                            };
             series[0].markArea = {
                                 animation: true,
                                 silent: true,
                                 label: { show: false},
                                 data: area,
-                            };
+                            }
             return {
                 height: this.sizeOfGraph,
                 animation: false,
@@ -288,9 +192,6 @@ export default {
                 ],
             };
         },
-        areasVisible: function() {
-            return this.$store.state.areasVisible;
-        }
     },
     watch:{
         option: function(){

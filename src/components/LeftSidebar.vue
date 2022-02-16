@@ -2,17 +2,7 @@
     <div class="row">
         <label class="description-text" >Data Files</label>
         <div class="input-group">
-            <select v-model="lastSelectedData" class="form-select" @change="selectDataFile()">
-                <option v-for="row in data" :key="row.id" v-bind:value="row.id">
-                    {{ row.name }}
-                </option>
-            </select>
-            <div class="input-group-apend">
-                <input id="dataFileUpload" type="file" accept=".csv" multiple v-on:change="onDataFileChange" hidden>
-                <button type="button" class="btn btn-default btn-circle" @click="chooseDataFile">
-                    <i class="fa fa-plus"></i>
-                </button>
-            </div>
+            <FileSelect type="data" :data="data" :selected="lastSelectedData" />
         </div>
     </div>
     <div class="row">
@@ -20,23 +10,13 @@
         <div id="scroll-container-axes">
             <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
                 <Axis :axis="axis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
-                
             </div>
         </div>
     </div>
     <div class="row">
         <label class="description-text" >Annotation Files</label>
         <div class="input-group">
-            <select v-model="lastSelectedAnnotation" class="form-select" ref="annoSelect" @change="selectAnnotationFile()">
-                <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" v-bind:value="annotationFile.id">
-                    {{ annotationFile.name }}
-                </option>
-            </select>
-            <div class="input-group-apend">
-                <button type="button" class="btn btn-default btn-circle" @click="showAnnotationModal">
-                    <i class="fa fa-plus"></i>
-                </button>
-            </div>
+            <FileSelect type="annotation" :data="annotationFiles" :selected="lastSelectedAnnotation" @annoModal="showAnnotationModal" />
         </div>
     </div>
     <div class="row">
@@ -46,6 +26,17 @@
                 <i class="fa fa-plus"></i>
             </button>
         </span>
+        <div class="row justify-content-start align-items-center">
+            <div class="col-auto area-visibility-container">
+                <p class="area-p">Areas visible</p>
+            </div>
+            <div class="col-auto area-visibility-container px-0">
+                <label class="switch">
+                    <input type="checkbox" v-model="areasVisible" v-show="false">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
         <div id="scroll-container-labels">
             <div class="row label-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
                 <Label :label="label" @editLabel="editLabel" />
@@ -61,6 +52,7 @@ import Axis from "./Axis.vue"
 import Label from "./Label.vue"
 import AnnotationModal from "./AnnotationModal.vue"
 import LabelModal from "./LabelModal.vue"
+import FileSelect from "./FileSelect.vue"
 import { liveQuery } from "dexie";
 import { db } from "/db";
 import { useObservable } from "@vueuse/rxjs";
@@ -72,6 +64,7 @@ export default {
         Label,
         AnnotationModal,
         LabelModal,
+        FileSelect,
     },
     setup: function(){
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
@@ -107,11 +100,19 @@ export default {
         selectedAxes: function() {
             return this.$store.getters.selectedAxes;
         },
+        areasVisible: {
+            get() {
+                return this.$store.state.areasVisible;
+            },
+            set() {
+                this.$store.commit("toggleAreasVisibility");
+            }
+        },
     },
     watch: {
         currAnn: function(){
             this.lastSelectedAnnotation = this.currAnn?.annoId;
-        }
+        },
     },
     methods: {
         labelOnClick(label) {
@@ -132,33 +133,6 @@ export default {
             }
             this.labelToEdit = null;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
-        },
-        selectDataFile() {
-            this.$store.commit("selectDataFile", this.lastSelectedData);
-        },
-        selectAnnotationFile() {
-            db.lastSelected.update(1, {annoId: parseInt(this.$refs.annoSelect.value)});
-        },
-        chooseDataFile() {
-            document.getElementById("dataFileUpload").click();
-        },
-        onDataFileChange(e) {
-            const fileList = e.target.files;
-            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const file = fileList[i];
-                this.readFile(file);
-            }
-        },
-        readFile(file){
-            const reader = new FileReader();
-            if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
-                reader.readAsText(file);
-                reader.onload = () => {
-                    if(file.name.includes("data")){
-                        this.$store.commit("addData", {result: reader.result, name: file.name});
-                    }
-                }
-            }
         },
         keyPressed: function(e) {
             let key = e.key;
@@ -298,6 +272,70 @@ export default {
 .fa-edit:hover, .fa-times:hover {
     opacity: 1;
     cursor: pointer;
+}
+
+.area-p {
+    margin-bottom: 0;
+}
+
+.area-visibility-container {
+    height: fit-content;
+    display: inline-flex;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 3vw;
+  height: 1.5vw;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.15vw;
+  width: 1.15vw;
+  left: 0.25vw;
+  bottom: 0.2vw;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(1.25vw);
+  -ms-transform: translateX(1.25vw);
+  transform: translateX(1.3vw);
+}
+
+.slider.round {
+  border-radius: 1vw;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
 
 </style>

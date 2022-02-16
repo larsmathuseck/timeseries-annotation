@@ -6,8 +6,8 @@
         <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
             <ul class="nav nav-pills">
                 <li class="nav-item">
-                    <button type="button" class="btn btn-light" @click="testDanfo">
-                            Test Danfo
+                    <button type="button" class="btn btn-light" @click="changePage">
+                            {{ buttonText }}
                     </button>
                 </li>
                 <li class="nav-item">
@@ -17,13 +17,13 @@
                         Import Folder
                     </button>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" v-if="!debug">
                     <button type="button" class="btn btn-light" @click="saveAnnotation">
                         <i class="fa fa-download"></i>
                         Save Annotation
                     </button>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" v-if="!debug">
                     <button @click="toggleModelModalVisibility  = !toggleModelModalVisibility" type="button" class="btn btn-light">
                         <i class="fa fa-wrench"></i>
                         Model
@@ -59,6 +59,7 @@ export default {
     },
     props: {
         title: String,
+        debug: Boolean,
     },
     data() {
         return {
@@ -67,9 +68,24 @@ export default {
             showModal: false,
         }
     },
+    computed: {
+        buttonText: function(){
+            if(!this.debug){
+                return "Debbuger";
+            }
+            else{
+                return "Main";
+            }
+        }
+    },
     methods: {
-        testDanfo: function() {
-            this.$store.commit("testDanfo");
+        changePage() {
+            if(!this.debug){
+                this.$router.push('/debug');
+            }
+            else{
+                this.$router.push('/');
+            }
         },
         chooseFiles() {
             document.getElementById("multipleFileUpload").click();
@@ -78,6 +94,7 @@ export default {
             db.annotations.clear();
             db.annoData.clear();
             db.labels.clear();
+            db.areas.clear();
             const fileList = e.target.files;
             let filesToUpload = [];
             let fileNames = {};

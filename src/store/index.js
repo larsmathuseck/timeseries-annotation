@@ -1,38 +1,14 @@
 import { createStore } from 'vuex'
 import { parse } from "@vanillaes/csv";
-import { DataFrame } from "danfojs";
 import { db } from "/db";
-
-function slope(df) {
-    let max = df.values[0][1];
-    let timestampMax = df.values[0][0];
-    let min = df.values[0][1];
-    let timestampMin = df.values[0][0];
-    const values = df.values;
-    for (let i = 1; i < values.length; i++) {
-        if (values[i][1] > max) {
-            max = values[i][1];
-            timestampMax = values[i][0];
-        }
-        if (values[i][1] < min) {
-            min = values[i][1];
-            timestampMin = values[i][0];
-        }
-    }
-    let slope = 0;
-    if (timestampMax != timestampMin) {
-        slope = (max - min) / (timestampMax - timestampMin);
-    }
-    return [timestampMax, slope];
-}
 
 export default createStore({
     state: {
         data: [],
         currentSelectedData: 0,
         activeLabel: null,
-        model: {},
-        colors: ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
+        areasVisible: false,
+        colors: ["red", "orange", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
     },
     mutations: {
         addData: async (state, payload) => {
@@ -61,13 +37,24 @@ export default createStore({
                     timestamps.push(new Date(row[timestampLocation]).getTime());
                     row.splice(timestampLocation, 1);
                 });
-            
+                
+                // Delete last not full second
+                const lastTimestamp = (timestamps[timestamps.length-1] - (timestamps[timestamps.length-1] - timestamps[0])%1000);
+                let time = timestamps[timestamps.length-1];
+                while(time > lastTimestamp){
+                    if(timestamps[timestamps.length-2] <= lastTimestamp){
+                        break;
+                    }
+                    time = timestamps.pop();
+                }
+                
                 // Get dimensions in own arrays
-                for(let row = 0; row < data.length; row++){
+                for(let row = 0; row < timestamps.length; row++){
                     for(let column = 0; column < data[row].length; column++){
                         dataJson[column].dataPoints.push([new Date(timestamps[row]).getTime(), data[row][column]]);   
                     }
                 }
+                
                 state.data.push({
                     id: state.data.length,
                     name: payload.name,
@@ -75,111 +62,8 @@ export default createStore({
                     timestamps: timestamps,
                     selectedAxes: [dataJson[0].id],
                 });
+                console.log(state.data);
             }
-        },
-        testDanfo: (state) => {
-            const samplingrate = 8;
-            const data = state.data[0].dataPoints[0].dataPoints;
-            let df = new DataFrame(data);
-            //df.drop({ columns: ["0"], inplace: true })
-            df = df.asType("1", "float32");
-            const timestamps = state.data[0].timestamps;
-            let segmentlengths = [];
-            let timestamp = timestamps[0];
-            let timestapplus = timestamp + 1000;
-            let i = 0;
-            while(i < data.length){
-                let dataCount = 0;
-                while(timestamp < timestapplus){
-                    i++;
-                    dataCount++;
-                    timestamp = timestamps[i];
-                }
-                let segmentlength = Math.floor(dataCount / samplingrate);
-                let remainder = dataCount % samplingrate;
-                for(let i = 0; i < samplingrate; i++){
-                    if(remainder > 0){
-                        segmentlengths.push(segmentlength + 1);
-                        remainder--;
-                    }
-                    else{
-                        segmentlengths.push(segmentlength);
-                    }
-                }
-                timestapplus = timestamp + 1000;
-            }
-            let max = [];
-            let min = [];
-            let mean = [];
-            let median = [];
-            let std = [];
-            let varianz = [];
-            let slopes = [];
-            let oldsegment = 0;
-            segmentlengths.forEach(segment => {
-                segment = oldsegment + segment;
-                let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
-                max.push([timestamps[segment], newFrame.max({ axis: 0 }).values[1]]);
-                min.push([timestamps[segment], newFrame.min({ axis: 0 }).values[1]]);
-                mean.push([timestamps[segment], newFrame.mean({ axis: 0 }).values[1]]);
-                median.push([timestamps[segment], newFrame.median({ axis: 0 }).values[1]]);
-                std.push([timestamps[segment], newFrame.std({ axis: 0 }).values[1]]);
-                varianz.push([timestamps[segment], newFrame.var({ axis: 0 }).values[1]]);
-                const slopeArray = slope(newFrame);
-                // console.log(slopeArray)
-                slopes.push([slopeArray[0], slopeArray[1]]);
-                oldsegment = segment;
-            })
-            state.data[0].dataPoints.push({
-                id: "max",
-                name: "Max",
-                dataPoints: max,
-                color: "black",
-            });
-            state.data[0].dataPoints.push({
-                id: "min",
-                name: "Min",
-                dataPoints: min,
-                color: "green",
-            });
-            state.data[0].dataPoints.push({
-                id: "mean",
-                name: "Mean",
-                dataPoints: mean,
-                color: "blue",
-            });
-            state.data[0].dataPoints.push({
-                id: "median",
-                name: "Median",
-                dataPoints: median,
-                color: "orange",
-            });
-            state.data[0].dataPoints.push({
-                id: "std",
-                name: "Std",
-                dataPoints: std,
-                color: "red",
-            });
-            state.data[0].dataPoints.push({
-                id: "var",
-                name: "Var",
-                dataPoints: varianz,
-                color: "brown",
-            });
-            state.data[0].dataPoints.push({
-                id: "slope",
-                name: "Slope",
-                dataPoints: slopes,
-                color: "purple",
-            });
-            state.data[0].selectedAxes.push("max");
-            state.data[0].selectedAxes.push("min");
-            state.data[0].selectedAxes.push("mean");
-            state.data[0].selectedAxes.push("median");
-            state.data[0].selectedAxes.push("std");
-            state.data[0].selectedAxes.push("var");
-            state.data[0].selectedAxes.push("slope");
-            console.log(state.data[0]);
         },
         addAnnotationData: async (state, payload) => {
             let data = parse(payload.result);
@@ -272,49 +156,14 @@ export default createStore({
         addSelectedAxes: (state, axis) => {
             state.data[state.currentSelectedData].selectedAxes.push(axis.id);
         },
-        addAnnotationPointFromModel(state, payload) {
-            const timestamp = payload.timestamp;
-            const label = payload.label;
-            state.activeLabel = state.annotations[state.currAnn].labels[label];
-            let time = new Date(timestamp).getTime();
-            let annotations = state.annotations[state.currAnn].data;
-            let inserted = false;
-            let lastAddedAnnotation = state.annotations[state.currAnn].lastAddedAnnotation;
-            if (annotations.length == 0) {
-                const newAnn = {
-                    id: 0,
-                    label: state.activeLabel.id,
-                    timestamp: time,
-                };
-                annotations.push(newAnn);
-                state.annotations[state.currAnn].lastAddedAnnotation = newAnn;
-                return;
-            }
-            const newAnn = {
-                id: lastAddedAnnotation.id +1,
-                label: state.activeLabel.id,
-                timestamp: time,
-            };
-            state.annotations[state.currAnn].lastAddedAnnotation = newAnn;
-            for(let i = 0; i < annotations.length; i++){
-                if(annotations[i].timestamp > time){
-                    annotations.splice(i, 0, newAnn);
-                    inserted = true;
-                    break;
-                }
-            }
-            if(!inserted){
-                annotations.push(newAnn);
-            }
-        },
-        deleteSelectedAxis(state, axis) {
+        deleteSelectedAxis: (state, axis) => {
             let selectedAxes = state.data[state.currentSelectedData].selectedAxes;
             const index = selectedAxes.indexOf(axis.id);
             if (index > -1) {
                 selectedAxes.splice(index, 1);
             }
         },
-        changeAxisColor(state, changedAxis) {
+        changeAxisColor: (state, changedAxis) => {
             let axes = state.data[state.currentSelectedData].dataPoints;
             for (let i in axes) {
                 if (axes[i].id === changedAxis.id) {
@@ -323,11 +172,14 @@ export default createStore({
                 }
             }
         },
-        toggleActiveLabel(state, label) {
+        toggleActiveLabel: (state, label) => {
             state.activeLabel = label;
         },
-        selectDataFile(state, dataFileId){
+        selectDataFile: (state, dataFileId) => {
             state.currentSelectedData = dataFileId;
+        },
+        toggleAreasVisibility: (state) => {
+            state.areasVisible = !state.areasVisible;
         },
     },
     getters: {
