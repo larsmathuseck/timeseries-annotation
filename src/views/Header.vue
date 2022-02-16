@@ -24,18 +24,18 @@
                     </button>
                 </li>
                 <li class="nav-item" v-if="!debug">
-                    <button @click="toggleModelModalVisibility  = !toggleModelModalVisibility" type="button" class="btn btn-light">
+                    <button @click="showModelModal = true; toggleModelModalVisibility  = !toggleModelModalVisibility" type="button" class="btn btn-light">
                         <i class="fa fa-wrench"></i>
                         Model
                     </button>
-                    <ImportModelModal :toggleModelModalVisibility="toggleModelModalVisibility" />
+                    <ImportModelModal v-if="showModelModal" :toggleModelModalVisibility="toggleModelModalVisibility" />
                 </li>
                 <li class="nav-item">
                     <button type="button" class="btn btn-light" @click="showModal = true; toggleTutorialModalVisibility  = !toggleTutorialModalVisibility">
                         <i class="fa fa-file"></i>
                         Tutorial
                     </button>
-                    <TutorialModal v-if="showModal" :toggleModalVisibility="toggleModalVisibility" />
+                    <TutorialModal v-if="showModal" :toggleTutorialModalVisibility="toggleTutorialModalVisibility" />
                 </li>
             </ul>
         </div>
@@ -45,7 +45,7 @@
 <script>
 import { defineAsyncComponent } from 'vue'
 const TutorialModal = defineAsyncComponent(() => import("@/components/TutorialModal.vue"))
-import ImportModelModal from "../components/ImportModelModal.vue";
+const ImportModelModal = defineAsyncComponent(() => import("@/components/ImportModelModal.vue"));
 import { db } from "/db";
 import { DateTime } from "luxon";
 import { stringify } from "@vanillaes/csv";
@@ -66,6 +66,7 @@ export default {
             toggleTutorialModalVisibility: false,
             toggleModelModalVisibility: false,
             showModal: false,
+            showModelModal: false,
         }
     },
     computed: {
