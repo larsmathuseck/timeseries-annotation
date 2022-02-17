@@ -47,13 +47,6 @@
                         <label class="col-4 col-lg-3 col-form-label text-left">Seconds</label>
                     </div>
                     <div class="row mb-3 justify-content-center">
-                        <label for="acceptedPercent" class="col-6 col-form-label">Percent Acceptance</label>
-                        <div class="col-2 col-lg-3">
-                            <input v-model="acceptedPercent" class="form-control" type="text" id="acceptedPercent" placeholder="80" :disabled="modelFileName.length == 0" required>
-                        </div>
-                        <label class="col-4 col-lg-3 col-form-label text-left">Percent</label>
-                    </div>
-                    <div class="row mb-3 justify-content-center">
                         <label for="selectedFeature" class="col-6 col-form-label">Downsampling Method</label>
                         <div class="col-5 col-lg-6">
                             <select v-model="selectedFeature" id="selectedFeature" ref="select" class="form-select" :disabled="modelFileName.length == 0">
@@ -104,7 +97,6 @@ export default {
             slidingWindow: null,
             samplingRate: null,
             windowShift: null,
-            acceptedPercent: null,
             inputsFilledOut: false,
             selectedAxes: [],
             features: features,
@@ -166,7 +158,6 @@ export default {
                     windowShift: this.windowShift,
                     selectedAxes: this.selectedAxes,
                     feature: this.selectedFeature,
-                    acceptedPercent: this.acceptedPercent,
             };
             this.loadDataIntoModel(modelConfiguration);
         },
@@ -193,15 +184,6 @@ export default {
             }
             else if (this.windowShift != 0 && this.isMultiple(this.slidingWindow, this.windowShift) != 0) {
                 invalidFeedback = "Sliding Window must be a multiple from Window Shift!";
-            }
-            else if (isNaN(this.acceptedPercent)) {
-                invalidFeedback = "Accepted Percent must be a number!";
-            }
-            else if (this.acceptedPercent < 0) {
-                invalidFeedback = "Accepted Percent must be greater than 0%!";
-            }
-            else if (this.acceptedPercent > 100) {
-                invalidFeedback = "Accepted Percent must be less than 101%!"
             }
             else if (data.length == 0) {
                 invalidFeedback = "Please upload data first!"
@@ -263,13 +245,6 @@ export default {
                     let index = data?.indexOf(Math.max(...data));
                     if(index == null){
                         continue;
-                    }
-                    else if(data[index] < modelConfiguration.acceptedPercent * 0.01){
-                        if (!indices.undecided) {
-                            indices.undecided = 1;
-                        } else {
-                            indices.undecided += 1;
-                        }
                     }
                     else {
                         if (!indices[index]) {
