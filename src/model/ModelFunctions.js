@@ -7,6 +7,8 @@ const features = [
     {id: 4, name: "Standard Deviation", func: (df) => std(df)},
     {id: 5, name: "Varianz", func: (df) => varianz(df)},
     {id: 6, name: "Slope", func: (df) => slope(df)},
+    {id: 7, name: "First", func: (df) => first(df)},
+    {id: 8, name: "Last", func: (df) => last(df)},
 ]
 
 function min(df){
@@ -31,6 +33,14 @@ function std(df){
 
 function varianz(df){
     return df.var({ axis: 0 }).values[1];
+}
+
+function first(df){
+    return df.head(1).values[0][1];
+}
+
+function last(df){
+    return df.tail(1).values[0][1];
 }
 
 function slope(df) {

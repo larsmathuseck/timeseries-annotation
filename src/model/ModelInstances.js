@@ -69,7 +69,7 @@ export function createInstances(state, modelConfiguration) {
     const slidingWindow = modelConfiguration.slidingWindow;
     const samplingrate = modelConfiguration.samplingRate;
     const selectedAxes = modelConfiguration.selectedAxes;
-    const feature = modelConfiguration.feature;
+    const downsamplingMethod = modelConfiguration.downsamplingMethod;
     const valuesPerInstance = slidingWindow * samplingrate;
     const allAxes = state.data[state.currentSelectedData].dataPoints;
     const timestamps = state.data[state.currentSelectedData].timestamps;
@@ -86,7 +86,7 @@ export function createInstances(state, modelConfiguration) {
     })
     let featureIndex;
     for (let i = 0; i < features.length; i++) {
-        if (features[i].id === feature.id) {
+        if (features[i].name === downsamplingMethod) {
             featureIndex = i;
             break;
         }

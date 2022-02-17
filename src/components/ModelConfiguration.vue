@@ -47,11 +47,11 @@
                         <label class="col-4 col-lg-3 col-form-label text-left">Seconds</label>
                     </div>
                     <div class="row mb-3 justify-content-center">
-                        <label for="selectedFeature" class="col-6 col-form-label">Downsampling Method</label>
+                        <label for="selectedDownsamplingMethod" class="col-6 col-form-label">Downsampling Method</label>
                         <div class="col-5 col-lg-6">
-                            <select v-model="selectedFeature" id="selectedFeature" ref="select" class="form-select" :disabled="modelFileName.length == 0">
-                                <option v-for="feature in features" :key="feature.id" v-bind:value="feature" >
-                                    {{ feature.name }}
+                            <select v-model="selectedDownsamplingMethod" id="selectedDownsamplingMethod" ref="select" class="form-select" :disabled="modelFileName.length == 0">
+                                <option v-for="method in downsamplingMethods" :key="method" v-bind:value="method" >
+                                    {{ method }}
                                 </option>
                             </select>
                         </div>
@@ -84,7 +84,6 @@
 
 <script>
 import * as tf from '@tensorflow/tfjs';
-import features from "../model/ModelFunctions";
 import { createInstances } from "../model/ModelInstances";
 import { db } from "/db";
 
@@ -99,8 +98,8 @@ export default {
             windowShift: null,
             inputsFilledOut: false,
             selectedAxes: [],
-            features: features,
-            selectedFeature: features[0],
+            downsamplingMethods: ["First", "Last", "Median"],
+            selectedDownsamplingMethod: "First",
         }
     },
     methods: {
@@ -157,7 +156,7 @@ export default {
                     samplingRate: this.samplingRate,
                     windowShift: this.windowShift,
                     selectedAxes: this.selectedAxes,
-                    feature: this.selectedFeature,
+                    downsamplingMethod: this.selectedDownsamplingMethod,
             };
             this.loadDataIntoModel(modelConfiguration);
         },
