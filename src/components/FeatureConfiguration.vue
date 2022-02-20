@@ -28,18 +28,9 @@
                     <AddFeature @addFeature="addFeature" @setInvalidFeedback="setInvalidFeedback"/>
                     <div class="row mb-3 justify-content-center">
                         <div class="col-2"></div>
-                        <label for="slidingWindowInput" class="col-4 col-form-label">Sliding Window</label>
-                        <div class="col-2">
-                            <input v-model="slidingWindow" type="number" class="form-control" id="slidingWindowInput" placeholder="4" :disabled="featureModelFileName.length == 0" required>
-                        </div>
-                        <label class="col-2 col-lg-3 col-form-label text-start">Seconds</label>
-                        <div class="col-2 col-lg-1"></div>
-                    </div>
-                    <div class="row mb-3 justify-content-center">
-                        <div class="col-2"></div>
                         <label for="samplingRateInput" class="col-4 col-form-label">Sampling Rate</label>
                         <div class="col-2">
-                            <input v-model="samplingrate" type="number" class="form-control" id="samplingRateInput" placeholder="8" :disabled="featureModelFileName.length == 0" required>
+                            <input v-model="samplingRate" type="number" class="form-control" id="samplingRateInput" placeholder="8" :disabled="featureModelFileName.length == 0" required>
                         </div>
                         <label class="col-2 col-lg-3 col-form-label text-start">Hertz</label>
                         <div class="col-2 col-lg-1"></div>
@@ -53,7 +44,7 @@
                         <draggable :disbaled="false " :list="features" item-key="id" class="list-group" ghost-class="ghost" >
                             <template #item="{ element  }">
                                 <div class="list-group-item"> 
-                                    {{ element.axis.name + "-" + element.feature.name + "-" + element.dataPointsPerInstance}}
+                                    {{ element.axis.name + "-" + element.feature.name + "-" + (element.slidingWindow*this.samplingRate)}}
                                     <button type="button" class="btn btn-default btn-circle trash-btn me-1" @click="deleteFeature(element)">
                                         <i class="fa fa-trash"></i>
                                     </button>
@@ -90,8 +81,7 @@ export default {
         return {
             featureModelFileName: "",
             addFeatureVisible: false,
-            samplingrate: null,
-            slidingWindow: null,
+            samplingRate: null,
             features: [],
         }
     },
@@ -151,9 +141,10 @@ export default {
                 return;
             }
             // TODO load data into model via this.$emit in ImportModelModal
-            const result = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, this.slidingWindow, this.samplingrate);
+            const result = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, this.samplingRate);
             const instances = result[0];
             const offsetInSeconds = result[1];
+            const smallestFeatureWindow = result[2];
             let predictedValues = [];
             try {
                 const tensor = tf.tensor(instances);
@@ -174,7 +165,7 @@ export default {
             let timestamp = this.$store.state.data[this.$store.state.currentSelectedData].timestamps[0] + 1000*offsetInSeconds;
             let nextTimestamp;
             predictedValues[0].data.forEach(prediction => {
-                nextTimestamp = timestamp + 1000*this.slidingWindow;
+                nextTimestamp = timestamp + 1000*smallestFeatureWindow;
                 let max = Math.max(...prediction);
                 if(max){
                     let index = prediction.indexOf(max);
@@ -188,7 +179,11 @@ export default {
                 }
                 timestamp = nextTimestamp;
             });
-            //this.modal.hide();
+            db.lastSelected.update(1, {annoId: parseInt(annotationId)});
+            if (!this.$store.state.areasVisible) {
+                this.$store.commit("toggleAreasVisibility");
+            }
+            this.$emit("closeModal");
         },
         createNewAnnotationFile: async function() {
             return await db.annotations.add({
@@ -210,13 +205,7 @@ export default {
             if (this.model == null) {
                 invalidFeedback = "No Model imported yet!";
             }
-            else if (isNaN(this.slidingWindow)) {
-                invalidFeedback = "Sliding Window must be a number!";
-            }
-            else if (this.slidingWindow < 0) {
-                invalidFeedback = "Sliding Window can not be a negative Number!";
-            }
-            else if (this.samplingrate < 0) {
+            else if (this.samplingRate < 0) {
                 invalidFeedback = "Sampling Rate can not be a negative Number!";
             }
             else if (this.features.length == 0) {
