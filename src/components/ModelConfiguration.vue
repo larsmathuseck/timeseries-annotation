@@ -253,16 +253,7 @@ export default {
                 }
                 let result = Object.keys(indices).reduce(function(a, b){ 
                     if(indices[a] == indices[b]){
-                        // if(a == 'undecided'){
-                            //     return b;
-                        // }
-                        // else if(b == 'undecided'){
-                        //     return a;
-                        // }
-                        // else{
-                            //createLabel("undecided_" + a + "_" + b, annotationId);
-                            return [a, b];
-                        // }
+                        return [a, b];
                     }
                     else if(indices[a] > indices[b]){
                         return a;
