@@ -1,14 +1,14 @@
 import { DataFrame } from "danfojs/dist/danfojs-base";
 import features from "./ModelFunctions"
 
+
 export function breakDownToSamplingrate(dataPoints, timestamps, samplingRate, feature) {
     if(!Array.isArray(dataPoints)){
         return [];
     }
     let dataFrames = [];
     dataPoints.forEach(data => {
-        let df = new DataFrame(data);
-        df = df.asType("1", "float32");
+        let df = new DataFrame(data, {dtypes: ["int32", "float32"]});
         dataFrames.push(df);
     });
     let segments = calcSegements(timestamps, samplingRate);
@@ -30,39 +30,23 @@ export function breakDownToSamplingrate(dataPoints, timestamps, samplingRate, fe
 
 function calcSegements(timestamps, samplingRate){
     let segments = [];
-    let newTimestmaps = [];
-    let timestamp = timestamps[0];
-    let timestampForPoint = timestamps[0] + Math.floor(1000/samplingRate/2);
-    let nextSecond;
-    let i = 0;
-    while(i < timestamps.length){
-        let dataCount = 0;
-        nextSecond = timestamp + 1000;
-        if(nextSecond < timestamps[timestamps.length-1]){
-            while(timestamps[i] < nextSecond){
-                i++;
-                dataCount++;
-            }
-            let segmentlength = Math.floor(dataCount / samplingRate);
-            let remainder = dataCount % samplingRate;
-            for(let i = 0; i < samplingRate; i++) {
-                newTimestmaps.push(timestampForPoint + i * (Math.floor(1000/samplingRate)));
-                if(remainder > 0) {
-                    segments.push(segmentlength + 1);
-                    remainder--;
-                }
-                else {
-                    segments.push(segmentlength);
-                }
-            }
-            timestamp = nextSecond;
-            timestampForPoint += 1000;
+    let segmentTimestamps = [];
+    const lastTimestamp = timestamps[timestamps.length -1];
+    const samplingWindow = 1000/samplingRate;
+    let currentTimestamp = 0;
+    let nextTimestamp = timestamps[0] + samplingWindow;
+    let counter = 0;
+    while(timestamps[currentTimestamp] <= lastTimestamp){
+        if(timestamps[currentTimestamp] >= nextTimestamp){
+            segments.push(counter);
+            segmentTimestamps.push(nextTimestamp - samplingWindow);
+            counter = 0;
+            nextTimestamp += samplingWindow;
         }
-        else{
-            break;
-        }
+        counter += 1;
+        currentTimestamp += 1;
     }
-    return [newTimestmaps, segments];
+    return [segmentTimestamps, segments];
 }
 
 export function createInstances(state, modelConfiguration) {
@@ -114,14 +98,18 @@ export function createInstances(state, modelConfiguration) {
  * data = data object with all axes
  * selectedFeatures = features with axis data
 */ 
-export function createFeatureInstances(data, selectedFeatures, slidingWindow, samplingRate){
+export function createFeatureInstances(data, selectedFeatures, samplingRate){
     let instances = [];
     let dataPoints = [];
     let largestFeatureWindow = 0;
+    let smallestFeatureWindow = selectedFeatures[0].slidingWindow;
     // Downsample dataPoints of selected axis
     selectedFeatures.forEach(feature => {
-        if(parseInt(feature.dataPointsPerInstance) > largestFeatureWindow){
-            largestFeatureWindow = parseInt(feature.dataPointsPerInstance);
+        if(parseFloat(feature.slidingWindow) > largestFeatureWindow){
+            largestFeatureWindow = parseFloat(feature.slidingWindow);
+        }
+        if(parseFloat(feature.slidingWindow) < smallestFeatureWindow){
+            smallestFeatureWindow = parseFloat(feature.slidingWindow);
         }
         data.dataPoints.forEach(axis => {
             if(axis.id == feature.axis.id){
@@ -132,25 +120,24 @@ export function createFeatureInstances(data, selectedFeatures, slidingWindow, sa
         })
     })
     const dataPointsLength = dataPoints[0].length;
-    let i = parseInt(largestFeatureWindow);
+    let i = parseInt(largestFeatureWindow*samplingRate);
     // calculate the feature for every slidingWindow and selectedFeature
     while(i < dataPointsLength){
         const result = [];
         selectedFeatures.forEach((feature) => {
             const axisData = dataPoints[feature.id];
-            result.push(calcFeature(axisData.slice(i - parseInt(feature.dataPointsPerInstance), i), feature.feature));
+            result.push(calcFeature(axisData.slice(i - parseInt(feature.slidingWindow*samplingRate), i), feature.feature));
         });
         instances.push(result);
-        i = i + parseInt(slidingWindow*samplingRate);
+        i = i + parseInt(smallestFeatureWindow*samplingRate);
     }
-    let offset = largestFeatureWindow/samplingRate - slidingWindow;
+    let offset = largestFeatureWindow - smallestFeatureWindow;
     offset = offset < 0 ? 0 : offset;
-    return([instances, offset]);
+    return([instances, offset, smallestFeatureWindow]);
 }
 
 function calcFeature(data, feature){
-    let df = new DataFrame(data);
-    df = df.asType("1", "float32");
+    let df = new DataFrame(data, {dtypes: ["int32", "float32"]});
     return feature.func(df);
 }
 
