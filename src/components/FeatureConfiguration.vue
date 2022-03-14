@@ -85,6 +85,9 @@ export default {
             features: [],
         }
     },
+    props: {
+        toggleConfigDownload: Boolean,
+    },
     methods: {
         importButtonOnClick: function() {
             document.getElementById("featureModelFileInput").click()
@@ -92,19 +95,23 @@ export default {
         onFileChange: async function(e) {
             const fileList = e.target.files;
             let model;
+            let config = null;
             const weights = [];
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
                 const file = fileList[i];
                 if(file.name[0] != '.' && (file.type.includes("json") && file.name.includes("model"))) {
                     model = file;
                 }
+                else if ((file.name.includes("configuration") || file.name.includes("config")) && file.type.includes("json")) {
+                    config = file;
+                }
                 else if(file.name[0] != '.') {
                     weights.push(file);
                 }
             }
-            this.importModel(model, weights);
+            this.importModel(model, weights, config);
         },
-        importModel: async function(modelFile, weights) {
+        importModel: async function(modelFile, weights, config) {
             tf.serialization.registerClass(L2);
             const reader = new FileReader();
             reader.readAsText(modelFile);
@@ -121,13 +128,30 @@ export default {
                 weights.forEach(weight => {
                     modelArray.push(weight);
                 });
-                await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => this.modelLoaded(model, modelFile.name));
+                await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => this.modelLoaded(model, modelFile.name, config));
             }
         },
-        modelLoaded: async function(model, modelFileName) {
+        modelLoaded: async function(model, modelFileName, config) {
             this.featureModelFileName = modelFileName;
             this.model = model;
-            console.log(this.featureModelFileName);
+            this.features = [];
+            if (config) {
+                this.setModelConfiguration(config);
+            }
+        },
+        setModelConfiguration: function(config) {
+            const reader = new FileReader();
+            reader.readAsText(config);
+            reader.onload = async () => { 
+                const json = JSON.parse(reader.result);
+                this.samplingRate = json.samplingRate;
+                const features = json.features;
+                if (features) {
+                    features.forEach(feature => {
+                        this.features.push(feature);
+                    });
+                }
+            }
         },
         addFeature: function(featureData) {
             this.features.push(featureData);
@@ -151,7 +175,6 @@ export default {
                 const a = this.model.predict(tensor);
                 predictedValues.push({data: a.arraySync()});               
             } catch (error) {
-                console.log(error);
                 this.$emit("setInvalidFeedback", error.messageback);
                 return;
             }
@@ -221,8 +244,47 @@ export default {
         deleteFeature: function(feature) {
             const index = this.features.indexOf(feature);
             this.features.splice(index, 1);
+        },
+        prepareConfigDownload: function() {
+            const config = {
+                samplingRate: this.samplingRate,
+                features: this.features,
+            }
+            this.downloadConfig(config);
+        },
+        downloadConfig: async function(config) {
+            const content = JSON.stringify(config);
+            if (typeof showSaveFilePicker === 'undefined') {
+                var a = document.createElement("a");
+                a.href = window.URL.createObjectURL(new Blob([content], {type: "text/json"}));
+                a.download = "config";
+                a.click();
+            }
+            else {
+                try {
+                    const fileHandle = await self.showSaveFilePicker({
+                        suggestedName: "config",
+                        types: [{
+                            description: 'JSON files',
+                            accept: {
+                            'text/json': ['.json'],
+                            },
+                        }],
+                    });
+                    const fileStream = await fileHandle.createWritable();
+                    await fileStream.write(new Blob([content], {type: "text/plain;charset=utf-8"}));
+                    await fileStream.close();
+                } catch(error) {
+                    console.log(error);
+                }
+            }
         }
-    }
+    },
+    watch: {
+        toggleConfigDownload: function() {
+            this.prepareConfigDownload();
+        },
+    },
 }
 class L2 {
     static className = 'L2';

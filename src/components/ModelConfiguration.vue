@@ -102,6 +102,9 @@ export default {
             selectedDownsamplingMethod: "First",
         }
     },
+    props: {
+        toggleConfigDownload: Boolean,
+    },
     methods: {
         importButtonOnClick: function() {
             document.getElementById("modelFileInput").click()
@@ -109,19 +112,23 @@ export default {
         onFileChange: function(e) {
             const fileList = e.target.files;
             let model;
+            let config = null;
             const weights = [];
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
                 const file = fileList[i];
                 if(file.name[0] != '.' && (file.type.includes("json") && file.name.includes("model"))) {
                     model = file;
                 }
+                else if ((file.name.includes("configuration") || file.name.includes("config")) && file.type.includes("json")) {
+                    config = file;
+                }
                 else if(file.name[0] != '.') {
                     weights.push(file);
                 }
             }
-            this.importModel(model, weights);
+            this.importModel(model, weights, config);
         },
-        importModel: async function(modelFile, weights) {
+        importModel: async function(modelFile, weights, config) {
             tf.serialization.registerClass(L2);
             const reader = new FileReader();
             reader.readAsText(modelFile);
@@ -138,12 +145,31 @@ export default {
                 weights.forEach(weight => {
                     modelArray.push(weight);
                 });
-                await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => this.modelLoaded(model, modelFile.name));
+                await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => this.modelLoaded(model, modelFile.name, config));
             }
         },
-        modelLoaded: async function(model, modelFileName) {
+        modelLoaded: async function(model, modelFileName, config) {
             this.modelFileName = modelFileName;
             this.model = model;
+            this.selectedAxes = [];
+            this.setModelConfiguration(config);
+        },
+        setModelConfiguration: function(config) {
+            const reader = new FileReader();
+            reader.readAsText(config);
+            reader.onload = async () => { 
+                const json = JSON.parse(reader.result);
+                this.slidingWindow = json.slidingWindow;
+                this.samplingRate = json.samplingRate;
+                this.windowShift = json.windowShift;
+                this.selectedDownsamplingMethod = json.downsamplingMethod;
+                const selectedAxes = json.selectedAxes;
+                if (selectedAxes) {
+                    selectedAxes.forEach(axis => {
+                        this.selectedAxes.push(axis);
+                    });
+                }
+            }
         },
         onSubmit: function(e) {
             e.preventDefault();
@@ -353,10 +379,52 @@ export default {
             const commaIndex = temp.indexOf(".");
             return commaIndex == -1 ? 0 : commaIndex;
         },
+        prepareConfigDownload: function() {
+            const config = {
+                slidingWindow: this.slidingWindow,
+                samplingRate: this.samplingRate,
+                windowShift: this.windowShift,
+                downsamplingMethod: this.selectedDownsamplingMethod,
+                selectedAxes: this.selectedAxes,
+            }
+            this.downloadConfig(config);
+        },
+        downloadConfig: async function(config) {
+            const content = JSON.stringify(config);
+            if (typeof showSaveFilePicker === 'undefined') {
+                var a = document.createElement("a");
+                a.href = window.URL.createObjectURL(new Blob([content], {type: "text/json"}));
+                a.download = "config";
+                a.click();
+            }
+            else {
+                try {
+                    const fileHandle = await self.showSaveFilePicker({
+                        suggestedName: "config",
+                        types: [{
+                            description: 'JSON files',
+                            accept: {
+                            'text/json': ['.json'],
+                            },
+                        }],
+                    });
+                    const fileStream = await fileHandle.createWritable();
+                    await fileStream.write(new Blob([content], {type: "text/plain;charset=utf-8"}));
+                    await fileStream.close();
+                } catch(error) {
+                    console.log(error);
+                }
+            }
+        }
     },
     computed: {
         axes: function() {
             return this.$store.getters.getAxes;
+        },
+    },
+    watch: {
+        toggleConfigDownload: function() {
+            this.prepareConfigDownload();
         },
     },
     emits: ["closeModal", "setInvalidFeedback"],
