@@ -166,10 +166,21 @@ export default {
                 const selectedAxes = json.selectedAxes;
                 if (selectedAxes) {
                     selectedAxes.forEach(axis => {
-                        this.selectedAxes.push(axis);
+                        if (this.axisExists(axis)) {
+                            this.selectedAxes.push(axis);
+                        }
                     });
                 }
             }
+        },
+        axisExists: function(axis) {
+            const axes = this.axes;
+            for (let i = 0; i < axes.length; i++) {
+                if (axes[i].name == axis.name && axes[i].id == axis.id) {
+                    return true;
+                }
+            }
+            return false;
         },
         onSubmit: function(e) {
             e.preventDefault();

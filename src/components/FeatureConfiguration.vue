@@ -37,7 +37,7 @@
                     </div>
                 </div>
                 <div class="col-12 col-lg-6">
-                    <div class="row mb-3 justify-content-center">
+                    <div class="row justify-content-center">
                         <p>Feature Order</p>
                     </div>
                     <div class="row mb-3 justify-content-center">
@@ -64,6 +64,7 @@
 </template>
 
 <script>
+import features from "../model/ModelFunctions";
 import * as tf from '@tensorflow/tfjs';
 import draggable from "vuedraggable";
 import AddFeature from "./AddFeature.vue";
@@ -148,10 +149,29 @@ export default {
                 const features = json.features;
                 if (features) {
                     features.forEach(feature => {
-                        this.features.push(feature);
+                        if (this.featureExists(feature)) {
+                            this.features.push(feature);
+                        }
                     });
                 }
             }
+        },
+        featureExists: function(feature) {
+            console.log(features)
+            for (let i = 0; i < features.length; i++) {
+                if (features[i].name == feature.feature.name && features[i].id == feature.feature.id) {
+                    return this.axisExists(feature.axis)
+                }
+            }
+        },
+        axisExists: function(axis) {
+            const axes = this.$store.state.data[this.$store.state.currentSelectedData].dataPoints;
+            for (let i = 0; i < axes.length; i++) {
+                if (axes[i].name == axis.name && axes[i].id == axis.id) {
+                    return true;
+                }
+            }
+            return false;
         },
         addFeature: function(featureData) {
             this.features.push(featureData);
