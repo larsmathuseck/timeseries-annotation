@@ -11,8 +11,8 @@
                     <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <ModelConfiguration v-show="!showFeatureConfiguration" @setInvalidFeedback="setInvalidFeedback" @closeModal="closeModal"/>
-                    <FeatureConfiguration v-show="showFeatureConfiguration" @setInvalidFeedback="setInvalidFeedback" @closeModal="closeModal"/>
+                    <ModelConfiguration v-show="!showFeatureConfiguration" :toggleConfigDownload="toggleModelConfigDownload" @setInvalidFeedback="setInvalidFeedback" @closeModal="closeModal"/>
+                    <FeatureConfiguration v-show="showFeatureConfiguration" :toggleConfigDownload="toggleFeatureModelConfigDownload" @setInvalidFeedback="setInvalidFeedback" @closeModal="closeModal"/>
                     <div class="row justify-content-center" v-show="showInvalidFeedback.length > 0">
                         <div class="col-12">
                             <div class="alert alert-danger p-1 m-3" role="alert">
@@ -22,6 +22,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button class="btn btn-primary" @click="toggleDownloadConfig">Save Configuration</button>
                     <button class="btn btn-secondary" @click="closeModal">Close</button>
                 </div>
             </div>
@@ -45,6 +46,8 @@ export default {
             modal: null,
             showFeatureConfiguration: false,
             showInvalidFeedback: "",
+            toggleModelConfigDownload: false,
+            toggleFeatureModelConfigDownload: false,
         }
     },
     props: {
@@ -53,6 +56,13 @@ export default {
     methods: {
         setInvalidFeedback: function(invalidFeedback) {
             this.showInvalidFeedback = invalidFeedback;
+        },
+        toggleDownloadConfig: function() {
+            if (this.showFeatureConfiguration) {
+                this.toggleFeatureModelConfigDownload = !this.toggleFeatureModelConfigDownload;
+            } else {
+                this.toggleModelConfigDownload = !this.toggleModelConfigDownload;
+            }
         },
         closeModal: function() {
             this.modal.hide();

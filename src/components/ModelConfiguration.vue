@@ -6,16 +6,44 @@
                     <h5 class="form-label">Import Model from File</h5>
                 </div>
             </div>
-            <div class="row justify-content-center">
-                <div class="col-auto">
-                    <input id="modelFileInput" type="file" webkitdirectory directory v-on:change="onFileChange" hidden>
-                    <button @click="importButtonOnClick" type="button" class="btn btn-light styled-btn">
-                        <i class="fa fa-folder"></i>
-                        Choose Directory
-                    </button>
+            <div class="row">
+                <div class="col-6">
+                    <div class="row justify-content-end">
+                        <div class="col-auto">
+                            <input id="modelFileInput" type="file" webkitdirectory directory v-on:change="onModelFileChange" hidden>
+                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light styled-btn">
+                                <i class="fa fa-folder"></i>
+                                Choose Directory
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-auto my-auto">
-                    <p class="m-0"> {{ modelFileName.length > 0 ? modelFileName : 'No Model selected yet' }}</p>
+                <div class="col-6 my-auto">
+                    <div class="row justify-content-start">
+                        <div class="col-auto my-auto">
+                            <p class="m-0"> {{ modelFileName.length > 0 ? modelFileName : 'No Model imported' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <div class="row justify-content-end">
+                        <div class="col-auto">
+                            <input id="configFileInput" type="file" v-on:change="onConfigFileChange" hidden>
+                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light styled-btn" :class="{disabled: modelFileName.length == 0}">
+                                <i class="fa fa-folder"></i>
+                                Import Config File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 my-auto">
+                    <div class="row justify-content-start">
+                        <div class="col-auto my-auto">
+                            <p class="m-0"> {{ configName.length > 0 ? configName : 'No Config imported' }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row-justify-content-center">
@@ -93,6 +121,7 @@ export default {
         this.model = null;
         return {
             modelFileName: "",
+            configName: "",
             slidingWindow: null,
             samplingRate: null,
             windowShift: null,
@@ -102,26 +131,40 @@ export default {
             selectedDownsamplingMethod: "First",
         }
     },
+    props: {
+        toggleConfigDownload: Boolean,
+    },
     methods: {
-        importButtonOnClick: function() {
-            document.getElementById("modelFileInput").click()
+        modelImportButtonOnClick: function() {
+            document.getElementById("modelFileInput").click();
         },
-        onFileChange: function(e) {
+        configImportButtonOnClick: function() {
+            document.getElementById("configFileInput").click();
+        },
+        onModelFileChange: function(e) {
             const fileList = e.target.files;
             let model;
+            let config = null;
             const weights = [];
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
                 const file = fileList[i];
                 if(file.name[0] != '.' && (file.type.includes("json") && file.name.includes("model"))) {
                     model = file;
                 }
+                else if ((file.name.includes("configuration") || file.name.includes("config")) && file.type.includes("json")) {
+                    config = file;
+                }
                 else if(file.name[0] != '.') {
                     weights.push(file);
                 }
             }
-            this.importModel(model, weights);
+            this.importModel(model, weights, config);
         },
-        importModel: async function(modelFile, weights) {
+        onConfigFileChange: function(e) {
+            this.clearModelConfiguration();
+            this.setModelConfiguration(e.target.files[0]);
+        },
+        importModel: async function(modelFile, weights, config) {
             tf.serialization.registerClass(L2);
             const reader = new FileReader();
             reader.readAsText(modelFile);
@@ -138,12 +181,50 @@ export default {
                 weights.forEach(weight => {
                     modelArray.push(weight);
                 });
-                await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => this.modelLoaded(model, modelFile.name));
+                await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => this.modelLoaded(model, modelFile.name, config));
             }
         },
-        modelLoaded: async function(model, modelFileName) {
+        modelLoaded: async function(model, modelFileName, config) {
             this.modelFileName = modelFileName;
             this.model = model;
+            this.selectedAxes = [];
+            this.setModelConfiguration(config);
+        },
+        setModelConfiguration: function(config) {
+            this.configName = config.name;
+            const reader = new FileReader();
+            reader.readAsText(config);
+            reader.onload = async () => {
+                const json = JSON.parse(reader.result);
+                this.slidingWindow = json.slidingWindow;
+                this.samplingRate = json.samplingRate;
+                this.windowShift = json.windowShift;
+                this.selectedDownsamplingMethod = json.downsamplingMethod;
+                const selectedAxes = json.selectedAxes;
+                if (selectedAxes) {
+                    selectedAxes.forEach(axis => {
+                        if (this.axisExists(axis)) {
+                            this.selectedAxes.push(axis);
+                        }
+                    });
+                }
+            }
+        },
+        clearModelConfiguration: function() {
+            this.slidingWindow = null;
+            this.samplingRate = null;
+            this.windowShift = null;
+            this.selectedDownsamplingMethod = "First";
+            this.selectedAxes = [];
+        },
+        axisExists: function(axis) {
+            const axes = this.axes;
+            for (let i = 0; i < axes.length; i++) {
+                if (axes[i].name == axis.name && axes[i].id == axis.id) {
+                    return true;
+                }
+            }
+            return false;
         },
         onSubmit: function(e) {
             e.preventDefault();
@@ -353,10 +434,52 @@ export default {
             const commaIndex = temp.indexOf(".");
             return commaIndex == -1 ? 0 : commaIndex;
         },
+        prepareConfigDownload: function() {
+            const config = {
+                slidingWindow: this.slidingWindow,
+                samplingRate: this.samplingRate,
+                windowShift: this.windowShift,
+                downsamplingMethod: this.selectedDownsamplingMethod,
+                selectedAxes: this.selectedAxes,
+            }
+            this.downloadConfig(config);
+        },
+        downloadConfig: async function(config) {
+            const content = JSON.stringify(config);
+            if (typeof showSaveFilePicker === 'undefined') {
+                var a = document.createElement("a");
+                a.href = window.URL.createObjectURL(new Blob([content], {type: "text/json"}));
+                a.download = "config";
+                a.click();
+            }
+            else {
+                try {
+                    const fileHandle = await self.showSaveFilePicker({
+                        suggestedName: "config",
+                        types: [{
+                            description: 'JSON files',
+                            accept: {
+                            'text/json': ['.json'],
+                            },
+                        }],
+                    });
+                    const fileStream = await fileHandle.createWritable();
+                    await fileStream.write(new Blob([content], {type: "text/plain;charset=utf-8"}));
+                    await fileStream.close();
+                } catch(error) {
+                    console.log(error);
+                }
+            }
+        }
     },
     computed: {
         axes: function() {
             return this.$store.getters.getAxes;
+        },
+    },
+    watch: {
+        toggleConfigDownload: function() {
+            this.prepareConfigDownload();
         },
     },
     emits: ["closeModal", "setInvalidFeedback"],

@@ -99,7 +99,6 @@ export default {
     },
     watch: {
         axes: function() {
-            console.log(this.axes);
             if (this.axes != undefined && this.axes.length != 0) {
                 const temp = {
                     name: this.axes[0].name, 
