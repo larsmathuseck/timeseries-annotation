@@ -6,16 +6,44 @@
             </div>
         </div>
         <form @submit="onSubmit">
-            <div class="row justify-content-center">
-                <div class="col-auto">
-                    <input id="featureModelFileInput" type="file" webkitdirectory directory v-on:change="onFileChange" hidden>
-                    <button @click="importButtonOnClick" type="button" class="btn btn-light styled-btn">
-                        <i class="fa fa-folder"></i>
-                        Choose Directory
-                    </button>
+            <div class="row">
+                <div class="col-6">
+                    <div class="row justify-content-end">
+                        <div class="col-auto">
+                            <input id="featureModelFileInput" type="file" webkitdirectory directory v-on:change="onFeatureModelFileChange" hidden>
+                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light styled-btn">
+                                <i class="fa fa-folder"></i>
+                                Choose Directory
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-auto my-auto">
-                    <p class="m-0"> {{ featureModelFileName.length > 0 ? featureModelFileName : 'No Model selected yet' }}</p>
+                <div class="col-6 my-auto">
+                    <div class="row justify-content-start">
+                        <div class="col-auto my-auto">
+                            <p class="m-0"> {{ featureModelFileName.length > 0 ? featureModelFileName : 'No Model imported' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <div class="row justify-content-end">
+                        <div class="col-auto">
+                            <input id="featureConfigFileInput" type="file" v-on:change="onFeatureConfigFileChange" hidden>
+                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light styled-btn" :class="{disabled: featureModelFileName.length == 0}">
+                                <i class="fa fa-folder"></i>
+                                Import Config File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 my-auto">
+                    <div class="row justify-content-start">
+                        <div class="col-auto my-auto">
+                            <p class="m-0"> {{ featureConfigName.length > 0 ? featureConfigName : 'No Config imported' }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row-justify-content-center">
@@ -81,6 +109,7 @@ export default {
         this.model = null;
         return {
             featureModelFileName: "",
+            featureConfigName: "",
             addFeatureVisible: false,
             samplingRate: null,
             features: [],
@@ -90,10 +119,13 @@ export default {
         toggleConfigDownload: Boolean,
     },
     methods: {
-        importButtonOnClick: function() {
+        modelImportButtonOnClick: function() {
             document.getElementById("featureModelFileInput").click()
         },
-        onFileChange: async function(e) {
+        configImportButtonOnClick: function() {
+            document.getElementById("featureConfigFileInput").click()
+        },
+        onFeatureModelFileChange: async function(e) {
             const fileList = e.target.files;
             let model;
             let config = null;
@@ -111,6 +143,10 @@ export default {
                 }
             }
             this.importModel(model, weights, config);
+        },
+        onFeatureConfigFileChange: function(e) {
+            this.clearModelConfiguration();
+            this.setModelConfiguration(e.target.files[0]);
         },
         importModel: async function(modelFile, weights, config) {
             tf.serialization.registerClass(L2);
@@ -141,6 +177,7 @@ export default {
             }
         },
         setModelConfiguration: function(config) {
+            this.featureConfigName = config.name;
             const reader = new FileReader();
             reader.readAsText(config);
             reader.onload = async () => { 
@@ -155,6 +192,10 @@ export default {
                     });
                 }
             }
+        },
+        clearModelConfiguration: function() {
+            this.samplingRate = null;
+            this.features = [];
         },
         featureExists: function(feature) {
             console.log(features)
