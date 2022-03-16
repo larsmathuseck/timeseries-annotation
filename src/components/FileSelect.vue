@@ -70,7 +70,6 @@ export default {
         async deleteFile() {
             const anno = await db.lastSelected.where('id').equals(1).first();
             const annoId = anno.annoId;
-            console.log(annoId);
             await db.annotations.delete(annoId);
             db.annoData.where("annoId").equals(annoId).delete();
             db.labels.where("annoId").equals(annoId).delete();

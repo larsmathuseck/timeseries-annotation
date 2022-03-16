@@ -186,8 +186,11 @@ export default {
                 const features = json.features;
                 if (features) {
                     features.forEach(feature => {
-                        if (this.featureExists(feature)) {
-                            this.features.push(feature);
+                        const func = this.featureExists(feature);
+                        if (func != null) {
+                            let featureToAdd = feature;
+                            featureToAdd.feature.func = func;
+                            this.features.push(featureToAdd);
                         }
                     });
                 }
@@ -198,10 +201,13 @@ export default {
             this.features = [];
         },
         featureExists: function(feature) {
-            console.log(features)
             for (let i = 0; i < features.length; i++) {
                 if (features[i].name == feature.feature.name && features[i].id == feature.feature.id) {
-                    return this.axisExists(feature.axis)
+                    if(this.axisExists(feature.axis)) {
+                        return features[i].func;
+                    } else {
+                        return null;
+                    }
                 }
             }
         },

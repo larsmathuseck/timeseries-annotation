@@ -124,10 +124,11 @@ export function createFeatureInstances(data, selectedFeatures, samplingRate){
     // calculate the feature for every slidingWindow and selectedFeature
     while(i < dataPointsLength){
         const result = [];
-        selectedFeatures.forEach((feature) => {
-            const axisData = dataPoints[feature.id];
+        for (let j = 0; j < selectedFeatures.length; j++) {
+            const feature = selectedFeatures[j];
+            const axisData = dataPoints[j];
             result.push(calcFeature(axisData.slice(i - parseInt(feature.slidingWindow*samplingRate), i), feature.feature));
-        });
+        }
         instances.push(result);
         i = i + parseInt(smallestFeatureWindow*samplingRate);
     }
