@@ -188,7 +188,9 @@ export default {
             this.modelFileName = modelFileName;
             this.model = model;
             this.selectedAxes = [];
-            this.setModelConfiguration(config);
+            if (config) {
+                this.setModelConfiguration(config);
+            }
         },
         setModelConfiguration: function(config) {
             this.configName = config.name;
@@ -282,7 +284,12 @@ export default {
             const data = this.$store.state.data;
             const model = modelConfiguration.model;
 
-            const instances = createInstances(this.$store.state, modelConfiguration);
+            let instances;
+            try {
+                instances = createInstances(this.$store.state, modelConfiguration);
+            } catch (error) {
+                this.$emit("setInvalidFeedback", error.message)
+            }
             let slotsNumber;
             if(modelConfiguration.windowShift == 0){
                 slotsNumber = instances[0].length;
@@ -298,7 +305,7 @@ export default {
                     predictedValues.push({data: a.arraySync(), timestamps: instance.timestamps});
                 });                
             } catch (error) {
-                this.showInvalidFeedback = error.message;
+                this.$emit("setInvalidFeedback", error.message)
                 return;
             }
             let currentPosition = [];

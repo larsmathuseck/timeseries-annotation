@@ -68,13 +68,11 @@ export function createInstances(state, modelConfiguration) {
             }
         }
     })
-    let featureIndex;
-    for (let i = 0; i < features.length; i++) {
-        if (features[i].name === downsamplingMethod) {
-            featureIndex = i;
-            break;
-        }
+    const featureIndex = getFeatureIndex(downsamplingMethod);
+    if (featureIndex == -1) {
+        throw new Error("Downsampling Method not found! Can't break down to sampling rate!");
     }
+
     const allSegmentsWithCorrectSampling = breakDownToSamplingrate(dataPoints, timestamps, samplingrate, featureIndex)[1];
 
     windowShift == 0 ? windowShift = slidingWindow : 'nothing';
@@ -142,3 +140,13 @@ function calcFeature(data, feature){
     return feature.func(df);
 }
 
+function getFeatureIndex(featureName) {
+    let featureIndex;
+    for (let i = 0; i < features.length; i++) {
+        if (features[i].name === featureName) {
+            featureIndex = i;
+            return featureIndex;
+        }
+    }
+    return -1;
+}
