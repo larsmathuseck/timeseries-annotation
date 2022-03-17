@@ -1,5 +1,5 @@
 import { DataFrame } from "danfojs/dist/danfojs-base";
-import features from "./ModelFunctions"
+import features from "./ModelFunctions";
 
 
 export function breakDownToSamplingrate(dataPoints, timestamps, samplingRate, feature) {
@@ -21,7 +21,7 @@ export function breakDownToSamplingrate(dataPoints, timestamps, samplingRate, fe
             let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
             const func = features[feature].func;
             arrayToPush.push(func(newFrame));
-        })
+        });
         result.push(arrayToPush);
         oldsegment = segment;
     });
@@ -67,7 +67,7 @@ export function createInstances(state, modelConfiguration) {
                 break;
             }
         }
-    })
+    });
     let featureIndex;
     for (let i = 0; i < features.length; i++) {
         if (features[i].name === downsamplingMethod) {
@@ -77,7 +77,7 @@ export function createInstances(state, modelConfiguration) {
     }
     const allSegmentsWithCorrectSampling = breakDownToSamplingrate(dataPoints, timestamps, samplingrate, featureIndex)[1];
 
-    windowShift == 0 ? windowShift = slidingWindow : 'nothing';
+    windowShift = (windowShift == 0) ? slidingWindow : 'nothing';
     const differentValues = slidingWindow / windowShift;
     for (let i = 0; i < differentValues; i++) {
         let dataArray = [];
@@ -117,8 +117,8 @@ export function createFeatureInstances(data, selectedFeatures, samplingRate){
                 sampeledData = sampeledData[1].map((x) => { return [sampeledData[0][sampeledData[1].indexOf(x)], x[0]]; });
                 dataPoints.push(sampeledData);
             }
-        })
-    })
+        });
+    });
     const dataPointsLength = dataPoints[0].length;
     let i = parseInt(largestFeatureWindow*samplingRate);
     // calculate the feature for every slidingWindow and selectedFeature
