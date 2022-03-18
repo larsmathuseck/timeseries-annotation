@@ -104,7 +104,10 @@
         </div>
         <div class="row justify-content-center">
             <div class="col-auto">
-                <button type="submit" class="btn btn-primary">Load Data in Model</button>
+                <button type="submit" class="btn btn-primary">
+                    <div v-if="loading" class="spinner-border spinner-border-sm"></div>
+                    Load Data in Model
+                </button>
             </div>
         </div>
     </form>
@@ -129,6 +132,7 @@ export default {
             selectedAxes: [],
             downsamplingMethods: ["First", "Last", "Median"],
             selectedDownsamplingMethod: "First",
+            loading: false,
         }
     },
     props: {
@@ -229,8 +233,10 @@ export default {
             return false;
         },
         onSubmit: function(e) {
+            this.loading = true;
             e.preventDefault();
             if (!this.validateInputs()) {
+                this.loading = false;
                 return;
             }
             const modelConfiguration = {
@@ -288,6 +294,7 @@ export default {
             try {
                 instances = createInstances(this.$store.state, modelConfiguration);
             } catch (error) {
+                this.loading = false
                 this.$emit("setInvalidFeedback", error.message)
             }
             let slotsNumber;
@@ -305,6 +312,7 @@ export default {
                     predictedValues.push({data: a.arraySync(), timestamps: instance.timestamps});
                 });                
             } catch (error) {
+                this.loading = false;
                 this.$emit("setInvalidFeedback", error.message)
                 return;
             }
@@ -403,6 +411,7 @@ export default {
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
             }
+            this.loading = false;
             this.$emit("closeModal");
         },
         createNewAnnotationFile: async function() {

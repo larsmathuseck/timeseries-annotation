@@ -84,7 +84,10 @@
             </div> 
             <div class="row justify-content-center">
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-primary" >Load Data in Model</button>
+                    <button type="submit" class="btn btn-primary" >
+                        <div v-if="loading" class="spinner-border spinner-border-sm"></div>
+                        Load Data in Model
+                    </button>
                 </div>
             </div>
         </form>
@@ -113,6 +116,7 @@ export default {
             addFeatureVisible: false,
             samplingRate: null,
             features: [],
+            loading: false,
         }
     },
     props: {
@@ -227,8 +231,10 @@ export default {
             this.$emit('setInvalidFeedback', invalidFeedback)
         },
         onSubmit: async function(e) {
+            this.loading = true;
             e.preventDefault();
             if (!this.validateInputs()) {
+                this.loading = false;
                 return;
             }
             // TODO load data into model via this.$emit in ImportModelModal
@@ -242,6 +248,7 @@ export default {
                 const a = this.model.predict(tensor);
                 predictedValues.push({data: a.arraySync()});               
             } catch (error) {
+                this.loading = false;
                 this.$emit("setInvalidFeedback", error.messageback);
                 return;
             }
@@ -273,6 +280,7 @@ export default {
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
             }
+            this.loading = false;
             this.$emit("closeModal");
         },
         createNewAnnotationFile: async function() {
