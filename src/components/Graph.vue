@@ -163,14 +163,16 @@ export default {
                                 xAxis: new Date(x.firstTimestamp),
                                 itemStyle: {
                                     color: x.label.color,
-                                    opacity: 0.5,
+                                    opacity: 0.2,
                                     borderColor: "black",
-                                    borderWidth: 0.2,
+                                    borderWidth: 1,
                                     borderType: "solid"
                                 },
+                                y: x.y1 + '%',
                             },
                             {
                                 xAxis: new Date(x.secondTimestamp),
+                                y: x.y2 + '%',
                             }
                         ];
                     });

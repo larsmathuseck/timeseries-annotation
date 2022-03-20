@@ -75,22 +75,28 @@ export function createInstances(state, modelConfiguration) {
             break;
         }
     }
-    const allSegmentsWithCorrectSampling = breakDownToSamplingrate(dataPoints, timestamps, samplingrate, featureIndex)[1];
-
-    windowShift = (windowShift == 0) ? slidingWindow : 'nothing';
+    const allSegmentsWithCorrectSampling = breakDownToSamplingrate(dataPoints, timestamps, samplingrate, featureIndex);
+    console.log(allSegmentsWithCorrectSampling);
+    const segmentTimestamps = allSegmentsWithCorrectSampling[0];
+    const segments = allSegmentsWithCorrectSampling[1];
+    windowShift = windowShift == 0 ? slidingWindow : windowShift;
+    console.log(windowShift);
     const differentValues = slidingWindow / windowShift;
     for (let i = 0; i < differentValues; i++) {
         let dataArray = [];
+        let timeArray = [];
         let shift = i * windowShift * samplingrate;
         let segmentStart = shift;
         let segmentEnd = shift + valuesPerInstance;
-        while (segmentEnd <= allSegmentsWithCorrectSampling.length) {
-            dataArray.push(allSegmentsWithCorrectSampling.slice(segmentStart, segmentEnd));
+        while (segmentEnd <= segments.length) {
+            dataArray.push(segments.slice(segmentStart, segmentEnd));
+            timeArray.push([segmentTimestamps[segmentStart], segmentTimestamps[segmentEnd]]);
             segmentStart = segmentEnd;
             segmentEnd += valuesPerInstance;
         }
-        allInstances.push(dataArray);
+        allInstances.push([timeArray, dataArray]);
     }
+    console.log(allInstances);
     return allInstances;
 }
 
