@@ -205,7 +205,7 @@ export default {
                 this.slidingWindow = json.slidingWindow;
                 this.samplingRate = json.samplingRate;
                 this.windowShift = json.windowShift;
-                this.selectedDownsamplingMethod = json.downsamplingMethod;
+                this.selectedDownsamplingMethod = json.downsamplingMethod || this.selectedDownsamplingMethod;
                 const selectedAxes = json.selectedAxes;
                 if (selectedAxes) {
                     selectedAxes.forEach(axis => {

@@ -63,6 +63,18 @@
                         <label class="col-2 col-lg-3 col-form-label text-start">Hertz</label>
                         <div class="col-2 col-lg-1"></div>
                     </div>
+                    <div class="row mb-3 justify-content-center">
+                        <div class="col-2"></div>
+                        <label for="selectedDownsamplingMethod" class="col-4 col-form-label">Downsampling Method</label>
+                        <div class="col-4 col-lg-5">
+                            <select v-model="selectedDownsamplingMethod" id="selectedDownsamplingMethod" ref="select" class="form-select" :disabled="featureModelFileName.length == 0">
+                                <option v-for="method in downsamplingMethods" :key="method" v-bind:value="method" >
+                                    {{ method }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-2 col-lg-1"></div>
+                    </div>
                 </div>
                 <div class="col-12 col-lg-6">
                     <div class="row justify-content-center">
@@ -117,6 +129,8 @@ export default {
             samplingRate: null,
             features: [],
             loading: false,
+            downsamplingMethods: ["First", "Last", "Median"],
+            selectedDownsamplingMethod: "First",
         }
     },
     props: {
@@ -188,6 +202,7 @@ export default {
                 const json = JSON.parse(reader.result);
                 this.samplingRate = json.samplingRate;
                 const features = json.features;
+                this.selectedDownsamplingMethod = json.downsamplingMethod || this.selectedDownsamplingMethod;
                 if (features) {
                     features.forEach(feature => {
                         const func = this.featureExists(feature);
@@ -203,6 +218,7 @@ export default {
         clearModelConfiguration: function() {
             this.samplingRate = null;
             this.features = [];
+            this.selectedDownsamplingMethod = "First";
         },
         featureExists: function(feature) {
             for (let i = 0; i < features.length; i++) {
@@ -238,7 +254,7 @@ export default {
                 return;
             }
             // TODO load data into model via this.$emit in ImportModelModal
-            const result = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, this.samplingRate);
+            const result = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, this.samplingRate, this.selectedDownsamplingMethod);
             const instances = result[0];
             const offsetInSeconds = result[1];
             const smallestFeatureWindow = result[2];
