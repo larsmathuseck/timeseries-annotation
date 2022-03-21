@@ -74,8 +74,8 @@
 import graph from "../components/DebugGraph.vue"
 import Header from "./Header.vue"
 import FileSelect from "../components/FileSelect.vue"
-import features from "../model/ModelFunctions"
-import { breakDownToSamplingrate } from "../model/ModelInstances";
+import features from "../util/model/ModelFunctions"
+import { breakDownToSamplingrate } from "../util/model/ModelInstances";
 
 export default {  
     name: "Debugger",

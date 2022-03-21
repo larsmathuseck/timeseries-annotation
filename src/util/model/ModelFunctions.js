@@ -36,11 +36,11 @@ function varianz(df){
 }
 
 function first(df){
-    return df.head(1).values[0][1];
+    return parseFloat(df.head(1).values[0][1]);
 }
 
 function last(df){
-    return df.tail(1).values[0][1];
+    return parseFloat(df.tail(1).values[0][1]);
 }
 
 function slope(df) {

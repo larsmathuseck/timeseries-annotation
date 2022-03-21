@@ -67,13 +67,10 @@ export function createInstances(state, modelConfiguration) {
                 break;
             }
         }
-    });
-    let featureIndex;
-    for (let i = 0; i < features.length; i++) {
-        if (features[i].name === downsamplingMethod) {
-            featureIndex = i;
-            break;
-        }
+    })
+    const featureIndex = getFeatureIndex(downsamplingMethod);
+    if (featureIndex == -1) {
+        throw new Error("Downsampling Method not found! Can't break down to sampling rate!");
     }
     const allSegmentsWithCorrectSampling = breakDownToSamplingrate(dataPoints, timestamps, samplingrate, featureIndex);
     console.log(allSegmentsWithCorrectSampling);
@@ -104,11 +101,15 @@ export function createInstances(state, modelConfiguration) {
  * data = data object with all axes
  * selectedFeatures = features with axis data
 */ 
-export function createFeatureInstances(data, selectedFeatures, samplingRate){
+export function createFeatureInstances(data, selectedFeatures, samplingRate, downsamplingMethod){
     let instances = [];
     let dataPoints = [];
     let largestFeatureWindow = 0;
     let smallestFeatureWindow = selectedFeatures[0].slidingWindow;
+    const featureIndex = getFeatureIndex(downsamplingMethod);
+    if (featureIndex == -1) {
+        throw new Error("Downsampling Method not found! Can't break down to sampling rate!");
+    }
     // Downsample dataPoints of selected axis
     selectedFeatures.forEach(feature => {
         if(parseFloat(feature.slidingWindow) > largestFeatureWindow){
@@ -119,7 +120,7 @@ export function createFeatureInstances(data, selectedFeatures, samplingRate){
         }
         data.dataPoints.forEach(axis => {
             if(axis.id == feature.axis.id){
-                let sampeledData = breakDownToSamplingrate([axis.dataPoints], data.timestamps, samplingRate, 3);
+                let sampeledData = breakDownToSamplingrate([axis.dataPoints], data.timestamps, samplingRate, featureIndex);
                 sampeledData = sampeledData[1].map((x) => { return [sampeledData[0][sampeledData[1].indexOf(x)], x[0]]; });
                 dataPoints.push(sampeledData);
             }
@@ -148,3 +149,13 @@ function calcFeature(data, feature){
     return feature.func(df);
 }
 
+function getFeatureIndex(featureName) {
+    let featureIndex;
+    for (let i = 0; i < features.length; i++) {
+        if (features[i].name === featureName) {
+            featureIndex = i;
+            return featureIndex;
+        }
+    }
+    return -1;
+}

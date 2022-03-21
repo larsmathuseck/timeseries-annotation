@@ -104,7 +104,10 @@
         </div>
         <div class="row justify-content-center">
             <div class="col-auto">
-                <button type="submit" class="btn btn-primary">Load Data in Model</button>
+                <button type="submit" class="btn btn-primary">
+                    <div v-if="loading" class="spinner-border spinner-border-sm"></div>
+                    Load Data in Model
+                </button>
             </div>
         </div>
     </form>
@@ -112,8 +115,10 @@
 
 <script>
 import * as tf from '@tensorflow/tfjs';
-import { createInstances } from "../model/ModelInstances";
 import { db } from "/db";
+import { createInstances } from "../util/model/ModelInstances";
+import { checkImportedFiles } from "../util/model/ImportModelManager";
+import { createNewAnnotationFile, createLabelsForAnnotation } from "../util/DatabankManager";
 
 export default {
     name: "ModelConfiguration",
@@ -129,6 +134,7 @@ export default {
             selectedAxes: [],
             downsamplingMethods: ["First", "Last", "Median"],
             selectedDownsamplingMethod: "First",
+            loading: false,
         }
     },
     props: {
@@ -142,53 +148,26 @@ export default {
             document.getElementById("configFileInput").click();
         },
         onModelFileChange: function(e) {
-            const fileList = e.target.files;
-            let model;
-            let config = null;
-            const weights = [];
-            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const file = fileList[i];
-                if(file.name[0] != '.' && (file.type.includes("json") && file.name.includes("model"))) {
-                    model = file;
-                }
-                else if ((file.name.includes("configuration") || file.name.includes("config")) && file.type.includes("json")) {
-                    config = file;
-                }
-                else if(file.name[0] != '.') {
-                    weights.push(file);
-                }
+            try {
+                checkImportedFiles(e, this.modelLoaded);
+            } catch (error) {
+                this.$emit("setInvalidFeedback", error.message);
             }
-            this.importModel(model, weights, config);
         },
         onConfigFileChange: function(e) {
-            this.clearModelConfiguration();
-            this.setModelConfiguration(e.target.files[0]);
-        },
-        importModel: async function(modelFile, weights, config) {
-            tf.serialization.registerClass(L2);
-            const reader = new FileReader();
-            reader.readAsText(modelFile);
-            reader.onload = async () => {
-                const model = JSON.parse(reader.result);
-                const layers = model?.modelTopology?.model_config?.config.layers;
-                if(layers != null){
-                    layers.forEach(layer => {
-                        let config = layer.config;
-                        delete config.activity_regularizer;
-                    })
-                }
-                let modelArray = [new File([JSON.stringify(model)], "model.json")];
-                weights.forEach(weight => {
-                    modelArray.push(weight);
-                });
-                await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => this.modelLoaded(model, modelFile.name, config));
+            const file = e.target.files[0];
+            if ((file.name.toLowerCase().includes("configuration") || file.name.toLowerCase().includes("config")) && file.type.toLowerCase().includes("json")) {
+                this.clearModelConfiguration();
+                this.setModelConfiguration(file);
             }
         },
         modelLoaded: async function(model, modelFileName, config) {
             this.modelFileName = modelFileName;
             this.model = model;
             this.selectedAxes = [];
-            this.setModelConfiguration(config);
+            if (config) {
+                this.setModelConfiguration(config);
+            }
         },
         setModelConfiguration: function(config) {
             this.configName = config.name;
@@ -199,7 +178,7 @@ export default {
                 this.slidingWindow = json.slidingWindow;
                 this.samplingRate = json.samplingRate;
                 this.windowShift = json.windowShift;
-                this.selectedDownsamplingMethod = json.downsamplingMethod;
+                this.selectedDownsamplingMethod = json.downsamplingMethod || this.selectedDownsamplingMethod;
                 const selectedAxes = json.selectedAxes;
                 if (selectedAxes) {
                     selectedAxes.forEach(axis => {
@@ -227,8 +206,10 @@ export default {
             return false;
         },
         onSubmit: function(e) {
+            this.loading = true;
             e.preventDefault();
             if (!this.validateInputs()) {
+                this.loading = false;
                 return;
             }
             const modelConfiguration = {
@@ -280,7 +261,13 @@ export default {
         },
         loadDataIntoModel: async function(modelConfiguration) {
             const model = modelConfiguration.model;
-            const instances = createInstances(this.$store.state, modelConfiguration);
+            let instances;
+            try {
+                instances = createInstances(this.$store.state, modelConfiguration);
+            } catch (error) {
+                this.loading = false
+                this.$emit("setInvalidFeedback", error.message)
+            }
             let predictedValues = [];
             try {
                 instances.forEach(instance => {
@@ -289,15 +276,16 @@ export default {
                     predictedValues.push({data: a.arraySync(), timestamps: instance[0]});
                 });                
             } catch (error) {
-                this.showInvalidFeedback = error.message;
+                this.loading = false;
+                this.$emit("setInvalidFeedback", error.message)
                 return;
             }
             console.log(predictedValues);
             // create annotation file
-            const annotationId = await this.createNewAnnotationFile();
+            const annotationId = await createNewAnnotationFile();
             // create as many labels as needed
             const labelAmount = predictedValues[0].data[0].length;
-            await this.createLabelsForAnnotation(annotationId, labelAmount);
+            await createLabelsForAnnotation(annotationId, labelAmount, this.$store.state.colors);
             // create all the areas
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
             const areaHeight = 77 / predictedValues.length;
@@ -324,33 +312,8 @@ export default {
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
             }
+            this.loading = false;
             this.$emit("closeModal");
-        },
-        createNewAnnotationFile: async function() {
-            const annotations = await db.annotations.toArray();
-            let counter = 0;
-            annotations.forEach(annotation => {
-                if (annotation.name.includes("ModelAnnotation")) {
-                    counter ++;
-                }
-            });
-            let name = "ModelAnnotation";
-            if (counter != 0) {
-                name += "(" + counter + ")";
-            }
-            return await db.annotations.add({
-                name: name,
-                lastAdded: {},
-            });
-        },
-        createLabelsForAnnotation: async function(annotationId, amountOfLabels) {
-            for (let i = 0; i < amountOfLabels; i++) {
-                await db.labels.add({
-                    name: "label_" + i,
-                    color: this.$store.state.colors[i % this.$store.state.colors.length],
-                    annoId: annotationId,
-                });
-            }
         },
         getOrCreateLabel: async function(labelName, annotationId) {
             const amountOfLabels = await db.labels.where("annoId").equals(annotationId).toArray();
@@ -420,14 +383,6 @@ export default {
         },
     },
     emits: ["closeModal", "setInvalidFeedback"],
-}
-
-class L2 {
-    static className = 'L2';
-
-    constructor(config) {
-        return tf.regularizers.l1l2(config)
-    }
 }
 </script>
 

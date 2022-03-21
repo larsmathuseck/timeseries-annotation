@@ -63,6 +63,18 @@
                         <label class="col-2 col-lg-3 col-form-label text-start">Hertz</label>
                         <div class="col-2 col-lg-1"></div>
                     </div>
+                    <div class="row mb-3 justify-content-center">
+                        <div class="col-2"></div>
+                        <label for="selectedDownsamplingMethod" class="col-4 col-form-label">Downsampling Method</label>
+                        <div class="col-4 col-lg-5">
+                            <select v-model="selectedDownsamplingMethod" id="selectedDownsamplingMethod" ref="select" class="form-select" :disabled="featureModelFileName.length == 0">
+                                <option v-for="method in downsamplingMethods" :key="method" v-bind:value="method" >
+                                    {{ method }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-2 col-lg-1"></div>
+                    </div>
                 </div>
                 <div class="col-12 col-lg-6">
                     <div class="row justify-content-center">
@@ -84,7 +96,10 @@
             </div> 
             <div class="row justify-content-center">
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-primary" >Load Data in Model</button>
+                    <button type="submit" class="btn btn-primary" >
+                        <div v-if="loading" class="spinner-border spinner-border-sm"></div>
+                        Load Data in Model
+                    </button>
                 </div>
             </div>
         </form>
@@ -92,12 +107,14 @@
 </template>
 
 <script>
-import features from "../model/ModelFunctions";
+import features from "../util/model/ModelFunctions";
 import * as tf from '@tensorflow/tfjs';
 import draggable from "vuedraggable";
 import AddFeature from "./AddFeature.vue";
-import { createFeatureInstances } from "../model/ModelInstances";
 import { db } from "/db";
+import { createFeatureInstances } from "../util/model/ModelInstances";
+import { createLabelsForAnnotation, createNewAnnotationFile } from "../util/DatabankManager";
+import { checkImportedFiles } from "../util/model/ImportModelManager";
 
 export default {
     name: "FeatureConfiguration",
@@ -113,6 +130,9 @@ export default {
             addFeatureVisible: false,
             samplingRate: null,
             features: [],
+            loading: false,
+            downsamplingMethods: ["First", "Last", "Median"],
+            selectedDownsamplingMethod: "First",
         }
     },
     props: {
@@ -126,46 +146,17 @@ export default {
             document.getElementById("featureConfigFileInput").click()
         },
         onFeatureModelFileChange: async function(e) {
-            const fileList = e.target.files;
-            let model;
-            let config = null;
-            const weights = [];
-            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const file = fileList[i];
-                if(file.name[0] != '.' && (file.type.includes("json") && file.name.includes("model"))) {
-                    model = file;
-                }
-                else if ((file.name.includes("configuration") || file.name.includes("config")) && file.type.includes("json")) {
-                    config = file;
-                }
-                else if(file.name[0] != '.') {
-                    weights.push(file);
-                }
+            try {
+                checkImportedFiles(e, this.modelLoaded);
+            } catch (error) {
+                this.$emit("setInvalidFeedback", error.message);
             }
-            this.importModel(model, weights, config);
         },
         onFeatureConfigFileChange: function(e) {
-            this.clearModelConfiguration();
-            this.setModelConfiguration(e.target.files[0]);
-        },
-        importModel: async function(modelFile, weights, config) {
-            tf.serialization.registerClass(L2);
-            const reader = new FileReader();
-            reader.readAsText(modelFile);
-            reader.onload = async () => {
-                const model = JSON.parse(reader.result);
-                const layers = model?.modelTopology?.model_config?.config.layers;
-                if(layers != null){
-                    layers.forEach(layer => {
-                        let config = layer.config;
-                        delete config.activity_regularizer;
-                    })
-                }
-                let modelArray = [new File([JSON.stringify(model)], "model.json")];
-                weights.forEach(weight => {
-                    modelArray.push(weight);
-                });
-                await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => this.modelLoaded(model, modelFile.name, config));
+            const file = e.target.files[0];
+            if ((file.name.toLowerCase().includes("configuration") || file.name.toLowerCase().includes("config")) && file.type.toLowerCase().includes("json")) {
+                this.clearModelConfiguration();
+                this.setModelConfiguration(file);
             }
         },
         modelLoaded: async function(model, modelFileName, config) {
@@ -184,6 +175,7 @@ export default {
                 const json = JSON.parse(reader.result);
                 this.samplingRate = json.samplingRate;
                 const features = json.features;
+                this.selectedDownsamplingMethod = json.downsamplingMethod || this.selectedDownsamplingMethod;
                 if (features) {
                     features.forEach(feature => {
                         const func = this.featureExists(feature);
@@ -199,6 +191,7 @@ export default {
         clearModelConfiguration: function() {
             this.samplingRate = null;
             this.features = [];
+            this.selectedDownsamplingMethod = "First";
         },
         featureExists: function(feature) {
             for (let i = 0; i < features.length; i++) {
@@ -227,12 +220,14 @@ export default {
             this.$emit('setInvalidFeedback', invalidFeedback)
         },
         onSubmit: async function(e) {
+            this.loading = true;
             e.preventDefault();
             if (!this.validateInputs()) {
+                this.loading = false;
                 return;
             }
             // TODO load data into model via this.$emit in ImportModelModal
-            const result = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, this.samplingRate);
+            const result = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, this.samplingRate, this.selectedDownsamplingMethod);
             const instances = result[0];
             const offsetInSeconds = result[1];
             const smallestFeatureWindow = result[2];
@@ -242,14 +237,15 @@ export default {
                 const a = this.model.predict(tensor);
                 predictedValues.push({data: a.arraySync()});               
             } catch (error) {
+                this.loading = false;
                 this.$emit("setInvalidFeedback", error.messageback);
                 return;
             }
              // create annotation file
-            const annotationId = await this.createNewAnnotationFile();
+            const annotationId = await createNewAnnotationFile();
             // create as many labels as needed
             const labelAmount = predictedValues[0].data[0].length;
-            await this.createLabelsForAnnotation(annotationId, labelAmount);
+            await createLabelsForAnnotation(annotationId, labelAmount, this.$store.state.colors);
             // create all the areas
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
             let timestamp = this.$store.state.data[this.$store.state.currentSelectedData].timestamps[0] + 1000*offsetInSeconds;
@@ -273,22 +269,8 @@ export default {
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
             }
+            this.loading = false;
             this.$emit("closeModal");
-        },
-        createNewAnnotationFile: async function() {
-            return await db.annotations.add({
-                name: "AnnotationCreatedByModel",
-                lastAdded: {},
-            });
-        },
-        createLabelsForAnnotation: async function(annotationId, amountOfLabels) {
-            for (let i = 0; i < amountOfLabels; i++) {
-                await db.labels.add({
-                    name: "label_" + i,
-                    color: this.$store.state.colors[i % this.$store.state.colors.length],
-                    annoId: annotationId,
-                });
-            }
         },
         validateInputs: function() {
             let invalidFeedback = "";
@@ -352,13 +334,6 @@ export default {
             this.prepareConfigDownload();
         },
     },
-}
-class L2 {
-    static className = 'L2';
-
-    constructor(config) {
-        return tf.regularizers.l1l2(config)
-    }
 }
 </script>
 
