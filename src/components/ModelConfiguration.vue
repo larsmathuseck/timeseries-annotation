@@ -287,9 +287,7 @@ export default {
             }
         },
         loadDataIntoModel: async function(modelConfiguration) {
-            const data = this.$store.state.data;
             const model = modelConfiguration.model;
-
             let instances;
             try {
                 instances = createInstances(this.$store.state, modelConfiguration);
@@ -297,116 +295,46 @@ export default {
                 this.loading = false
                 this.$emit("setInvalidFeedback", error.message)
             }
-            let slotsNumber;
-            if(modelConfiguration.windowShift == 0){
-                slotsNumber = instances[0].length;
-            }
-            else{
-                slotsNumber = instances[0].length*modelConfiguration.slidingWindow/modelConfiguration.windowShift;
-            }
             let predictedValues = [];
             try {
                 instances.forEach(instance => {
-                    const tensor = tf.tensor(instance);
+                    const tensor = tf.tensor(instance[1]);
                     const a = model.predict(tensor);
-                    predictedValues.push({data: a.arraySync(), timestamps: instance.timestamps});
+                    predictedValues.push({data: a.arraySync(), timestamps: instance[0]});
                 });                
             } catch (error) {
                 this.loading = false;
                 this.$emit("setInvalidFeedback", error.message)
                 return;
             }
-            let currentPosition = [];
-            for(let i = 0; i < predictedValues.length; i++){
-                currentPosition.push(null);
-            }
-            let predictions = [];
-            for(let i = 0; i < slotsNumber; i++){
-                let position = i%predictedValues.length;
-                if(currentPosition[position] == null){
-                    currentPosition[position] = 0;
-                }
-                else{
-                    currentPosition[position] += 1;
-                    if(currentPosition[position] >= predictedValues[0].data.length){
-                        currentPosition[position] = null;
-                    }
-                }
-                let indices = {};
-                for(let j = 0; j < predictedValues.length; j++){
-                    let data = predictedValues[j].data[currentPosition[j]];
-                    let index = data?.indexOf(Math.max(...data));
-                    if(index == null){
-                        continue;
-                    }
-                    else {
-                        if (!indices[index]) {
-                            indices[index] = 1;
-                        } else {
-                            indices[index] += 1;
-                        }
-                    }
-                }
-                let result = Object.keys(indices).reduce(function(a, b){ 
-                    if(indices[a] == indices[b]){
-                        return [a, b];
-                    }
-                    else if(indices[a] > indices[b]){
-                        return a;
-                    }
-                    else{
-                        return b; 
-                    }
-                });
-                predictions.push(result);
-            }
+            console.log(predictedValues);
             // create annotation file
             const annotationId = await this.createNewAnnotationFile();
+            // create as many labels as needed
+            const labelAmount = predictedValues[0].data[0].length;
+            await this.createLabelsForAnnotation(annotationId, labelAmount);
             // create all the areas
-            let timestamp = data[this.$store.state.currentSelectedData].timestamps[0];
-            let nextTimestamp;
-            for (let index = 0; index < predictions.length; index++) {
-                let prediction = predictions[index];
-                if(modelConfiguration.windowShift == 0){
-                    nextTimestamp = timestamp + 1000*modelConfiguration.slidingWindow;
-                }
-                else{
-                    nextTimestamp = timestamp + 1000*modelConfiguration.windowShift
-                }
-                if (prediction != 'undecided') {
-                    let labelName = "";
-                    let labelId;
-                    if (Array.isArray(prediction)) {
-                        const labelArray = [];
-                        for (let i = 0; i < prediction.length; i++) {
-                            labelArray.push(prediction[i]);
-                        }
-                        labelName = "undecided_";
-                        for (let i = 0; i < labelArray.length; i++) {
-                            if (labelArray[i] == "undecided") {
-                                labelName = "undecided_label";
-                                break;
-                            }
-                            labelName += parseInt(labelArray[i]) + 1;
-                            if (i != labelArray.length-1) {
-                                labelName += "_";
-                            }
-                        }
-                        labelId = await this.getOrCreateLabel(labelName, annotationId);
+            const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
+            const areaHeight = 77 / predictedValues.length;
+            let predIndex = 0;
+            predictedValues.forEach(prediction => {
+                for (let i = 0; i < prediction.data.length; i++) {
+                    const max = Math.max(...prediction.data[i]);
+                    if(max){
+                        const index = prediction.data[i].indexOf(max);
+                        const label = allLabels[index];
+                        db.areas.add({
+                            annoId: annotationId,
+                            labelId: label.id,
+                            firstTimestamp: prediction.timestamps[i][0],
+                            secondTimestamp: prediction.timestamps[i][1],
+                            y1: 4.5 + predIndex*areaHeight,
+                            y2: 4.5 + (predIndex+1) * areaHeight,
+                        });
                     }
-                    else {
-                        labelName = "prediction_" + (parseInt(prediction) + 1);
-                        labelId = await this.getOrCreateLabel(labelName, annotationId);
-                    }
-                    db.areas.add({
-                        annoId: annotationId,
-                        labelId: labelId,
-                        firstTimestamp: timestamp,
-                        secondTimestamp: nextTimestamp,
-                    });
                 }
-                timestamp = nextTimestamp;
-            }
+                predIndex += 1;
+            })
             db.lastSelected.update(1, {annoId: parseInt(annotationId)});
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
@@ -430,6 +358,15 @@ export default {
                 name: name,
                 lastAdded: {},
             });
+        },
+        createLabelsForAnnotation: async function(annotationId, amountOfLabels) {
+            for (let i = 0; i < amountOfLabels; i++) {
+                await db.labels.add({
+                    name: "label_" + i,
+                    color: this.$store.state.colors[i % this.$store.state.colors.length],
+                    annoId: annotationId,
+                });
+            }
         },
         getOrCreateLabel: async function(labelName, annotationId) {
             const amountOfLabels = await db.labels.where("annoId").equals(annotationId).toArray();

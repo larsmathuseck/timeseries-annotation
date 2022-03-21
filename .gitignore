@@ -164,4 +164,6 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
+.jshintrc
+
 package-lock.json
