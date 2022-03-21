@@ -111,9 +111,10 @@ import features from "../util/model/ModelFunctions";
 import * as tf from '@tensorflow/tfjs';
 import draggable from "vuedraggable";
 import AddFeature from "./AddFeature.vue";
-import { createFeatureInstances } from "../util/model/ModelInstances";
 import { db } from "/db";
+import { createFeatureInstances } from "../util/model/ModelInstances";
 import { createLabelsForAnnotation, createNewAnnotationFile } from "../util/DatabankManager";
+import { checkImportedFiles } from "../util/model/ImportModelManager";
 
 export default {
     name: "FeatureConfiguration",
@@ -145,46 +146,17 @@ export default {
             document.getElementById("featureConfigFileInput").click()
         },
         onFeatureModelFileChange: async function(e) {
-            const fileList = e.target.files;
-            let model;
-            let config = null;
-            const weights = [];
-            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const file = fileList[i];
-                if(file.name[0] != '.' && (file.type.includes("json") && file.name.includes("model"))) {
-                    model = file;
-                }
-                else if ((file.name.includes("configuration") || file.name.includes("config")) && file.type.includes("json")) {
-                    config = file;
-                }
-                else if(file.name[0] != '.') {
-                    weights.push(file);
-                }
+            try {
+                checkImportedFiles(e, this.modelLoaded);
+            } catch (error) {
+                this.$emit("setInvalidFeedback", error.message);
             }
-            this.importModel(model, weights, config);
         },
         onFeatureConfigFileChange: function(e) {
-            this.clearModelConfiguration();
-            this.setModelConfiguration(e.target.files[0]);
-        },
-        importModel: async function(modelFile, weights, config) {
-            tf.serialization.registerClass(L2);
-            const reader = new FileReader();
-            reader.readAsText(modelFile);
-            reader.onload = async () => {
-                const model = JSON.parse(reader.result);
-                const layers = model?.modelTopology?.model_config?.config.layers;
-                if(layers != null){
-                    layers.forEach(layer => {
-                        let config = layer.config;
-                        delete config.activity_regularizer;
-                    })
-                }
-                let modelArray = [new File([JSON.stringify(model)], "model.json")];
-                weights.forEach(weight => {
-                    modelArray.push(weight);
-                });
-                await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => this.modelLoaded(model, modelFile.name, config));
+            const file = e.target.files[0];
+            if ((file.name.toLowerCase().includes("configuration") || file.name.toLowerCase().includes("config")) && file.type.toLowerCase().includes("json")) {
+                this.clearModelConfiguration();
+                this.setModelConfiguration(file);
             }
         },
         modelLoaded: async function(model, modelFileName, config) {
@@ -362,13 +334,6 @@ export default {
             this.prepareConfigDownload();
         },
     },
-}
-class L2 {
-    static className = 'L2';
-
-    constructor(config) {
-        return tf.regularizers.l1l2(config)
-    }
 }
 </script>
 
