@@ -115,8 +115,9 @@
 
 <script>
 import * as tf from '@tensorflow/tfjs';
-import { createInstances } from "../model/ModelInstances";
+import { createInstances } from "../util/model/ModelInstances";
 import { db } from "/db";
+import { createNewAnnotationFile, createLabelsForAnnotation } from "../util/DatabankManager";
 
 export default {
     name: "ModelConfiguration",
@@ -309,10 +310,10 @@ export default {
             }
             console.log(predictedValues);
             // create annotation file
-            const annotationId = await this.createNewAnnotationFile();
+            const annotationId = await createNewAnnotationFile();
             // create as many labels as needed
             const labelAmount = predictedValues[0].data[0].length;
-            await this.createLabelsForAnnotation(annotationId, labelAmount);
+            await createLabelsForAnnotation(annotationId, labelAmount, this.$store.state.colors);
             // create all the areas
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
             const areaHeight = 77 / predictedValues.length;
@@ -341,32 +342,6 @@ export default {
             }
             this.loading = false;
             this.$emit("closeModal");
-        },
-        createNewAnnotationFile: async function() {
-            const annotations = await db.annotations.toArray();
-            let counter = 0;
-            annotations.forEach(annotation => {
-                if (annotation.name.includes("ModelAnnotation")) {
-                    counter ++;
-                }
-            });
-            let name = "ModelAnnotation";
-            if (counter != 0) {
-                name += "(" + counter + ")";
-            }
-            return await db.annotations.add({
-                name: name,
-                lastAdded: {},
-            });
-        },
-        createLabelsForAnnotation: async function(annotationId, amountOfLabels) {
-            for (let i = 0; i < amountOfLabels; i++) {
-                await db.labels.add({
-                    name: "label_" + i,
-                    color: this.$store.state.colors[i % this.$store.state.colors.length],
-                    annoId: annotationId,
-                });
-            }
         },
         getOrCreateLabel: async function(labelName, annotationId) {
             const amountOfLabels = await db.labels.where("annoId").equals(annotationId).toArray();

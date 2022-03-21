@@ -107,12 +107,13 @@
 </template>
 
 <script>
-import features from "../model/ModelFunctions";
+import features from "../util/model/ModelFunctions";
 import * as tf from '@tensorflow/tfjs';
 import draggable from "vuedraggable";
 import AddFeature from "./AddFeature.vue";
-import { createFeatureInstances } from "../model/ModelInstances";
+import { createFeatureInstances } from "../util/model/ModelInstances";
 import { db } from "/db";
+import { createLabelsForAnnotation, createNewAnnotationFile } from "../util/DatabankManager";
 
 export default {
     name: "FeatureConfiguration",
@@ -269,10 +270,10 @@ export default {
                 return;
             }
              // create annotation file
-            const annotationId = await this.createNewAnnotationFile();
+            const annotationId = await createNewAnnotationFile();
             // create as many labels as needed
             const labelAmount = predictedValues[0].data[0].length;
-            await this.createLabelsForAnnotation(annotationId, labelAmount);
+            await createLabelsForAnnotation(annotationId, labelAmount, this.$store.state.colors);
             // create all the areas
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
             let timestamp = this.$store.state.data[this.$store.state.currentSelectedData].timestamps[0] + 1000*offsetInSeconds;
@@ -298,21 +299,6 @@ export default {
             }
             this.loading = false;
             this.$emit("closeModal");
-        },
-        createNewAnnotationFile: async function() {
-            return await db.annotations.add({
-                name: "AnnotationCreatedByModel",
-                lastAdded: {},
-            });
-        },
-        createLabelsForAnnotation: async function(annotationId, amountOfLabels) {
-            for (let i = 0; i < amountOfLabels; i++) {
-                await db.labels.add({
-                    name: "label_" + i,
-                    color: this.$store.state.colors[i % this.$store.state.colors.length],
-                    annoId: annotationId,
-                });
-            }
         },
         validateInputs: function() {
             let invalidFeedback = "";
