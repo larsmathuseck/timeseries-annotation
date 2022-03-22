@@ -81,7 +81,6 @@ export default {
     },
     data() {
         return {
-            lastSelectedData: this.$store.state.currentSelectedData,
             lastSelectedAnnotation: 1,
             toggleAnnotationModalVisibility: false,
             toggleLabelModalVisibility: false,
@@ -91,6 +90,9 @@ export default {
         }
     },
     computed: {
+        lastSelectedData: function() {
+            return this.$store.state.currentSelectedData;
+        },
         data: function() {
             return this.$store.state.data;
         },

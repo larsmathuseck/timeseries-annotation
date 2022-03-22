@@ -280,7 +280,6 @@ export default {
                 this.$emit("setInvalidFeedback", error.message)
                 return;
             }
-            console.log(predictedValues);
             // create annotation file
             const annotationId = await createNewAnnotationFile();
             // create as many labels as needed
