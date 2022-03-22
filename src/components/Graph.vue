@@ -168,11 +168,11 @@ export default {
                                     borderWidth: 1,
                                     borderType: "solid"
                                 },
-                                y: x.y1 + '%',
+                                y: 30 + ((this.sizeOfGraph - 20)/x.yAmount)*x.y1,
                             },
                             {
                                 xAxis: new Date(x.secondTimestamp),
-                                y: x.y2 + '%',
+                                y: 30 + ((this.sizeOfGraph - 20)/x.yAmount)*x.y2,
                             }
                         ];
                     });

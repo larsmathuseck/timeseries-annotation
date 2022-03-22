@@ -288,7 +288,6 @@ export default {
             await createLabelsForAnnotation(annotationId, labelAmount, this.$store.state.colors);
             // create all the areas
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
-            const areaHeight = 77 / predictedValues.length;
             let predIndex = 0;
             predictedValues.forEach(prediction => {
                 for (let i = 0; i < prediction.data.length; i++) {
@@ -301,8 +300,9 @@ export default {
                             labelId: label.id,
                             firstTimestamp: prediction.timestamps[i][0],
                             secondTimestamp: prediction.timestamps[i][1],
-                            y1: 4.5 + predIndex*areaHeight,
-                            y2: 4.5 + (predIndex+1) * areaHeight,
+                            y1: predIndex,
+                            y2: predIndex+1,
+                            yAmount: predictedValues.length,
                         });
                     }
                 }
