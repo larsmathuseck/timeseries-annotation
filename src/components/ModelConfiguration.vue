@@ -12,7 +12,7 @@
                         <div class="col-auto">
                             <input id="modelFileInput" type="file" webkitdirectory directory v-on:change="onModelFileChange" hidden>
                             <button @click="modelImportButtonOnClick" type="button" class="btn btn-light styled-btn">
-                                <i class="fa fa-folder"></i>
+                                <i class="fa-solid fa-folder"></i>
                                 Choose Directory
                             </button>
                         </div>
@@ -32,7 +32,7 @@
                         <div class="col-auto">
                             <input id="configFileInput" type="file" v-on:change="onConfigFileChange" hidden>
                             <button @click="configImportButtonOnClick" type="button" class="btn btn-light styled-btn" :class="{disabled: modelFileName.length == 0}">
-                                <i class="fa fa-folder"></i>
+                                <i class="fa-solid fa-folder"></i>
                                 Import Config File
                             </button>
                         </div>

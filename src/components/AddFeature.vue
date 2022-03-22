@@ -36,7 +36,7 @@
             </div>
             <div class="row mb-3 justify-content-center">
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-primary">Add <i class="fa fa-plus"></i></button>
+                    <button type="submit" class="btn btn-primary">Add <i class="fa-solid fa-plus"></i></button>
                 </div>
             </div>
         </form>

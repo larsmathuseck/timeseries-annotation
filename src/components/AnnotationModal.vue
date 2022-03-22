@@ -19,7 +19,7 @@
                             <div class="col-2">
                                 <input id="annotationFileUpload" type="file" accept=".csv" multiple v-on:change="onAnnotationFileChange" hidden>
                                 <button type="button" class="btn btn-default btn-circle" @click="chooseAnnotationFile">
-                                    <i class="fa fa-folder"></i>
+                                    <i class="fa-solid fa-folder"></i>
                                 </button>
                             </div>
                         </div>
