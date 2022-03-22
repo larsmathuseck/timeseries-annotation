@@ -219,8 +219,8 @@ export default {
                     windowShift: this.windowShift,
                     selectedAxes: this.selectedAxes,
                     downsamplingMethod: this.selectedDownsamplingMethod,
-            };
-            this.loadDataIntoModel(modelConfiguration);
+            }
+            setTimeout(() => this.loadDataIntoModel(modelConfiguration), 100);
         },
         validateInputs: function() {
             let invalidFeedback = "";
@@ -349,13 +349,13 @@ export default {
             if (typeof showSaveFilePicker === 'undefined') {
                 var a = document.createElement("a");
                 a.href = window.URL.createObjectURL(new Blob([content], {type: "text/json"}));
-                a.download = "config";
+                a.download = "config.json";
                 a.click();
             }
             else {
                 try {
                     const fileHandle = await self.showSaveFilePicker({
-                        suggestedName: "config",
+                        suggestedName: "config.json",
                         types: [{
                             description: 'JSON files',
                             accept: {

@@ -226,7 +226,9 @@ export default {
                 this.loading = false;
                 return;
             }
-            // TODO load data into model via this.$emit in ImportModelModal
+            setTimeout(() => this.loadDataIntoModel(), 100);
+        },
+        loadDataIntoModel: async function() {
             const result = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, this.samplingRate, this.selectedDownsamplingMethod);
             const instances = result[0];
             const offsetInSeconds = result[1];
