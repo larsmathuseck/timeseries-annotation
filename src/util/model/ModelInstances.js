@@ -19,6 +19,7 @@ export function breakDownToSamplingrate(dataPoints, timestamps, samplingRate, fe
         let arrayToPush = [];
         dataFrames.forEach(df => {
             let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
+            newFrame = newFrame.asType("1", "float32");
             const func = features[feature].func;
             arrayToPush.push(func(newFrame));
         });
