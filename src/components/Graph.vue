@@ -134,6 +134,9 @@ export default {
             let ann;
             let ml;
             let area;
+            if (graphData.length == 0) {
+                return;
+            }
             if(annotations != undefined){
                 ann = annotations.map((x, i) => {
                     return {

@@ -15,7 +15,7 @@
                     </div>
                     <div class="col col-2" id="submitButtonContainer">
                         <button id="colorButton" class="btn rounded" type="button" @click="showColorPicker = !showColorPicker">
-                            <i class="fa fa-tint" />
+                            <i class="fa-solid fa-droplet"></i>
                         </button>
                     </div>
                 </div>
@@ -107,15 +107,10 @@ export default {
 
 <style scoped>
 .form-container {
-    padding: 16px;
-}
-
-#buttonRow {
-    margin-top: 5px;
+    padding: 1rem;
 }
 
 #colorButton {
-    margin-left: 1,5px;
     align-self: center;
     background-color: #2196F3;
     opacity: 0.7;
@@ -134,13 +129,13 @@ export default {
 }
 
 .alert-danger {
-    margin-top: 25px;
+    margin-top: 1.5rem;
     margin-bottom: 0px;
 }
 
-.fa {
-    height: 10px;
-    width: 10px;
+.fa-droplet {
+    height: 0.75rem;
+    width: 0.75rem;
     color: white;
     opacity: 1;
 }
@@ -154,6 +149,6 @@ export default {
 }
 
 .modal-footer {
-    margin-top: 25px;
+    margin-top: 1.75rem;
 }
 </style>

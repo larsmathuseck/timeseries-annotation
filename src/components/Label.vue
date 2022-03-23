@@ -12,10 +12,10 @@
     </div>
     <div class="col-auto">
         <button>
-            <i class="fa fa-edit" @click="editLabel" />
+            <i class="fa-solid fa-pen-to-square" @click="editLabel"></i>
         </button>
         <button>
-            <i class="fa fa-times" @click="deleteLabel" />
+            <i class="fa-solid fa-xmark" @click="deleteLabel" />
         </button>
     </div>
 </template>
@@ -88,7 +88,7 @@ button {
     padding: 0 3px 0 3px;
 }
 
-.fa {
+.fa-solid {
     font-size: 1.25vw;
 }
 </style>

@@ -8,6 +8,7 @@
             <div class="col col-lg-8 col-md-8 col-sm-12 col-12">
                 <div class="graphDiv">
                     <graph ref="graphRef" v-if="showGraph" class="chart" />
+                    <GraphPlaceholder v-if="!showGraph" />
                 </div>
             </div>
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
@@ -22,6 +23,7 @@ import graph from "../components/Graph.vue"
 import Header from "./Header.vue"
 import LeftSidebar from "../components/LeftSidebar.vue"
 import RightSidebar from "../components/RightSidebar.vue"
+import GraphPlaceholder from "../components/GraphPlaceholder.vue";
 
 export default {  
     name: "Home",
@@ -30,6 +32,7 @@ export default {
         Header,
         LeftSidebar,
         RightSidebar,
+        GraphPlaceholder,
     },
     data() {
         return {

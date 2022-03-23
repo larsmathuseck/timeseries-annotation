@@ -74,11 +74,9 @@ export function createInstances(state, modelConfiguration) {
         throw new Error("Downsampling Method not found! Can't break down to sampling rate!");
     }
     const allSegmentsWithCorrectSampling = breakDownToSamplingrate(dataPoints, timestamps, samplingrate, featureIndex);
-    console.log(allSegmentsWithCorrectSampling);
     const segmentTimestamps = allSegmentsWithCorrectSampling[0];
     const segments = allSegmentsWithCorrectSampling[1];
     windowShift = windowShift == 0 ? slidingWindow : windowShift;
-    console.log(windowShift);
     const differentValues = slidingWindow / windowShift;
     for (let i = 0; i < differentValues; i++) {
         let dataArray = [];
@@ -94,7 +92,6 @@ export function createInstances(state, modelConfiguration) {
         }
         allInstances.push([timeArray, dataArray]);
     }
-    console.log(allInstances);
     return allInstances;
 }
 

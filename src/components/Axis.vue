@@ -6,7 +6,7 @@
     </div>
     <div class="col-auto">
         <button @click="showColorPicker = !showColorPicker">
-            <i class="fa fa-tint" />
+            <i class="fa-solid fa-droplet"></i>
         </button>
         <label class="switch">
             <input type="checkbox" v-model="selected" @change="toggleAxis" v-show="false">
@@ -94,7 +94,7 @@ button {
     justify-content: center;
 }
 
-.fa-tint {
+.fa-droplet {
     color: #2196F3;
     font-size: 1.2vw;
     display:inline-block;

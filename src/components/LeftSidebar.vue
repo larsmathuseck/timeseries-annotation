@@ -23,7 +23,7 @@
         <span class="description-text" >
             <label>Labels</label>
             <button type="button" class="btn btn-default btn-circle" @click="showLabelModal">
-                <i class="fa fa-plus"></i>
+                <i class="fa-solid fa-plus"></i>
             </button>
         </span>
         <div class="row justify-content-start align-items-center">
@@ -81,7 +81,6 @@ export default {
     },
     data() {
         return {
-            lastSelectedData: this.$store.state.currentSelectedData,
             lastSelectedAnnotation: 1,
             toggleAnnotationModalVisibility: false,
             toggleLabelModalVisibility: false,
@@ -91,6 +90,9 @@ export default {
         }
     },
     computed: {
+        lastSelectedData: function() {
+            return this.$store.state.currentSelectedData;
+        },
         data: function() {
             return this.$store.state.data;
         },
@@ -265,11 +267,11 @@ export default {
     color: gray;
 }
 
-.fa-edit , .fa-times{
+.fa-pen-to-square , .fa-xmark{
     opacity: 0.5;
 }
 
-.fa-edit:hover, .fa-times:hover {
+.fa-pen-to-square:hover, .fa-xmark:hover {
     opacity: 1;
     cursor: pointer;
 }

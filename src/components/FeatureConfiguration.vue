@@ -12,7 +12,7 @@
                         <div class="col-auto">
                             <input id="featureModelFileInput" type="file" webkitdirectory directory v-on:change="onFeatureModelFileChange" hidden>
                             <button @click="modelImportButtonOnClick" type="button" class="btn btn-light styled-btn">
-                                <i class="fa fa-folder"></i>
+                                <i class="fa-solid fa-folder"></i>
                                 Choose Directory
                             </button>
                         </div>
@@ -32,7 +32,7 @@
                         <div class="col-auto">
                             <input id="featureConfigFileInput" type="file" v-on:change="onFeatureConfigFileChange" hidden>
                             <button @click="configImportButtonOnClick" type="button" class="btn btn-light styled-btn" :class="{disabled: featureModelFileName.length == 0}">
-                                <i class="fa fa-folder"></i>
+                                <i class="fa-solid fa-folder"></i>
                                 Import Config File
                             </button>
                         </div>
@@ -86,7 +86,7 @@
                                 <div class="list-group-item"> 
                                     {{ element.axis.name + "-" + element.feature.name + "-" + (element.slidingWindow*this.samplingRate)}}
                                     <button type="button" class="btn btn-default btn-circle trash-btn me-1" @click="deleteFeature(element)">
-                                        <i class="fa fa-trash"></i>
+                                        <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
                             </template>
