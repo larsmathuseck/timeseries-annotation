@@ -67,7 +67,7 @@ export function createInstances(state, modelConfiguration) {
                 break;
             }
         }
-    })
+    });
     const featureIndex = getFeatureIndex(downsamplingMethod);
     if (featureIndex == -1) {
         throw new Error("Downsampling Method not found! Can't break down to sampling rate!");
@@ -94,7 +94,7 @@ export function createInstances(state, modelConfiguration) {
         allInstances.push([timeArray, dataArray]);
     }
     console.log(allInstances);
-    return allInstances;
+    return [allInstances, segments.length];
 }
 
 /* function to get feature instances for supplied data

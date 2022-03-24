@@ -262,8 +262,11 @@ export default {
         loadDataIntoModel: async function(modelConfiguration) {
             const model = modelConfiguration.model;
             let instances;
+            let slotsNumber = 0;
             try {
                 instances = createInstances(this.$store.state, modelConfiguration);
+                slotsNumber = instances[1] / (modelConfiguration.samplingRate * modelConfiguration.windowShift);
+                instances = instances[0];
             } catch (error) {
                 this.loading = false
                 this.$emit("setInvalidFeedback", error.message)
@@ -308,12 +311,75 @@ export default {
                 }
                 predIndex += 1;
             })
+
+            if(modelConfiguration.slidingWindow > 0){
+                await this.addCompleteResultOverview(predictedValues, slotsNumber, allLabels, annotationId, modelConfiguration.windowShift, predIndex);
+            }
+
             db.lastSelected.update(1, {annoId: parseInt(annotationId)});
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
             }
             this.loading = false;
             this.$emit("closeModal");
+        },
+        addCompleteResultOverview: async function (predictedValues, slotsNumber, allLabels, annotationId, windowShift, predIndex){
+            let timestamp = predictedValues[0].timestamps[0][0];
+            let currentPosition = [];
+            for(let i = 0; i < predictedValues.length; i++){
+                currentPosition.push(null);
+            }
+            for(let i = 0; i < slotsNumber; i++){
+                let position = i%predictedValues.length;
+                if(currentPosition[position] == null){
+                    currentPosition[position] = 0;
+                }
+                else{
+                    currentPosition[position] += 1;
+                    if(currentPosition[position] >= predictedValues[0].data.length){
+                        currentPosition[position] = null;
+                    }
+                }
+                let indices = {};
+                for(let j = 0; j < predictedValues.length; j++){
+                    let data = predictedValues[j].data[currentPosition[j]];
+                    let index = data?.indexOf(Math.max(...data));
+                    let label = allLabels[index]?.id;
+                    if(label == null){
+                        continue;
+                    }
+                    else {
+                        if (!indices[label]) {
+                            indices[label] = 1;
+                        } else {
+                            indices[label] += 1;
+                        }
+                    }
+                }
+                let result = Object.keys(indices).reduce(function(a, b){ 
+                    if(indices[a] == indices[b]){
+                        return null;
+                    }
+                    else if(indices[a] > indices[b]){
+                        return a;
+                    }
+                    else{
+                        return b; 
+                    }
+                });
+                if(result != null){
+                    db.areas.add({
+                            annoId: annotationId,
+                            labelId: parseInt(result),
+                            firstTimestamp: timestamp,
+                            secondTimestamp: timestamp + windowShift*1000,
+                            y1: predIndex,
+                            y2: predIndex+1,
+                            yAmount: predictedValues.length,
+                        });
+                }
+                timestamp += windowShift*1000;
+            }
         },
         getOrCreateLabel: async function(labelName, annotationId) {
             const amountOfLabels = await db.labels.where("annoId").equals(annotationId).toArray();
