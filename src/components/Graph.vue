@@ -158,23 +158,43 @@ export default {
             if (this.areasVisible && areas != undefined) {
                 if (areas.length != 0) {
                     area = areas.map(x => {
-                        return [
-                            {
-                                xAxis: new Date(x.firstTimestamp),
-                                itemStyle: {
-                                    color: x.label.color,
-                                    opacity: 0.2,
-                                    borderColor: "black",
-                                    borderWidth: 1,
-                                    borderType: "solid"
+                        console.log(x);
+                        if(x.yAmount != null) {
+                            return [
+                                {
+                                    xAxis: new Date(x.firstTimestamp),
+                                    itemStyle: {
+                                        color: x.label.color,
+                                        opacity: 0.2,
+                                        borderColor: "black",
+                                        borderWidth: 0.5,
+                                        borderType: "solid"
+                                    },
+                                    y: 30 + (((this.sizeOfGraph - 20)*0.95)/(x.yAmount))*x.y1,
                                 },
-                                y: 30 + ((this.sizeOfGraph - 20)/(x.yAmount+1))*x.y1,
-                            },
-                            {
-                                xAxis: new Date(x.secondTimestamp),
-                                y: 30 + ((this.sizeOfGraph - 20)/(x.yAmount+1))*x.y2,
-                            }
-                        ];
+                                {
+                                    xAxis: new Date(x.secondTimestamp),
+                                    y: 30 + (((this.sizeOfGraph - 20)*0.95)/(x.yAmount))*x.y2,
+                                }
+                            ];
+                        }
+                        else {
+                            return [
+                                {
+                                    xAxis: new Date(x.firstTimestamp),
+                                    itemStyle: {
+                                        color: x.label.color,
+                                        opacity: 0.5,
+                                    },
+                                    y: 30 + ((this.sizeOfGraph - 20)*0.95),
+                                },
+                                {
+                                    xAxis: new Date(x.secondTimestamp),
+                                    y: 30 + ((this.sizeOfGraph - 20)),
+                                }
+                            ];
+                        }
+                        
                     });
                 }
             }

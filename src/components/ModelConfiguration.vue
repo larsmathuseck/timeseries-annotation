@@ -312,7 +312,7 @@ export default {
                 predIndex += 1;
             })
 
-            if(modelConfiguration.slidingWindow > 0){
+            if(modelConfiguration.windowShift > 0){
                 await this.addCompleteResultOverview(predictedValues, slotsNumber, allLabels, annotationId, modelConfiguration.windowShift, predIndex);
             }
 
@@ -357,14 +357,14 @@ export default {
                     }
                 }
                 let result = Object.keys(indices).reduce(function(a, b){ 
-                    if(indices[a] == indices[b]){
-                        return null;
-                    }
-                    else if(indices[a] > indices[b]){
+                    if(indices[a] > indices[b]){
                         return a;
                     }
+                    else if(indices[a] < indices[b]){
+                        return b;
+                    }
                     else{
-                        return b; 
+                        return null; 
                     }
                 });
                 if(result != null){
@@ -375,7 +375,7 @@ export default {
                             secondTimestamp: timestamp + windowShift*1000,
                             y1: predIndex,
                             y2: predIndex+1,
-                            yAmount: predictedValues.length,
+                            yAmount: null,
                         });
                 }
                 timestamp += windowShift*1000;

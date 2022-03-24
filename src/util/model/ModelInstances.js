@@ -46,6 +46,8 @@ function calcSegements(timestamps, samplingRate){
         counter += 1;
         currentTimestamp += 1;
     }
+    // Push last Timestamp, so that in case that the last segment ends exactly on the last timestamp, it can be showed correctly in the graph
+    segmentTimestamps.push(lastTimestamp);
     return [segmentTimestamps, segments];
 }
 
