@@ -128,6 +128,7 @@ export default {
         option: function () {
             let series = [];
             let graphData = this.$store.getters.getData;
+            let downSamplingGraphData = this.$store.getters.getDownsamplingData;
             let legende = [];
             let annotations = this.annoData;
             let areas = this.areaData;
@@ -199,6 +200,26 @@ export default {
                         width: 1.5,
                     },
                     data: graphData[key].dataPoints,
+                });
+            }
+            for(let key in downSamplingGraphData){
+                legende.push(downSamplingGraphData[key].name);
+                series.push({
+                    name: downSamplingGraphData[key].name,
+                    type: "line",
+                    showSymbol: false,
+                    emphasis: {
+                        scale: false,
+                        lineStyle: {
+                            width: 1.5,
+                            color: downSamplingGraphData[key].color,
+                        },
+                    },
+                    lineStyle: {
+                        color: downSamplingGraphData[key].color,
+                        width: 1.5,
+                    },
+                    data: downSamplingGraphData[key].dataPoints,
                 });
             }
             series[0].markPoint = {

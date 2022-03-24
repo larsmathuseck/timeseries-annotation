@@ -5,6 +5,7 @@ import { db } from "/db";
 export default createStore({
     state: {
         data: [],
+        downSamplingData: [],
         currentSelectedData: 0,
         currentSelectedDataIndex: 0,
         activeLabel: null,
@@ -151,6 +152,9 @@ export default createStore({
         toggleAreasVisibility: (state) => {
             state.areasVisible = !state.areasVisible;
         },
+        setDownsamplingData: (state, data) => {
+            state.downSamplingData = data;
+        },
     },
     getters: {
         getData: state => {
@@ -158,6 +162,9 @@ export default createStore({
                 return state.data[state.currentSelectedDataIndex].dataPoints.filter(key => state.data[state.currentSelectedDataIndex].selectedAxes.includes(key.id));
             }
             return [];
+        },
+        getDownsamplingData: state => {
+            return state.downSamplingData;
         },
         getAxes: state => {
             if(state.data?.length > 0){

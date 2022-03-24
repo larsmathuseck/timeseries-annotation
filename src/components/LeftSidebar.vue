@@ -13,6 +13,7 @@
             </div>
         </div>
     </div>
+    <Downsampling/>
     <div class="row">
         <label class="description-text" >Annotation Files</label>
         <div class="input-group">
@@ -48,11 +49,12 @@
 </template>
 
 <script>
-import Axis from "./Axis.vue"
-import Label from "./Label.vue"
-import AnnotationModal from "./AnnotationModal.vue"
-import LabelModal from "./LabelModal.vue"
-import FileSelect from "./FileSelect.vue"
+import Axis from "./Axis.vue";
+import Label from "./Label.vue";
+import AnnotationModal from "./AnnotationModal.vue";
+import LabelModal from "./LabelModal.vue";
+import FileSelect from "./FileSelect.vue";
+import Downsampling from "./Downsampling.vue";
 import { liveQuery } from "dexie";
 import { db } from "/db";
 import { useObservable } from "@vueuse/rxjs";
@@ -65,6 +67,7 @@ export default {
         AnnotationModal,
         LabelModal,
         FileSelect,
+        Downsampling,
     },
     setup: function(){
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
@@ -189,12 +192,6 @@ export default {
     padding-right: 0;
 }
 
-.input-group-apend {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .btn-circle {
     height: 2.5vw;
     width: 2.5vw;
@@ -254,8 +251,6 @@ export default {
     font-family: Tahoma;
     font-weight: Bold;
     font-size: 1.5vw;
-    padding-top: 10px;
-    padding-bottom: 2px;
     margin: 0;
 }
 
