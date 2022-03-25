@@ -166,7 +166,6 @@ export default {
             if (this.areasVisible && areas != undefined) {
                 if (areas.length != 0) {
                     area = areas.map(x => {
-                        console.log(x);
                         if(x.yAmount != null) {
                             return [
                                 {
