@@ -12,7 +12,7 @@
                         <div class="col-auto">
                             <input id="modelFileInput" type="file" webkitdirectory directory v-on:change="onModelFileChange" hidden>
                             <button @click="modelImportButtonOnClick" type="button" class="btn btn-light styled-btn">
-                                <i class="fa fa-folder"></i>
+                                <i class="fa-solid fa-folder"></i>
                                 Choose Directory
                             </button>
                         </div>
@@ -32,7 +32,7 @@
                         <div class="col-auto">
                             <input id="configFileInput" type="file" v-on:change="onConfigFileChange" hidden>
                             <button @click="configImportButtonOnClick" type="button" class="btn btn-light styled-btn" :class="{disabled: modelFileName.length == 0}">
-                                <i class="fa fa-folder"></i>
+                                <i class="fa-solid fa-folder"></i>
                                 Import Config File
                             </button>
                         </div>
@@ -118,7 +118,7 @@ import * as tf from '@tensorflow/tfjs';
 import { db } from "/db";
 import { createInstances } from "../util/model/ModelInstances";
 import { checkImportedFiles } from "../util/model/ImportModelManager";
-import { createNewAnnotationFile, createLabelsForAnnotation } from "../util/DatabankManager";
+import { createNewAnnotationFile, createLabelsForAnnotation, selectAnnotationFile } from "../util/DatabankManager";
 
 export default {
     name: "ModelConfiguration",
@@ -219,8 +219,8 @@ export default {
                     windowShift: this.windowShift,
                     selectedAxes: this.selectedAxes,
                     downsamplingMethod: this.selectedDownsamplingMethod,
-            };
-            this.loadDataIntoModel(modelConfiguration);
+            }
+            setTimeout(() => this.loadDataIntoModel(modelConfiguration), 100);
         },
         validateInputs: function() {
             let invalidFeedback = "";
@@ -283,7 +283,6 @@ export default {
                 this.$emit("setInvalidFeedback", error.message)
                 return;
             }
-            console.log(predictedValues);
             // create annotation file
             const annotationId = await createNewAnnotationFile();
             // create as many labels as needed
@@ -316,7 +315,7 @@ export default {
                 await this.addCompleteResultOverview(predictedValues, slotsNumber, allLabels, annotationId, modelConfiguration.windowShift, predIndex);
             }
 
-            db.lastSelected.update(1, {annoId: parseInt(annotationId)});
+            await selectAnnotationFile(annotationId);
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
             }
@@ -415,13 +414,13 @@ export default {
             if (typeof showSaveFilePicker === 'undefined') {
                 var a = document.createElement("a");
                 a.href = window.URL.createObjectURL(new Blob([content], {type: "text/json"}));
-                a.download = "config";
+                a.download = "config.json";
                 a.click();
             }
             else {
                 try {
                     const fileHandle = await self.showSaveFilePicker({
-                        suggestedName: "config",
+                        suggestedName: "config.json",
                         types: [{
                             description: 'JSON files',
                             accept: {

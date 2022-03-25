@@ -13,26 +13,26 @@
                 <li class="nav-item">
                     <input id="multipleFileUpload" type="file" webkitdirectory directory multiple v-on:change="onFileChange" hidden>
                     <button type="button" @click="chooseFiles" class="btn btn-light" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-content="All unsaved changes will be lost">
-                        <i class="fa fa-folder"></i>
+                        <i class="fa-solid fa-folder"></i>
                         Import Folder
                     </button>
                 </li>
                 <li class="nav-item" v-if="!debug">
                     <button type="button" class="btn btn-light" @click="saveAnnotation">
-                        <i class="fa fa-download"></i>
+                        <i class="fa-solid fa-download"></i>
                         Save Annotation
                     </button>
                 </li>
                 <li class="nav-item" v-if="!debug">
                     <button @click="toggleModelModalVisibility  = !toggleModelModalVisibility" type="button" class="btn btn-light">
-                        <i class="fa fa-wrench"></i>
+                        <i class="fa-solid fa-wrench"></i>
                         Model
                     </button>
                     <ImportModelModal :toggleModelModalVisibility="toggleModelModalVisibility" />
                 </li>
                 <li class="nav-item" v-if="!debug">
                     <button type="button" class="btn btn-light" @click="toggleTutorialModalVisibility  = !toggleTutorialModalVisibility">
-                        <i class="fa fa-file"></i>
+                        <i class="fa-solid fa-file"></i>
                         Tutorial
                     </button>
                     <TutorialModal :toggleTutorialModalVisibility="toggleTutorialModalVisibility" />

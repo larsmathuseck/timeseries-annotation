@@ -12,7 +12,7 @@
                         <div class="col-auto">
                             <input id="featureModelFileInput" type="file" webkitdirectory directory v-on:change="onFeatureModelFileChange" hidden>
                             <button @click="modelImportButtonOnClick" type="button" class="btn btn-light styled-btn">
-                                <i class="fa fa-folder"></i>
+                                <i class="fa-solid fa-folder"></i>
                                 Choose Directory
                             </button>
                         </div>
@@ -32,7 +32,7 @@
                         <div class="col-auto">
                             <input id="featureConfigFileInput" type="file" v-on:change="onFeatureConfigFileChange" hidden>
                             <button @click="configImportButtonOnClick" type="button" class="btn btn-light styled-btn" :class="{disabled: featureModelFileName.length == 0}">
-                                <i class="fa fa-folder"></i>
+                                <i class="fa-solid fa-folder"></i>
                                 Import Config File
                             </button>
                         </div>
@@ -86,7 +86,7 @@
                                 <div class="list-group-item"> 
                                     {{ element.axis.name + "-" + element.feature.name + "-" + (element.slidingWindow*this.samplingRate)}}
                                     <button type="button" class="btn btn-default btn-circle trash-btn me-1" @click="deleteFeature(element)">
-                                        <i class="fa fa-trash"></i>
+                                        <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
                             </template>
@@ -113,7 +113,7 @@ import draggable from "vuedraggable";
 import AddFeature from "./AddFeature.vue";
 import { db } from "/db";
 import { createFeatureInstances } from "../util/model/ModelInstances";
-import { createLabelsForAnnotation, createNewAnnotationFile } from "../util/DatabankManager";
+import { createLabelsForAnnotation, createNewAnnotationFile, selectAnnotationFile } from "../util/DatabankManager";
 import { checkImportedFiles } from "../util/model/ImportModelManager";
 
 export default {
@@ -226,7 +226,9 @@ export default {
                 this.loading = false;
                 return;
             }
-            // TODO load data into model via this.$emit in ImportModelModal
+            setTimeout(() => this.loadDataIntoModel(), 100);
+        },
+        loadDataIntoModel: async function() {
             const result = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, this.samplingRate, this.selectedDownsamplingMethod);
             const instances = result[0];
             const offsetInSeconds = result[1];
@@ -265,7 +267,7 @@ export default {
                 }
                 timestamp = nextTimestamp;
             });
-            db.lastSelected.update(1, {annoId: parseInt(annotationId)});
+            await selectAnnotationFile(annotationId);
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
             }

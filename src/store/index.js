@@ -5,7 +5,9 @@ import { db } from "/db";
 export default createStore({
     state: {
         data: [],
+        downSamplingData: [],
         currentSelectedData: 0,
+        currentSelectedDataIndex: 0,
         activeLabel: null,
         areasVisible: false,
         colors: ["red", "orange", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
@@ -64,6 +66,14 @@ export default createStore({
                 });
             }
         },
+        deleteData: (state) => {
+            const data = state.data;
+            data.splice(state.currentSelectedDataIndex, 1);
+            if (data.length > 0) {
+                state.currentSelectedData = data[0].id;
+                state.currentSelectedDataIndex = 0;
+            }
+        },
         addAnnotationData: async (state, payload) => {
             let data = parse(payload.result);
             let legende = data.shift();
@@ -108,62 +118,18 @@ export default createStore({
             await db.lastSelected.put({id: 1, annoId: anno});
             anno = await db.annotations.update(anno, {lastAdded: lastAnn})
         },
-        addNewAnnotationFile: (state, fileName) => {
-            state.annotations.push({
-                id: state.annotations.length,
-                name: fileName + ".csv",
-                data: [],
-                labels: {},
-                lastAddedAnnotation: {},
-            });
-        },
-        addAnnotationPoint: (state, timestamp) => {
-            if(state.activeLabel != null){
-                let time = new Date(timestamp).getTime();
-                let annotations = state.annotations[state.currAnn].data;
-                let inserted = false;
-                let lastAddedAnnotation = state.annotations[state.currAnn].lastAddedAnnotation;
-                if (annotations.length == 0) {
-                    const newAnn = {
-                        id: 0,
-                        label: state.activeLabel.id,
-                        timestamp: time,
-                    };
-                    annotations.push(newAnn);
-                    state.annotations[state.currAnn].lastAddedAnnotation = newAnn;
-                    return;
-                }
-
-                const newAnn = {
-                    id: lastAddedAnnotation.id +1,
-                    label: state.activeLabel.id,
-                    timestamp: time,
-                };
-                state.annotations[state.currAnn].lastAddedAnnotation = newAnn;
-                for(let i = 0; i < annotations.length; i++){
-                    if(annotations[i].timestamp > time){
-                        annotations.splice(i, 0, newAnn);
-                        inserted = true;
-                        break;
-                    }
-                }
-                if(!inserted){
-                    annotations.push(newAnn);
-                }
-            }
-        },
         addSelectedAxes: (state, axis) => {
-            state.data[state.currentSelectedData].selectedAxes.push(axis.id);
+            state.data[state.currentSelectedDataIndex].selectedAxes.push(axis.id);
         },
         deleteSelectedAxis: (state, axis) => {
-            let selectedAxes = state.data[state.currentSelectedData].selectedAxes;
+            let selectedAxes = state.data[state.currentSelectedDataIndex].selectedAxes;
             const index = selectedAxes.indexOf(axis.id);
             if (index > -1) {
                 selectedAxes.splice(index, 1);
             }
         },
         changeAxisColor: (state, changedAxis) => {
-            let axes = state.data[state.currentSelectedData].dataPoints;
+            let axes = state.data[state.currentSelectedDataIndex].dataPoints;
             for (let i in axes) {
                 if (axes[i].id === changedAxis.id) {
                     axes[i].color = changedAxis.color;
@@ -176,33 +142,45 @@ export default createStore({
         },
         selectDataFile: (state, dataFileId) => {
             state.currentSelectedData = dataFileId;
+            for (let i = 0; i < state.data.length; i++) {
+                if (state.data[i].id == dataFileId) {
+                    state.currentSelectedDataIndex = i;
+                    return;
+                }
+            }
         },
         toggleAreasVisibility: (state) => {
             state.areasVisible = !state.areasVisible;
+        },
+        setDownsamplingData: (state, data) => {
+            state.downSamplingData = data;
         },
     },
     getters: {
         getData: state => {
             if(state.data?.length > 0){
-                return state.data[state.currentSelectedData].dataPoints.filter(key => state.data[state.currentSelectedData].selectedAxes.includes(key.id));
+                return state.data[state.currentSelectedDataIndex].dataPoints.filter(key => state.data[state.currentSelectedDataIndex].selectedAxes.includes(key.id));
             }
             return [];
         },
+        getDownsamplingData: state => {
+            return state.downSamplingData;
+        },
         getAxes: state => {
             if(state.data?.length > 0){
-                return state.data[state.currentSelectedData].dataPoints;
+                return state.data[state.currentSelectedDataIndex].dataPoints;
             }
             return [];
         },
         timestamps: state => {
             if(state.data?.length > 0){
-                return state.data[state.currentSelectedData].timestamps;
+                return state.data[state.currentSelectedDataIndex].timestamps;
             }
             return [];
         },
         selectedAxes: state => {
             if(state.data?.length > 0){
-                return state.data[state.currentSelectedData].selectedAxes;
+                return state.data[state.currentSelectedDataIndex].selectedAxes;
             }
             return [];
         },

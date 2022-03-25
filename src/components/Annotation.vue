@@ -2,7 +2,7 @@
     <div class="col-auto" :style="{ background: annotation.color }">
         <label class="annotation-name">
             {{ annotation.name }}
-        <i @click="deleteAnnotation(annotation)" class="fa fa-times"></i>
+            <i @click="deleteAnnotation(annotation)" class="fa-solid fa-xmark"></i>
         </label>
     </div>
     <label class="annotation-timestamp">

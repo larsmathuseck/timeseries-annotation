@@ -17,7 +17,6 @@ export function checkImportedFiles(e, callback) {
             weights.push(file);
         }
     }
-    console.log(model);
     if (model) {
         importModel(model, weights, config, callback);
     } else {

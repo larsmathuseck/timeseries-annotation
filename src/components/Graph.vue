@@ -128,31 +128,39 @@ export default {
         option: function () {
             let series = [];
             let graphData = this.$store.getters.getData;
+            let downSamplingGraphData = this.$store.getters.getDownsamplingData;
             let legende = [];
             let annotations = this.annoData;
             let areas = this.areaData;
             let ann;
             let ml;
             let area;
+            if (graphData.length == 0) {
+                return;
+            }
             if(annotations != undefined){
                 ann = annotations.map((x, i) => {
-                    return {
-                        symbol: "pin",
-                        itemStyle: {
-                        color: x.label.color
-                        },
-                        name: (i + 1).toString() + " " + x.label.name,
-                        xAxis: new Date(x.timestamp),
-                        y: "75"
-                    };
+                    if (x.label) {
+                        return {
+                            symbol: "pin",
+                            itemStyle: {
+                            color: x.label.color
+                            },
+                            name: (i + 1).toString() + " " + x.label.name,
+                            xAxis: new Date(x.timestamp),
+                            y: "75"
+                        };
+                    }
                 });
                 ml = annotations.map(x => {
-                    return {
-                        itemStyle: {
-                            color: x.label.color
-                        },
-                        xAxis: new Date(x.timestamp),
-                    };
+                    if (x.label) {
+                        return {
+                            itemStyle: {
+                                color: x.label.color
+                            },
+                            xAxis: new Date(x.timestamp),
+                        };
+                    }
                 });
             }
             if (this.areasVisible && areas != undefined) {
@@ -216,6 +224,26 @@ export default {
                         width: 1.5,
                     },
                     data: graphData[key].dataPoints,
+                });
+            }
+            for(let key in downSamplingGraphData){
+                legende.push(downSamplingGraphData[key].name);
+                series.push({
+                    name: downSamplingGraphData[key].name,
+                    type: "line",
+                    showSymbol: false,
+                    emphasis: {
+                        scale: false,
+                        lineStyle: {
+                            width: 1.5,
+                            color: downSamplingGraphData[key].color,
+                        },
+                    },
+                    lineStyle: {
+                        color: downSamplingGraphData[key].color,
+                        width: 1.5,
+                    },
+                    data: downSamplingGraphData[key].dataPoints,
                 });
             }
             series[0].markPoint = {
