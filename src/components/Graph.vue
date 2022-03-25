@@ -140,45 +140,51 @@ export default {
             }
             if(annotations != undefined){
                 ann = annotations.map((x, i) => {
-                    return {
-                        symbol: "pin",
-                        itemStyle: {
-                        color: x.label.color
-                        },
-                        name: (i + 1).toString() + " " + x.label.name,
-                        xAxis: new Date(x.timestamp),
-                        y: "75"
-                    };
+                    if (x.label) {
+                        return {
+                            symbol: "pin",
+                            itemStyle: {
+                            color: x.label.color
+                            },
+                            name: (i + 1).toString() + " " + x.label.name,
+                            xAxis: new Date(x.timestamp),
+                            y: "75"
+                        };
+                    }
                 });
                 ml = annotations.map(x => {
-                    return {
-                        itemStyle: {
-                            color: x.label.color
-                        },
-                        xAxis: new Date(x.timestamp),
-                    };
+                    if (x.label) {
+                        return {
+                            itemStyle: {
+                                color: x.label.color
+                            },
+                            xAxis: new Date(x.timestamp),
+                        };
+                    }
                 });
             }
             if (this.areasVisible && areas != undefined) {
                 if (areas.length != 0) {
                     area = areas.map(x => {
-                        return [
-                            {
-                                xAxis: new Date(x.firstTimestamp),
-                                itemStyle: {
-                                    color: x.label.color,
-                                    opacity: 0.2,
-                                    borderColor: "black",
-                                    borderWidth: 1,
-                                    borderType: "solid"
+                        if (x.label) {
+                            return [
+                                {
+                                    xAxis: new Date(x.firstTimestamp),
+                                    itemStyle: {
+                                        color: x.label.color,
+                                        opacity: 0.2,
+                                        borderColor: "black",
+                                        borderWidth: 1,
+                                        borderType: "solid"
+                                    },
+                                    y: x.y1 + '%',
                                 },
-                                y: x.y1 + '%',
-                            },
-                            {
-                                xAxis: new Date(x.secondTimestamp),
-                                y: x.y2 + '%',
-                            }
-                        ];
+                                {
+                                    xAxis: new Date(x.secondTimestamp),
+                                    y: x.y2 + '%',
+                                }
+                            ];
+                        }
                     });
                 }
             }

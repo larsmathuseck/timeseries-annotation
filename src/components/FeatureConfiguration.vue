@@ -113,7 +113,7 @@ import draggable from "vuedraggable";
 import AddFeature from "./AddFeature.vue";
 import { db } from "/db";
 import { createFeatureInstances } from "../util/model/ModelInstances";
-import { createLabelsForAnnotation, createNewAnnotationFile } from "../util/DatabankManager";
+import { createLabelsForAnnotation, createNewAnnotationFile, selectAnnotationFile } from "../util/DatabankManager";
 import { checkImportedFiles } from "../util/model/ImportModelManager";
 
 export default {
@@ -267,7 +267,7 @@ export default {
                 }
                 timestamp = nextTimestamp;
             });
-            db.lastSelected.update(1, {annoId: parseInt(annotationId)});
+            await selectAnnotationFile(annotationId);
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
             }

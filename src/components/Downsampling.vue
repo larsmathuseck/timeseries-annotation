@@ -65,11 +65,14 @@ export default {
             return this.$store.state.data;
         },
         currentData: function() {
-            return this.data?.[this.$store.state.currentSelectedData];
+            return this.data?.[this.$store.state.currentSelectedDataIndex];
         },
         // not updating properly
         selectedAxes: function() {
-            return this.currentData.selectedAxes;
+            if (this.currentData) {
+                return this.currentData.selectedAxes;
+            }
+            return [];
         },
         graphData: function() {
             if (!this.showDownsamplingInGraph) {

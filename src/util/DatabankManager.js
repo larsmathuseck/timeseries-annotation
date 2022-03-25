@@ -40,3 +40,15 @@ export async function deleteAnnotationFile() {
         db.lastSelected.update(1, {annoId: parseInt(annotations[0].id)});
     }
 }
+
+export async function selectAnnotationFile(annoId) {
+    const lastSelected = await db.lastSelected.where("id").equals(1).first();
+    console.log("lastSelected before change: ", lastSelected);
+    console.log("changing to: ", annoId);
+    console.log("parseInt: ", parseInt(annoId))
+    if (!lastSelected) {
+        await db.lastSelected.put({id: 1, annoId: parseInt(annoId)});
+    } else {
+        await db.lastSelected.update(1, {annoId: parseInt(annoId)});
+    }
+}

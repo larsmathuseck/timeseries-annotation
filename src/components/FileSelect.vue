@@ -72,7 +72,7 @@ export default {
                 this.$store.commit("deleteData", this.lastSelected);
             }
             else if(this.type == "annotation"){
-                deleteAnnotationFile();
+                await deleteAnnotationFile();
             }
         }
     },

@@ -118,7 +118,7 @@ import * as tf from '@tensorflow/tfjs';
 import { db } from "/db";
 import { createInstances } from "../util/model/ModelInstances";
 import { checkImportedFiles } from "../util/model/ImportModelManager";
-import { createNewAnnotationFile, createLabelsForAnnotation } from "../util/DatabankManager";
+import { createNewAnnotationFile, createLabelsForAnnotation, selectAnnotationFile } from "../util/DatabankManager";
 
 export default {
     name: "ModelConfiguration",
@@ -307,7 +307,7 @@ export default {
                 }
                 predIndex += 1;
             })
-            db.lastSelected.update(1, {annoId: parseInt(annotationId)});
+            await selectAnnotationFile(annotationId);
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
             }
