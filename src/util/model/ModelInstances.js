@@ -29,7 +29,22 @@ export function breakDownToSamplingrate(dataPoints, timestamps, samplingRate, fe
     return [segments[0], result];
 }
 
-function calcSegements(timestamps, samplingRate){
+export function breakDownAxisToSamplingrate(data, segments, feature) {
+    let df = new DataFrame(data, {dtypes: ["int32", "float32"]});
+    let oldsegment = 0;
+    let result = [];
+    segments[1].forEach(segment => {
+        segment = oldsegment + segment;
+        let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
+        newFrame = newFrame.asType("1", "float32");
+        const func = features[feature].func;
+        result.push(func(newFrame));
+        oldsegment = segment;
+    });
+    return result;
+}
+
+export function calcSegements(timestamps, samplingRate){
     let segments = [];
     let segmentTimestamps = [];
     const lastTimestamp = timestamps[timestamps.length -1];

@@ -1,6 +1,7 @@
-import { createStore } from 'vuex'
+import { createStore } from 'vuex';
 import { parse } from "@vanillaes/csv";
 import { db } from "/db";
+import { breakDownToSamplingrate } from '../util/model/ModelInstances';
 
 export default createStore({
     state: {
@@ -13,11 +14,11 @@ export default createStore({
         colors: ["red", "orange", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
     },
     mutations: {
-        addData: async (state, payload) => {
+        addData: (state, payload) => {
             let data = parse(payload.result);
             let legende = data.shift();
             let timestamps = [];
-            let dataJson = [];
+            let axes = [];
 
             // Get Timestamps
             let timestampLocation = -1;
@@ -26,7 +27,7 @@ export default createStore({
                     timestampLocation = i;
                 }
                 else {
-                    dataJson.push({
+                    axes.push({
                         id: i,
                         name: legende[i],
                         dataPoints: [],
@@ -53,16 +54,16 @@ export default createStore({
                 // Get dimensions in own arrays
                 for(let row = 0; row < timestamps.length; row++){
                     for(let column = 0; column < data[row].length; column++){
-                        dataJson[column].dataPoints.push([new Date(timestamps[row]).getTime(), data[row][column]]);   
+                        axes[column].dataPoints.push([new Date(timestamps[row]).getTime(), data[row][column]]);   
                     }
                 }
                 
                 state.data.push({
                     id: state.data.length,
                     name: payload.name,
-                    dataPoints: dataJson,
+                    dataPoints: axes,
                     timestamps: timestamps,
-                    selectedAxes: [dataJson[0].id],
+                    selectedAxes: [axes[0].id],
                 });
             }
         },
@@ -74,6 +75,20 @@ export default createStore({
                 state.currentSelectedDataIndex = 0;
             }
         },
+        addAxis: (state, payload) => {
+            const axisData = state.data[state.currentSelectedDataIndex].dataPoints[payload.axis.id-1].dataPoints;
+            let data = breakDownToSamplingrate([axisData], state.data[state.currentSelectedDataIndex].timestamps, payload.samplingRate, payload.feature.id);
+            data = data[1].map((x) => { return [data[0][data[1].indexOf(x)], x[0]]; });
+            const dataPoints = state.data[state.currentSelectedDataIndex].dataPoints;
+            const axis = {
+                id: dataPoints[dataPoints.length-1] +1,
+                name: payload.name,
+                dataPoints: data,
+                color: payload.color, 
+            };
+            state.data[state.currentSelectedData].dataPoints.push(axis);
+            state.data[state.currentSelectedData].selectedAxes.push(axis.id);
+        },
         addAnnotationData: async (state, payload) => {
             let data = parse(payload.result);
             let legende = data.shift();
@@ -82,7 +97,7 @@ export default createStore({
             let anno = await db.annotations.add({
                 name: payload.name,
                 lastAdded: lastAnn,
-            })
+            });
 
             // Get Timestamp and Label location
             let timestampLocation = -1;
@@ -103,7 +118,7 @@ export default createStore({
                         name: data[i][labelLocation],
                         color: state.colors[i % state.colors.length],
                         annoId: anno,
-                    })
+                    });
                 }
                 else{
                     label = label[0].id;
@@ -116,7 +131,7 @@ export default createStore({
                 lastAnn = newAnn;
             }
             await db.lastSelected.put({id: 1, annoId: anno});
-            anno = await db.annotations.update(anno, {lastAdded: lastAnn})
+            anno = await db.annotations.update(anno, {lastAdded: lastAnn});
         },
         addSelectedAxes: (state, axis) => {
             state.data[state.currentSelectedDataIndex].selectedAxes.push(axis.id);
@@ -193,4 +208,4 @@ export default createStore({
             }
         }
     },
-})
+});

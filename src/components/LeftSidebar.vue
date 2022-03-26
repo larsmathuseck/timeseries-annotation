@@ -6,14 +6,18 @@
         </div>
     </div>
     <div class="row">
-        <label class="description-text" >Y-Axes</label>
+        <span class="description-text" >
+            <label>Axes</label>
+            <button type="button" class="btn btn-default btn-circle" @click="showAxesModal">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </span>
         <div id="scroll-container-axes">
             <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
                 <Axis :axis="axis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
             </div>
         </div>
     </div>
-    <Downsampling/>
     <div class="row">
         <label class="description-text" >Annotation Files</label>
         <div class="input-group">
@@ -46,6 +50,7 @@
     </div>
     <AnnotationModal :toggleModalVisibility="toggleAnnotationModalVisibility" />
     <LabelModal :addLabelKey="addLabelKey" :toggleModalVisibility="toggleLabelModalVisibility" :labelToEdit="labelToEdit" />
+    <AxesModal :toggleModalVisibility="toggleAxesModalVisibility"/>
 </template>
 
 <script>
@@ -53,8 +58,8 @@ import Axis from "./Axis.vue";
 import Label from "./Label.vue";
 import AnnotationModal from "./AnnotationModal.vue";
 import LabelModal from "./LabelModal.vue";
+import AxesModal from "./AxesModal.vue";
 import FileSelect from "./FileSelect.vue";
-import Downsampling from "./Downsampling.vue";
 import { liveQuery } from "dexie";
 import { db } from "/db";
 import { useObservable } from "@vueuse/rxjs";
@@ -67,7 +72,7 @@ export default {
         AnnotationModal,
         LabelModal,
         FileSelect,
-        Downsampling,
+        AxesModal,
     },
     setup: function(){
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
@@ -87,6 +92,7 @@ export default {
             lastSelectedAnnotation: 1,
             toggleAnnotationModalVisibility: false,
             toggleLabelModalVisibility: false,
+            toggleAxesModalVisibility: false,
             labelToEdit: null,
             addLabelKey: 0,
             acceptedKeys: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
@@ -138,6 +144,9 @@ export default {
             }
             this.labelToEdit = null;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
+        },
+        showAxesModal() {
+            this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;
         },
         keyPressed: function(e) {
             let key = e.key;
@@ -193,9 +202,9 @@ export default {
 }
 
 .btn-circle {
-    height: 2.5vw;
-    width: 2.5vw;
-    border-radius: 1.25vw;
+    height: 2vw;
+    width: 2vw;
+    border-radius: 1vw;
     text-align: center;
     font-size: 1vw;
     background-color: #bbb;
