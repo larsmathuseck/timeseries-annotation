@@ -1,6 +1,6 @@
 <template>
     <div ref="chartDiv" @mouseup="chartClicked" @mousedown="dragDetection">
-        <v-chart ref="charts" class="chart" :option="option" @datazoom="zoom"/>
+        <v-chart ref="charts" class="chart" :option="option2" @datazoom="zoom"/>
     </div>
 </template>
 
@@ -82,6 +82,7 @@ export default {
             sizeOfGraph: 0,
             clickX: 0,
             clickY: 0,
+            option2: null,
         };
     },
     provide: {
@@ -122,20 +123,21 @@ export default {
         },
         resizeChart: function () {
             this.$refs.charts?.resize();
-        }
+        },
     },
     computed: {
+        graphData: function(){
+            return this.$store.getters.getData;
+        },
         option: function () {
             let series = [];
-            let graphData = this.$store.getters.getData;
-            let downSamplingGraphData = this.$store.getters.getDownsamplingData;
             let legende = [];
             let annotations = this.annoData;
             let areas = this.areaData;
             let ann;
             let ml;
             let area;
-            if (graphData.length == 0) {
+            if (this.graphData.length == 0) {
                 return;
             }
             if(annotations != undefined){
@@ -205,44 +207,24 @@ export default {
                     });
                 }
             }
-            for(let key in graphData){
-                legende.push(graphData[key].name);
+            for(let key in this.graphData){
+                legende.push(this.graphData[key].name);
                 series.push({
-                    name: graphData[key].name,
+                    name: this.graphData[key].name,
                     type: "line",
                     showSymbol: false,
                     emphasis: {
                         scale: false,
                         lineStyle: {
                             width: 1.5,
-                            color: graphData[key].color,
+                            color: this.graphData[key].color,
                         },
                     },
                     lineStyle: {
-                        color: graphData[key].color,
+                        color: this.graphData[key].color,
                         width: 1.5,
                     },
-                    data: graphData[key].dataPoints,
-                });
-            }
-            for(let key in downSamplingGraphData){
-                legende.push(downSamplingGraphData[key].name);
-                series.push({
-                    name: downSamplingGraphData[key].name,
-                    type: "line",
-                    showSymbol: false,
-                    emphasis: {
-                        scale: false,
-                        lineStyle: {
-                            width: 1.5,
-                            color: downSamplingGraphData[key].color,
-                        },
-                    },
-                    lineStyle: {
-                        color: downSamplingGraphData[key].color,
-                        width: 1.5,
-                    },
-                    data: downSamplingGraphData[key].dataPoints,
+                    data: this.graphData[key].dataPoints,
                 });
             }
             series[0].markPoint = {
@@ -343,11 +325,15 @@ export default {
     },
     watch:{
         option: function(){
-            this.$refs.charts?.clear();
+            this.$emit('loading', true);
             this.dataZoomStart = this.tempDataZoomStart;
             this.dataZoomEnd = this.tempDataZoomEnd;
             this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
-        }
+            setTimeout(() => {
+                this.$refs.charts?.clear();
+                this.option2 = this.option
+            }, 10);
+        },
     },
     created: function(){
         this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
@@ -355,7 +341,10 @@ export default {
             this.resizeChart();
             this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
         })
-    }
+    },
+    updated: function(){
+        this.$emit('loading', false);
+    },
 }
 
 </script>
