@@ -1,6 +1,5 @@
 import { createStore } from 'vuex';
 import { parse } from "@vanillaes/csv";
-import { db } from "/db";
 import { breakDownToSamplingrate } from '../util/model/ModelInstances';
 
 export default createStore({
@@ -111,50 +110,6 @@ export default createStore({
                 const index = axes.indexOf(payload);
                 axes.splice(index, 1);
             }
-        },
-        addAnnotationData: async (state, payload) => {
-            let data = parse(payload.result);
-            let legende = data.shift();
-            let lastAnn = {};
-
-            let anno = await db.annotations.add({
-                name: payload.name,
-                lastAdded: lastAnn,
-            });
-
-            // Get Timestamp and Label location
-            let timestampLocation = -1;
-            let labelLocation = -1;
-            for(let i = 0; i < legende.length; i++){
-                if(legende[i].toLowerCase() == "timestamp"){
-                    timestampLocation = i;
-                }
-                else if(legende[i].toLowerCase() == "label"){
-                    labelLocation = i;
-                }
-            }
-
-            for(let i = 0; i < data.length; i++){
-                let label = await db.labels.where('[annoId+name]').equals([anno, data[i][labelLocation]]).toArray();
-                if(label.length === 0){
-                    label = await db.labels.add({
-                        name: data[i][labelLocation],
-                        color: state.colors[i % state.colors.length],
-                        annoId: anno,
-                    });
-                }
-                else{
-                    label = label[0].id;
-                }
-                const newAnn = await db.annoData.add({
-                    labelId: label,
-                    annoId: anno,
-                    timestamp: new Date(data[i][timestampLocation]).getTime(),
-                });
-                lastAnn = newAnn;
-            }
-            await db.lastSelected.put({id: 1, annoId: anno});
-            anno = await db.annotations.update(anno, {lastAdded: lastAnn});
         },
         addSelectedAxes: (state, axis) => {
             state.data[state.selectedData].selectedAxes.push(axis.id);

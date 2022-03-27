@@ -49,6 +49,7 @@ import { db } from "/db";
 import { DateTime } from "luxon";
 import { stringify } from "@vanillaes/csv";
 import { Popover } from "bootstrap";
+import { addAnnotationData } from "../util/DatabankManager";
 
 export default {
     name: "Header",
@@ -122,7 +123,7 @@ export default {
                         this.$store.commit("addData", {result: reader.result, name: fileName});
                     }
                     else if(file.name.includes("annotation") || file.name.includes("labels")){
-                        this.$store.commit("addAnnotationData", {result: reader.result, name: fileName});
+                        addAnnotationData(reader.result, file.name, this.$store.state.colors);
                     }
                 }
             }

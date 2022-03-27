@@ -1,4 +1,5 @@
 import { db } from "/db";
+import { parse } from "@vanillaes/csv";
 
 export async function createNewAnnotationFile() {
     const annotations = await db.annotations.toArray();
@@ -48,4 +49,49 @@ export async function selectAnnotationFile(annoId) {
     } else {
         await db.lastSelected.update(1, {annoId: parseInt(annoId)});
     }
+}
+
+export async function addAnnotationData(result, name, colors) {
+    let data = parse(result);
+    let legende = data.shift();
+    let lastAnn = {};
+
+    let anno = await db.annotations.add({
+        name: name,
+        lastAdded: lastAnn,
+    });
+
+    // Get Timestamp and Label location
+    let timestampLocation = -1;
+    let labelLocation = -1;
+    for(let i = 0; i < legende.length; i++){
+        if(legende[i].toLowerCase() == "timestamp"){
+            timestampLocation = i;
+        }
+        else if(legende[i].toLowerCase() == "label"){
+            labelLocation = i;
+        }
+    }
+
+    for(let i = 0; i < data.length; i++){
+        let label = await db.labels.where('[annoId+name]').equals([anno, data[i][labelLocation]]).toArray();
+        if(label.length === 0){
+            label = await db.labels.add({
+                name: data[i][labelLocation],
+                color: colors[i % colors.length],
+                annoId: anno,
+            });
+        }
+        else{
+            label = label[0].id;
+        }
+        const newAnn = await db.annoData.add({
+            labelId: label,
+            annoId: anno,
+            timestamp: new Date(data[i][timestampLocation]).getTime(),
+        });
+        lastAnn = newAnn;
+    }
+    await db.lastSelected.put({id: 1, annoId: anno});
+    anno = await db.annotations.update(anno, {lastAdded: lastAnn});
 }
