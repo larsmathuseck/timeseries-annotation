@@ -9,7 +9,7 @@
                 <div class="graphDiv">
                     <Graph class="chart" v-if="showGraph" @loading="loadingChange"/>
                     <GraphPlaceholder v-if="!showGraph" />
-                    <div v-if="loading" id="spinner" class="spinner-border spinner-border-lg"></div>
+                    <div v-if="loading&&showGraph" id="spinner" class="spinner-border spinner-border-lg"></div>
                 </div>
             </div>
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
