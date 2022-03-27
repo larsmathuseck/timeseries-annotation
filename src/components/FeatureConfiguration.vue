@@ -243,7 +243,7 @@ export default {
                 this.$emit("setInvalidFeedback", error.messageback);
                 return;
             }
-             // create annotation file
+            // create annotation file
             const annotationId = await createNewAnnotationFile();
             // create as many labels as needed
             const labelAmount = predictedValues[0].data[0].length;
@@ -263,6 +263,16 @@ export default {
                         labelId: label.id,
                         firstTimestamp: timestamp,
                         secondTimestamp: nextTimestamp,
+                        y1: 0,
+                        y2: 1,
+                        yAmount: 1,
+                    });
+                    db.areas.add({
+                        annoId: annotationId,
+                        labelId: label.id,
+                        firstTimestamp: timestamp,
+                        secondTimestamp: nextTimestamp,
+                        yAmount: null,
                     });
                 }
                 timestamp = nextTimestamp;

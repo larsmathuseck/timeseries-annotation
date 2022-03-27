@@ -29,7 +29,22 @@ export function breakDownToSamplingrate(dataPoints, timestamps, samplingRate, fe
     return [segments[0], result];
 }
 
-function calcSegements(timestamps, samplingRate){
+export function breakDownAxisToSamplingrate(data, segments, feature) {
+    let df = new DataFrame(data, {dtypes: ["int32", "float32"]});
+    let oldsegment = 0;
+    let result = [];
+    segments[1].forEach(segment => {
+        segment = oldsegment + segment;
+        let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
+        newFrame = newFrame.asType("1", "float32");
+        const func = features[feature].func;
+        result.push(func(newFrame));
+        oldsegment = segment;
+    });
+    return result;
+}
+
+export function calcSegements(timestamps, samplingRate){
     let segments = [];
     let segmentTimestamps = [];
     const lastTimestamp = timestamps[timestamps.length -1];
@@ -47,6 +62,8 @@ function calcSegements(timestamps, samplingRate){
         counter += 1;
         currentTimestamp += 1;
     }
+    // Push last Timestamp, so that in case that the last segment ends exactly on the last timestamp, it can be showed correctly in the graph
+    segmentTimestamps.push(lastTimestamp);
     return [segmentTimestamps, segments];
 }
 
@@ -68,7 +85,7 @@ export function createInstances(state, modelConfiguration) {
                 break;
             }
         }
-    })
+    });
     const featureIndex = getFeatureIndex(downsamplingMethod);
     if (featureIndex == -1) {
         throw new Error("Downsampling Method not found! Can't break down to sampling rate!");
@@ -92,7 +109,8 @@ export function createInstances(state, modelConfiguration) {
         }
         allInstances.push([timeArray, dataArray]);
     }
-    return allInstances;
+    console.log(allInstances);
+    return [allInstances, segments.length];
 }
 
 /* function to get feature instances for supplied data
