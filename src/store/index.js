@@ -84,10 +84,21 @@ export default createStore({
                 id: dataPoints[dataPoints.length-1] +1,
                 name: payload.name,
                 dataPoints: data,
-                color: payload.color, 
+                color: payload.color,
+                samplingRate: payload.samplingRate,
+                feature: payload.feature, 
             };
-            state.data[state.currentSelectedData].dataPoints.push(axis);
-            state.data[state.currentSelectedData].selectedAxes.push(axis.id);
+            state.data[state.currentSelectedDataIndex].dataPoints.push(axis);
+            state.data[state.currentSelectedDataIndex].selectedAxes.push(axis.id);
+        },
+        updateAxis: (state, payload) => {
+            let axes = state.data[state.currentSelectedDataIndex].dataPoints;
+            axes.forEach(axis => {
+                if(axis.id == payload.id){
+                    axis.name = payload.name;
+                    axis.color = payload.color;
+                }
+            });
         },
         addAnnotationData: async (state, payload) => {
             let data = parse(payload.result);
