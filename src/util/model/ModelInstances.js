@@ -109,7 +109,6 @@ export function createInstances(state, modelConfiguration) {
         }
         allInstances.push([timeArray, dataArray]);
     }
-    console.log(allInstances);
     return [allInstances, segments.length];
 }
 

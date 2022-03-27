@@ -102,7 +102,7 @@ export default {
     },
     computed: {
         lastSelectedData: function() {
-            return this.$store.state.currentSelectedData;
+            return this.$store.state.selectedData;
         },
         data: function() {
             return this.$store.state.data;
