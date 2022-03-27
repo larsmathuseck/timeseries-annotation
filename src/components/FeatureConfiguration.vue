@@ -66,7 +66,7 @@
                     <div class="row mb-3 justify-content-center">
                         <div class="col-2"></div>
                         <label for="selectedDownsamplingMethod" class="col-4 col-form-label">Downsampling Method</label>
-                        <div class="col-4 col-lg-5">
+                        <div class="col-4 col-lg-5 my-auto">
                             <select v-model="selectedDownsamplingMethod" id="selectedDownsamplingMethod" ref="select" class="form-select" :disabled="featureModelFileName.length == 0">
                                 <option v-for="method in downsamplingMethods" :key="method" v-bind:value="method" >
                                     {{ method }}
@@ -81,7 +81,7 @@
                         <p>Feature Order</p>
                     </div>
                     <div class="row mb-3 justify-content-center">
-                        <draggable :disbaled="false " :list="features" item-key="id" class="list-group" ghost-class="ghost" >
+                        <draggable :disbaled="false " :list="features" item-key="id" class="list-group p-0" ghost-class="ghost" >
                             <template #item="{ element  }">
                                 <div class="list-group-item"> 
                                     {{ element.axis.name + "-" + element.feature.name + "-" + (element.slidingWindow*this.samplingRate)}}
@@ -94,8 +94,14 @@
                     </div>
                 </div>
             </div> 
+            <div class="row justify-content-center my-3">
+                <label for="annotationFileNameInput" class="col-5 col-lg-3 col-form-label">Annotation Filename</label>
+                <div class="col-5 col-lg-3">
+                    <input v-model="annotationFileName" type="text" class="form-control" id="annotationFileNameInput" :disabled="featureModelFileName.length == 0" required>
+                </div>
+            </div>
             <div class="row justify-content-center">
-                <div class="col-auto">
+                <div class="col">
                     <button type="submit" class="btn btn-primary" >
                         <div v-if="loading" class="spinner-border spinner-border-sm"></div>
                         Load Data in Model
@@ -127,6 +133,7 @@ export default {
         return {
             featureModelFileName: "",
             featureConfigName: "",
+            annotationFileName: "ModelAnnotation",
             addFeatureVisible: false,
             samplingRate: null,
             features: [],
@@ -149,7 +156,7 @@ export default {
             try {
                 checkImportedFiles(e, this.modelLoaded);
             } catch (error) {
-                this.$emit("setInvalidFeedback", error.message);
+                this.setInvalidFeedback(error.message);
             }
         },
         onFeatureConfigFileChange: function(e) {
@@ -217,7 +224,7 @@ export default {
             this.features.push(featureData);
         },
         setInvalidFeedback: function(invalidFeedback) {
-            this.$emit('setInvalidFeedback', invalidFeedback)
+            this.$emit("setInvalidFeedback", invalidFeedback)
         },
         onSubmit: async function(e) {
             this.loading = true;
@@ -240,11 +247,11 @@ export default {
                 predictedValues.push({data: a.arraySync()});               
             } catch (error) {
                 this.loading = false;
-                this.$emit("setInvalidFeedback", error.messageback);
+                this.setInvalidFeedback(error.message);
                 return;
             }
             // create annotation file
-            const annotationId = await createNewAnnotationFile();
+            const annotationId = await createNewAnnotationFile(this.annotationFileName);
             // create as many labels as needed
             const labelAmount = predictedValues[0].data[0].length;
             await createLabelsForAnnotation(annotationId, labelAmount, this.$store.state.colors);
@@ -298,7 +305,7 @@ export default {
             if (invalidFeedback.length == 0) {
                 return true;
             } else {
-                this.$emit("setInvalidFeedback", invalidFeedback)
+                this.setInvalidFeedback(invalidFeedback)
                 return false;
             }
         },

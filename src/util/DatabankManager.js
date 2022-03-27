@@ -1,14 +1,14 @@
 import { db } from "/db";
 
-export async function createNewAnnotationFile() {
+export async function createNewAnnotationFile(fileName) {
     const annotations = await db.annotations.toArray();
     let counter = 0;
     annotations.forEach(annotation => {
-        if (annotation.name.includes("ModelAnnotation")) {
+        if (annotation.name.slice(0, fileName.length).includes(fileName)) {
             counter ++;
         }
     });
-    let name = "ModelAnnotation";
+    let name = fileName;
     if (counter != 0) {
         name += "(" + counter + ")";
     }
@@ -43,9 +43,6 @@ export async function deleteAnnotationFile() {
 
 export async function selectAnnotationFile(annoId) {
     const lastSelected = await db.lastSelected.where("id").equals(1).first();
-    console.log("lastSelected before change: ", lastSelected);
-    console.log("changing to: ", annoId);
-    console.log("parseInt: ", parseInt(annoId))
     if (!lastSelected) {
         await db.lastSelected.put({id: 1, annoId: parseInt(annoId)});
     } else {
