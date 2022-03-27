@@ -100,6 +100,13 @@ export default createStore({
                 }
             });
         },
+        deleteAxis: (state, payload) => {
+            let axes = state.data[state.currentSelectedDataIndex].dataPoints;
+            if(axes.length > 1){
+                const index = axes.indexOf(payload);
+                axes.splice(index, 1);
+            }
+        },
         addAnnotationData: async (state, payload) => {
             let data = parse(payload.result);
             let legende = data.shift();

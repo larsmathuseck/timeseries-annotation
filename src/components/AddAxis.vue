@@ -60,6 +60,7 @@
             </div>
         </div>
         <div class="modal-footer">
+            <button type="button" class="btn btn-danger" v-if="axisToEdit" @click="deleteAxis">Delete</button>
             <button type="button" class="btn btn-secondary" @click="$emit('closeModal')">Close</button>
             <button id="submitButton" class="btn btn-primary" type="submit">Save</button>
         </div>
@@ -113,10 +114,14 @@ export default {
             }
             this.$emit('closeModal');
         },
-        updateAxisName(){
+        updateAxisName() {
             if(this.axisToEdit == null && this.samplingRate && this.selectedFeature){
                 this.axisName = this.selectedAxis.name + "-" + this.selectedFeature.shortName + "-" + this.samplingRate;
             }
+        },
+        deleteAxis() {
+            this.$store.commit("deleteAxis", this.axisToEdit);
+            this.$emit('closeModal');
         },
         validateInputs() {
             if (isNaN(this.samplingRate)) {
