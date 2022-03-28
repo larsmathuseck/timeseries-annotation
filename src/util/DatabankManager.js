@@ -1,15 +1,15 @@
 import { db } from "/db";
 import { parse } from "@vanillaes/csv";
 
-export async function createNewAnnotationFile() {
+export async function createNewAnnotationFile(fileName) {
     const annotations = await db.annotations.toArray();
     let counter = 0;
     annotations.forEach(annotation => {
-        if (annotation.name.includes("ModelAnnotation")) {
+        if (annotation.name.slice(0, fileName.length).includes(fileName)) {
             counter ++;
         }
     });
-    let name = "ModelAnnotation";
+    let name = fileName;
     if (counter != 0) {
         name += "(" + counter + ")";
     }

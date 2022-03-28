@@ -56,7 +56,7 @@
                     <div class="row mb-3 justify-content-center">
                         <label for="slidingWindowInput" class="col-6 col-form-label">Sliding Window</label>
                         <div class="col-2 col-lg-3">
-                            <input v-model="slidingWindow" type="number" class="form-control" id="slidingWindowInput" placeholder="4" :disabled="modelFileName.length == 0" required>
+                            <input v-model="slidingWindow" type="text" class="form-control" id="slidingWindowInput" placeholder="4" :disabled="modelFileName.length == 0" required>
                         </div>
                         <label class="col-4 col-lg-3 col-form-label text-left">Seconds</label>
                     </div>
@@ -70,7 +70,7 @@
                     <div class="row mb-3 justify-content-center">
                         <label for="overlapValue" class="col-6 col-form-label">Window Shift</label>
                         <div class="col-2 col-lg-3">
-                            <input v-model="windowShift" class="form-control" type="text" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0" required>
+                            <input v-model="windowShift" type="text" class="form-control" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0" required>
                         </div>
                         <label class="col-4 col-lg-3 col-form-label text-left">Seconds</label>
                     </div>
@@ -87,29 +87,48 @@
                     </div>
                 </div>
                 <div class="col-12 col-lg-6">
-                    <p>Axis Selection</p>
-                    <div class="list-group">
-                        <label class="list-group-item" v-for="axis in axes" :key="axis.id">
-                            <input class="form-check-input me-1" type="checkbox" v-bind:value="{id: axis.id, name: axis.name}" v-model="selectedAxes" :disabled="modelFileName.length == 0">
-                            {{ axis.name }}
-                        </label>
-                    </div>
-                    <div class="col-auto">
-                        <label class="pe-2" v-for="axis in selectedAxes" :key="axis.id">
-                            {{ (selectedAxes.indexOf(axis) + 1) + ". " + axis.name + ",\t"}}
-                        </label>
+                    <div class="row">
+                        <div class="container-fluid">
+                            <p>Axis Selection</p>
+                            <div class="row justify-content-center">
+                                <div class="list-group px-2">
+                                    <label class="list-group-item" v-for="axis in axes" :key="axis.id">
+                                        <input class="form-check-input me-1" type="checkbox" v-bind:value="{id: axis.id, name: axis.name}" v-model="selectedAxes" :disabled="modelFileName.length == 0">
+                                        {{ axis.name }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-auto">
+                                    <label class="pe-2" v-for="axis in selectedAxes" :key="axis.id">
+                                        {{ (selectedAxes.indexOf(axis) + 1) + ". " + axis.name + ",\t"}}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center py-3">
+                                <div class="col-auto">
+                                    <button type="button" class="btn btn-danger" @click="resetAxisSelection" >Clear Axis Selection</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="row justify-content-center">
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary">
-                    <div v-if="loading" class="spinner-border spinner-border-sm"></div>
-                    Load Data in Model
-                </button>
+        <div class="row justify-content-center my-3">
+                <label for="annotationFileNameInput" class="col-5 col-lg-3 col-form-label">Annotation Filename</label>
+                <div class="col-5 col-lg-3">
+                    <input v-model="annotationFileName" type="text" class="form-control" id="annotationFileNameInput" :disabled="modelFileName.length == 0" required>
+                </div>
             </div>
-        </div>
+            <div class="row justify-content-center">
+                <div class="col">
+                    <button type="submit" class="btn btn-primary" >
+                        <div v-if="loading" class="spinner-border spinner-border-sm"></div>
+                        Load Data in Model
+                    </button>
+                </div>
+            </div>
     </form>
 </template>
 
@@ -127,6 +146,7 @@ export default {
         return {
             modelFileName: "",
             configName: "",
+            annotationFileName: "ModelAnnotation",
             slidingWindow: null,
             samplingRate: null,
             windowShift: null,
@@ -151,7 +171,7 @@ export default {
             try {
                 checkImportedFiles(e, this.modelLoaded);
             } catch (error) {
-                this.$emit("setInvalidFeedback", error.message);
+                this.setInvalidFeedback(error.message);
             }
         },
         onConfigFileChange: function(e) {
@@ -206,6 +226,12 @@ export default {
             }
             return false;
         },
+        resetAxisSelection: function() {
+            this.selectedAxes = [];
+        },
+        setInvalidFeedback: function(invalidFeedback) {
+            this.$emit("setInvalidFeedback", invalidFeedback)
+        },
         onSubmit: function(e) {
             this.loading = true;
             e.preventDefault();
@@ -229,6 +255,9 @@ export default {
             if (this.model == null) {
                 invalidFeedback = "No Model imported yet!";
             }
+            else if (isNaN(this.slidingWindow)) {
+                invalidFeedback ="Sliding Window must be a number!";
+            }
             else if (this.slidingWindow < 0) {
                 invalidFeedback = "Sliding Window can not be a negative Number!";
             }
@@ -247,6 +276,9 @@ export default {
             else if (this.windowShift != 0 && this.isMultiple(this.slidingWindow, this.windowShift) != 0) {
                 invalidFeedback = "Sliding Window must be a multiple from Window Shift!";
             }
+            else if (this.isMultiple(this.samplingRate * this.windowShift, 1) != 0) {
+                invalidFeedback = "Sliding Window * Sampling Rate must be an Integer!";
+            }
             else if (data.length == 0) {
                 invalidFeedback = "Please upload data first!"
             }
@@ -256,7 +288,7 @@ export default {
             if (invalidFeedback.length == 0) {
                 return true;
             } else {
-                this.$emit("setInvalidFeedback", invalidFeedback)
+                this.setInvalidFeedback(invalidFeedback)
                 return false;
             }
         },
@@ -272,9 +304,7 @@ export default {
                 instances = instances[0];
             } catch (error) {
                 this.loading = false
-                console.error(error);
-                this.$emit("setInvalidFeedback", error.message)
-                return;
+                this.setInvalidFeedback(error.message)
             }
             let predictedValues = [];
             try {
@@ -285,12 +315,11 @@ export default {
                 });                
             } catch (error) {
                 this.loading = false;
-                console.error(error);
-                this.$emit("setInvalidFeedback", error.message)
+                this.setInvalidFeedback(error.message)
                 return;
             }
             // create annotation file
-            const annotationId = await createNewAnnotationFile();
+            const annotationId = await createNewAnnotationFile(this.annotationFileName);
             // create as many labels as needed
             const labelAmount = predictedValues[0].data[0].length;
             await createLabelsForAnnotation(annotationId, labelAmount, this.$store.state.colors);
