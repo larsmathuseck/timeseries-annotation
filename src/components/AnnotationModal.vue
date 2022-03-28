@@ -19,7 +19,7 @@
                             <div class="col-2">
                                 <input id="annotationFileUpload" type="file" accept=".csv" multiple v-on:change="onAnnotationFileChange" hidden>
                                 <button type="button" class="btn btn-default btn-circle" @click="chooseAnnotationFile">
-                                    <i class="fa fa-folder"></i>
+                                    <i class="fa-solid fa-folder"></i>
                                 </button>
                             </div>
                         </div>
@@ -63,7 +63,9 @@
 </template>
 
 <script>
-import { Modal } from 'bootstrap'
+import { Modal } from 'bootstrap';
+import { db } from "/db";
+import { addAnnotationData } from "../util/DatabankManager";
 
 export default {
     name: "AnnotationModal",
@@ -95,7 +97,7 @@ export default {
                     reader.readAsText(file);
                     reader.onload = () => {
                         if(file.name.includes("annotation") || file.name.includes("labels")){
-                            this.$store.commit("addAnnotationData", {result: reader.result, name: file.name});
+                            addAnnotationData(reader.result, file.name, this.$store.state.colors);
                             annotationFileImported = true;
                         }
                         if (!annotationFileImported) { // check if file is correct if not show error 
@@ -109,13 +111,16 @@ export default {
             }
             document.getElementById("annotationFileUpload").value = ""; // reset file input so when same file chosen again its an "onChange"
         },
-        onSubmit(e) {
+        async onSubmit(e) {
             e.preventDefault();
             if(!this.fileName.toLowerCase().includes("annotation") && !this.fileName.toLowerCase().includes("labels")) {
                 this.showInvalidFeedback = true;
                 return;
             }
-            this.$store.commit("addNewAnnotationFile", this.fileName);
+            const filename = this.fileName + '.csv';
+            const anno = await db.annotations.add({name: filename, lastAdded: null});
+            db.lastSelected.put({id: 1, annoId: anno});
+            this.$store.state.activeLabel = null;
             this.modal.hide();
         },
     },

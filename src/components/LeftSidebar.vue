@@ -1,53 +1,47 @@
 <template>
     <div class="row">
-        <p @click="test" class="description-text" >Data Files</p>
+        <label class="description-text" >Data Files</label>
         <div class="input-group">
-            <select v-model="lastSelectedData" class="form-select" @change="selectDataFile()">
-                <option v-for="row in data" :key="row.id" v-bind:value="row.id">
-                    {{ row.name }}
-                </option>
-            </select>
-            <div class="input-group-apend">
-                <input id="dataFileUpload" type="file" accept=".csv" multiple v-on:change="onDataFileChange" hidden>
-                <button type="button" class="btn btn-default btn-circle" @click="chooseDataFile">
-                    <i class="fa fa-plus"></i>
-                </button>
-            </div>
+            <FileSelect type="data" :data="data" :selected="lastSelectedData" />
         </div>
     </div>
     <div class="row">
-        <p class="description-text" >Y-Axes</p>
+        <span class="description-text" >
+            <label>Axes</label>
+            <button type="button" class="btn btn-default btn-circle" @click="showAxesModal">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </span>
         <div id="scroll-container-axes">
             <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
-                <Axis :axis="axis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
-                <div class="colorpicker-container">
-                    <ColorPicker v-show="showColorPicker" />
-                </div>
+                <Axis :axis="axis" @editAxis="editAxis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
             </div>
         </div>
     </div>
     <div class="row">
-        <p class="description-text" >Annotation Files</p>
+        <label class="description-text" >Annotation Files</label>
         <div class="input-group">
-            <select v-model="lastSelectedAnnotation" class="form-select" @change="selectAnnotationFile()">
-                <option v-for="annotationFile in annotationFiles" :key="annotationFile.id" v-bind:value="annotationFile.id">
-                    {{ annotationFile.name }}
-                </option>
-            </select>
-            <div class="input-group-apend">
-                <button type="button" class="btn btn-default btn-circle" @click="showAnnotationModal">
-                    <i class="fa fa-plus"></i>
-                </button>
-            </div>
+            <FileSelect type="annotation" :data="annotationFiles" :selected="lastSelectedAnnotation" @annoModal="showAnnotationModal" />
         </div>
     </div>
     <div class="row">
         <span class="description-text" >
             <label>Labels</label>
             <button type="button" class="btn btn-default btn-circle" @click="showLabelModal">
-                <i class="fa fa-plus"></i>
+                <i class="fa-solid fa-plus"></i>
             </button>
         </span>
+        <div class="row justify-content-start align-items-center">
+            <div class="col-auto area-visibility-container">
+                <p class="area-p">Areas visible</p>
+            </div>
+            <div class="col-auto area-visibility-container px-0">
+                <label class="switch">
+                    <input type="checkbox" v-model="areasVisible" v-show="false">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
         <div id="scroll-container-labels">
             <div class="row label-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
                 <Label :label="label" @editLabel="editLabel" />
@@ -56,51 +50,82 @@
     </div>
     <AnnotationModal :toggleModalVisibility="toggleAnnotationModalVisibility" />
     <LabelModal :addLabelKey="addLabelKey" :toggleModalVisibility="toggleLabelModalVisibility" :labelToEdit="labelToEdit" />
+    <AxesModal :toggleModalVisibility="toggleAxesModalVisibility" :title="axisModalTitle" :axisToEdit="axisToEdit"/>
 </template>
 
 <script>
-import Axis from "./Axis.vue"
-import ColorPicker from "./Colorpicker.vue"
-import Label from "./Label.vue"
-import AnnotationModal from "./AnnotationModal.vue"
-import LabelModal from "./LabelModal.vue"
-
+import Axis from "./Axis.vue";
+import Label from "./Label.vue";
+import AnnotationModal from "./AnnotationModal.vue";
+import LabelModal from "./LabelModal.vue";
+import AxesModal from "./AxesModal.vue";
+import FileSelect from "./FileSelect.vue";
+import { liveQuery } from "dexie";
+import { db } from "/db";
+import { useObservable } from "@vueuse/rxjs";
 
 export default {
     name: "LeftSidebar",
     components: {
         Axis,
-        ColorPicker,
         Label,
         AnnotationModal,
         LabelModal,
+        FileSelect,
+        AxesModal,
+    },
+    setup: function(){
+        const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
+        const labels = useObservable(liveQuery(async () => {
+            const curr = await db.lastSelected.where('id').equals(1).first();
+            return db.labels.where('annoId').equals(parseInt(curr?.annoId || 1)).toArray();
+        }));
+        const annotationFiles = useObservable(liveQuery(() => db.annotations.toArray()));
+        return {
+            labels,
+            annotationFiles,
+            currAnn,
+        }
     },
     data() {
         return {
-            lastSelectedData: this.$store.state.currentSelectedData,
-            lastSelectedAnnotation: this.$store.state.currAnn,
-            showColorPicker: false,
+            lastSelectedAnnotation: 1,
             toggleAnnotationModalVisibility: false,
             toggleLabelModalVisibility: false,
+            toggleAxesModalVisibility: false,
             labelToEdit: null,
+            axisToEdit: null,
             addLabelKey: 0,
+            acceptedKeys: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+            axisModalTitle: "Add Axis",
         }
     },
     computed: {
+        lastSelectedData: function() {
+            return this.$store.state.selectedData;
+        },
         data: function() {
             return this.$store.state.data;
         },
         axes: function() {
+            console.log(this.$store.getters.getAxes);
             return this.$store.getters.getAxes;
         },
         selectedAxes: function() {
             return this.$store.getters.selectedAxes;
         },
-        labels: function() {
-            return this.$store.getters.getLabels;
+        areasVisible: {
+            get() {
+                return this.$store.state.areasVisible;
+            },
+            set() {
+                this.$store.commit("toggleAreasVisibility");
+            }
         },
-        annotationFiles: function() {
-            return this.$store.state.annotations;
+    },
+    watch: {
+        currAnn: function(){
+            this.lastSelectedAnnotation = this.currAnn?.annoId;
         },
     },
     methods: {
@@ -110,6 +135,11 @@ export default {
         editLabel(label) {
             this.labelToEdit = label;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
+        },
+        editAxis(axis) {
+            this.axisModalTitle = "Edit Axis";
+            this.axisToEdit = axis;
+            this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;
         },
         showAnnotationModal() {
             this.toggleAnnotationModalVisibility = !this.toggleAnnotationModalVisibility;
@@ -123,30 +153,35 @@ export default {
             this.labelToEdit = null;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
         },
-        selectDataFile() {
-            this.$store.commit("selectDataFile", this.lastSelectedData);
+        showAxesModal() {
+            this.axisModalTitle = "Add Axis";
+            this.axisToEdit = null;
+            this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;
         },
-        selectAnnotationFile() {
-            this.$store.commit("selectAnnotationFile", this.lastSelectedAnnotation);
-        },
-        chooseDataFile() {
-            document.getElementById("dataFileUpload").click()
-        },
-        onDataFileChange(e) {
-            const fileList = e.target.files;
-            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const reader = new FileReader();
-                const file = fileList[i];
-                if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
-                    reader.readAsText(file);
-                    reader.onload = () => {
-                        if(file.name.includes("data")){
-                            this.$store.commit("addData", {result: reader.result, name: file.name});
-                        }
-                    }
+        keyPressed: function(e) {
+            let key = e.key;
+            if (this.acceptedKeys.indexOf(key) > -1) {
+                if (key == 0) { // modify key so that by pressing 1 its the first label, which has index 0, and by pressing 0 you reach label 10
+                    key = 10;
+                } else {
+                    key -= 1;
+                }
+                if (this.labels == undefined || this.labels == null) {
+                    return;
+                }
+                const keys = Object.keys(this.labels);
+                if (keys.length > 0 && keys.length > key) {
+                    key = keys[key];
+                    this.$store.state.activeLabel = this.labels[key];
                 }
             }
-        },
+        }
+    },
+    mounted: async function() {
+        window.addEventListener("keypress", this.keyPressed);
+    },
+    beforeUnmount: function() {
+        window.removeEventListener('keypress', this.keyPressed);
     },
 }
 </script>
@@ -172,28 +207,14 @@ export default {
     height: 0;
 }
 
-.colorpicker-container {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: stretch;
-    width: 100%;
-}
-
 .input-group {
     padding-right: 0;
 }
 
-.input-group-apend {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .btn-circle {
-    height: 2.5vw;
-    width: 2.5vw;
-    border-radius: 1.25vw;
+    height: 2vw;
+    width: 2vw;
+    border-radius: 1vw;
     text-align: center;
     font-size: 1vw;
     background-color: #bbb;
@@ -249,8 +270,6 @@ export default {
     font-family: Tahoma;
     font-weight: Bold;
     font-size: 1.5vw;
-    padding-top: 10px;
-    padding-bottom: 2px;
     margin: 0;
 }
 
@@ -262,13 +281,77 @@ export default {
     color: gray;
 }
 
-.fa-edit , .fa-times{
+.fa-pen-to-square , .fa-xmark{
     opacity: 0.5;
 }
 
-.fa-edit:hover, .fa-times:hover {
+.fa-pen-to-square:hover, .fa-xmark:hover {
     opacity: 1;
     cursor: pointer;
+}
+
+.area-p {
+    margin-bottom: 0;
+}
+
+.area-visibility-container {
+    height: fit-content;
+    display: inline-flex;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 3vw;
+  height: 1.5vw;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.15vw;
+  width: 1.15vw;
+  left: 0.25vw;
+  bottom: 0.2vw;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(1.25vw);
+  -ms-transform: translateX(1.25vw);
+  transform: translateX(1.3vw);
+}
+
+.slider.round {
+  border-radius: 1vw;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
 
 </style>

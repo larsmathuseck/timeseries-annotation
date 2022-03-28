@@ -2,7 +2,7 @@
     <div class="col-auto" :style="{ background: annotation.color }">
         <label class="annotation-name">
             {{ annotation.name }}
-        <i @click="deleteAnnotation(annotation)" class="fa fa-times"></i>
+            <i @click="deleteAnnotation(annotation)" class="fa-solid fa-xmark"></i>
         </label>
     </div>
     <label class="annotation-timestamp">
@@ -11,6 +11,8 @@
 </template>
 
 <script>
+import { db } from "/db";
+
 export default {
     name: "Annotation",
     props: {
@@ -18,7 +20,7 @@ export default {
     },
     methods: {
         deleteAnnotation(annotation) {
-            this.$store.commit("deleteAnnotation", annotation.annotationObject)
+            db.annoData.delete(annotation.id);
         }
     },
 }

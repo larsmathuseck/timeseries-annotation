@@ -14,19 +14,43 @@
 <script>
 import Annotation from "./Annotation.vue"
 import { DateTime } from "luxon"
+import { liveQuery } from "dexie";
+import { db } from "/db";
+import { useObservable } from "@vueuse/rxjs";
 
 export default {
     name: "RightSidebar",
     components: {
         Annotation,
     },
+    setup: function(){
+        const annoData = useObservable(liveQuery(async () => {
+            const curr = await db.lastSelected.where('id').equals(1).first();
+            const annotations = await db.annoData.where('annoId').equals(parseInt(curr?.annoId || 1)).sortBy('timestamp');
+            await Promise.all (annotations.map (async anno => {
+                [anno.label] = await Promise.all([
+                    db.labels.get(anno.labelId)
+                ]);
+            }));
+            return annotations;
+        }));
+        return {
+            annoData,
+        }
+    },
     computed: {
         annotations: function() {
-            let ann = this.$store.getters.getAnnotations;
-            for(let i = 0; i < ann.length; i++){
-                ann[i].timestamp = DateTime.fromMillis(ann[i].timestamp).toFormat('hh:mm:ss SSS');
+            let annoData = this.annoData;
+            if(annoData != undefined){
+                for(let i = 0; i < annoData.length; i++){
+                    const label = annoData[i].label;
+                    annoData[i].name = label.name;
+                    annoData[i].color = label.color;
+                    annoData[i].timestamp = DateTime.fromMillis(annoData[i].timestamp).toFormat('hh:mm:ss SSS');
+                }
             }
-            return ann;
+            
+            return annoData;
         }
     },
 }

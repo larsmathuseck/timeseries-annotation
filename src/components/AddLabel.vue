@@ -15,7 +15,7 @@
                     </div>
                     <div class="col col-2" id="submitButtonContainer">
                         <button id="colorButton" class="btn rounded" type="button" @click="showColorPicker = !showColorPicker">
-                            <i class="fa fa-tint" />
+                            <i class="fa-solid fa-droplet"></i>
                         </button>
                     </div>
                 </div>
@@ -42,6 +42,7 @@
 
 <script>
 import ColorPicker from "./Colorpicker.vue"
+import { db } from "/db"
 
 export default {
     name: "AddLabel",
@@ -63,33 +64,23 @@ export default {
         colorPicked(color) {
             this.labelColor = color
         },
-        onSubmit(e) {
+        async onSubmit(e) {
             e.preventDefault();
             if (this.labelToEdit === null) {
-                const labels = this.$store.getters.getLabels;
-                if (typeof labels == "undefined") { // no or false data uploaded --> no annotation file
-                    this.error = "Can't add Label. First add Annotation and Data files!"
+                const currAnn = await db.lastSelected.where('id').equals(1).first();
+                if (currAnn === undefined) { // no or false data uploaded --> no annotation file
+                    this.error = "Can't add Label. First add Annotation file!"
                     return;
-                } 
-                const labelKeys = Object.keys(labels);
-                const lastKey = labelKeys.at(-1);
-                const lastLabel = labels[lastKey];
-                let newId = 0
-                if (Object.values(labels).length != 0) {
-                    newId = lastLabel.id +1;
                 }
                 const label = {
-                    id: newId,
                     name: this.labelName,
                     color: this.labelColor,
                 }
                 this.$emit("labelCreated", label)
             } else {
-                const label = {
-                    id: this.labelToEdit.id,
-                    name: this.labelName,
-                    color: this.labelColor,
-                }
+                let label = this.labelToEdit;
+                label.name = this.labelName;
+                label.color = this.labelColor;
                 this.$emit("labelEdited", label)
             }
             this.labelName = "";
@@ -116,15 +107,10 @@ export default {
 
 <style scoped>
 .form-container {
-    padding: 16px;
-}
-
-#buttonRow {
-    margin-top: 5px;
+    padding: 1rem;
 }
 
 #colorButton {
-    margin-left: 1,5px;
     align-self: center;
     background-color: #2196F3;
     opacity: 0.7;
@@ -143,13 +129,13 @@ export default {
 }
 
 .alert-danger {
-    margin-top: 25px;
+    margin-top: 1.5rem;
     margin-bottom: 0px;
 }
 
-.fa {
-    height: 10px;
-    width: 10px;
+.fa-droplet {
+    height: 0.75rem;
+    width: 0.75rem;
     color: white;
     opacity: 1;
 }
@@ -163,6 +149,6 @@ export default {
 }
 
 .modal-footer {
-    margin-top: 25px;
+    margin-top: 1.75rem;
 }
 </style>

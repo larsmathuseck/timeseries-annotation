@@ -1,6 +1,6 @@
 <template>
     <div ref="chartDiv" @mouseup="chartClicked" @mousedown="dragDetection">
-        <v-chart ref="charts" class="chart" :option="option" @datazoom="zoom"/>
+        <v-chart ref="charts" class="chart" :option="option2" @datazoom="zoom"/>
     </div>
 </template>
 
@@ -17,9 +17,13 @@ import {
     DataZoomComponent,
     MarkLineComponent,
     MarkPointComponent,
+    MarkAreaComponent,
 } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
 import { DateTime } from "luxon";
+import { liveQuery } from "dexie";
+import { db } from "/db";
+import { useObservable } from "@vueuse/rxjs";
 
 use([
     CanvasRenderer,
@@ -32,12 +36,41 @@ use([
     GridComponent,
     MarkLineComponent,
     MarkPointComponent,
+    MarkAreaComponent,
 ]);
 
 export default {
     name: "Graph",
     components: {
         VChart,
+    },
+    setup: function(){
+        const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
+        const annoData = useObservable(liveQuery(async () => {
+            const curr = await db.lastSelected.where('id').equals(1).first();
+            const annotations = await db.annoData.where('annoId').equals(parseInt(curr?.annoId || 1)).sortBy('timestamp');
+            await Promise.all (annotations.map (async anno => {
+                [anno.label] = await Promise.all([
+                    db.labels.get(anno.labelId)
+                ]);
+            }));
+            return annotations;
+        }));
+        const areaData = useObservable(liveQuery(async () => {
+            const curr = await db.lastSelected.where('id').equals(1).first();
+            const areas = await db.areas.where('annoId').equals(parseInt(curr?.annoId || 1)).toArray();
+            await Promise.all (areas.map (async area => {
+                [area.label] = await Promise.all([
+                    db.labels.get(area.labelId)
+                ]);
+            }));
+            return areas;
+        }));
+        return {
+            currAnn,
+            annoData,
+            areaData,
+        }
     },
     data: function () {
         return {
@@ -49,6 +82,7 @@ export default {
             sizeOfGraph: 0,
             clickX: 0,
             clickY: 0,
+            option2: null,
         };
     },
     provide: {
@@ -62,8 +96,16 @@ export default {
                 let pointInPixel = [event.offsetX, event.offsetY];
                 if (this.$refs.charts.containPixel("grid", pointInPixel)) {
                     let pointInGrid = this.$refs.charts.convertFromPixel("grid", pointInPixel);
-                    this.$store.commit("addAnnotationPoint", Math.round(pointInGrid[0]));
+                    this.addAnnotationPoint(Math.round(pointInGrid[0]));
                 }
+            }
+        },
+        addAnnotationPoint: function (timestamp) {
+            let time = new Date(timestamp).getTime();
+            let label = this.$store.state.activeLabel;
+            let currAnn = this.currAnn;
+            if(label != null && currAnn != undefined){
+                db.annoData.add({labelId: label.id, annoId: currAnn.annoId, timestamp: time});
             }
         },
         dragDetection: function (event) {
@@ -81,73 +123,137 @@ export default {
         },
         resizeChart: function () {
             this.$refs.charts?.resize();
-        }
+        },
     },
     computed: {
+        graphData: function(){
+            return this.$store.getters.getData;
+        },
         option: function () {
             let series = [];
-            let graphData = this.$store.getters.getData;
             let legende = [];
-            let annotations = this.$store.getters.getAnnotations;
-            let ann = annotations.map((x, i) => {
-                return {
-                    symbol: "pin",
-                    itemStyle: {
-                    color: x.color
-                    },
-                    name: (i + 1).toString() + " " + x.name,
-                    xAxis: new Date(x.timestamp),
-                    y: "75"
-                };
-            });
-            let ml = annotations.map(x => {
-                return {
-                    itemStyle: {
-                        color: x.color
-                    },
-                    xAxis: new Date(x.timestamp),
-                };
-            });
-            for(let key in graphData){
-                legende.push(graphData[key].name);
+            let annotations = this.annoData;
+            let areas = this.areaData;
+            let ann;
+            let ml;
+            let area;
+            if (this.graphData.length == 0) {
+                return;
+            }
+            if(annotations != undefined){
+                ann = annotations.map((x, i) => {
+                    if (x.label) {
+                        return {
+                            symbol: "pin",
+                            itemStyle: {
+                            color: x.label.color
+                            },
+                            name: (i + 1).toString() + " " + x.label.name,
+                            xAxis: new Date(x.timestamp),
+                            y: "75"
+                        };
+                    }
+                });
+                ml = annotations.map(x => {
+                    if (x.label) {
+                        return {
+                            itemStyle: {
+                                color: x.label.color
+                            },
+                            xAxis: new Date(x.timestamp),
+                        };
+                    }
+                });
+            }
+            if (this.areasVisible && areas != undefined) {
+                if (areas.length != 0) {
+                    area = areas.map(x => {
+                        if(x.yAmount != null) {
+                            return [
+                                {
+                                    xAxis: new Date(x.firstTimestamp),
+                                    itemStyle: {
+                                        color: x.label.color,
+                                        opacity: 0.2,
+                                        borderColor: "black",
+                                        borderWidth: 0.5,
+                                        borderType: "solid"
+                                    },
+                                    y: 30 + (((this.sizeOfGraph - 20)*0.95)/(x.yAmount))*x.y1,
+                                },
+                                {
+                                    xAxis: new Date(x.secondTimestamp),
+                                    y: 30 + (((this.sizeOfGraph - 20)*0.95)/(x.yAmount))*x.y2,
+                                }
+                            ];
+                        }
+                        else {
+                            return [
+                                {
+                                    xAxis: new Date(x.firstTimestamp),
+                                    itemStyle: {
+                                        color: x.label.color,
+                                        opacity: 0.5,
+                                    },
+                                    y: 30 + ((this.sizeOfGraph - 20)*0.95),
+                                },
+                                {
+                                    xAxis: new Date(x.secondTimestamp),
+                                    y: 30 + ((this.sizeOfGraph - 20)),
+                                }
+                            ];
+                        }
+                        
+                    });
+                }
+            }
+            for(let key in this.graphData){
+                legende.push(this.graphData[key].name);
                 series.push({
-                    name: graphData[key].name,
+                    name: this.graphData[key].name,
                     type: "line",
                     showSymbol: false,
                     emphasis: {
                         scale: false,
                         lineStyle: {
                             width: 1.5,
+                            color: this.graphData[key].color,
                         },
                     },
                     lineStyle: {
-                        color: graphData[key].color,
+                        color: this.graphData[key].color,
                         width: 1.5,
                     },
-                    markPoint: {
-                        animation: true,
-                        symbol: "pin",
-                        label: {
-                            show: true,
-                            padding: 5,
-                            distance: 5,
-                            formatter: (value) => {
-                                return value.name.split(" ")[0];
-                            },
-                            color: "white"
-                        },
-                        data: ann,
-                    },
-                    markLine: {
-                        animation: true,
-                        silent: true,
-                        symbol: "none",
-                        label: { show: false},
-                        data: ml,
-                    },
-                    data: graphData[key].dataPoints,
+                    data: this.graphData[key].dataPoints,
                 });
             }
+            series[0].markPoint = {
+                                animation: true,
+                                symbol: "pin",
+                                label: {
+                                    show: true,
+                                    padding: 5,
+                                    distance: 5,
+                                    formatter: (value) => {
+                                        return value.name.split(" ")[0];
+                                    },
+                                    color: "white"
+                                },
+                                data: ann,
+                            };
+            series[0].markLine = {
+                                animation: true,
+                                silent: true,
+                                symbol: "none",
+                                label: { show: false},
+                                data: ml,
+                            };
+            series[0].markArea = {
+                                animation: true,
+                                silent: true,
+                                label: { show: false},
+                                data: area,
+                            };
             return {
                 height: this.sizeOfGraph,
                 animation: false,
@@ -193,7 +299,7 @@ export default {
                         throttle: 100,
                         dataBackground: {
                             lineStyle: {
-                                color: "green",
+                                color: "#79bdf2",
                                 width: 1.5,
                             },
                             areaStyle: {
@@ -213,14 +319,21 @@ export default {
                 ],
             };
         },
+        areasVisible: function() {
+            return this.$store.state.areasVisible;
+        }
     },
     watch:{
         option: function(){
-            this.$refs.charts?.clear();
+            this.$emit('loading', true);
             this.dataZoomStart = this.tempDataZoomStart;
             this.dataZoomEnd = this.tempDataZoomEnd;
             this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
-        }
+            setTimeout(() => {
+                this.$refs.charts?.clear();
+                this.option2 = this.option
+            }, 10);
+        },
     },
     created: function(){
         this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
@@ -228,7 +341,10 @@ export default {
             this.resizeChart();
             this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
         })
-    }
+    },
+    updated: function(){
+        this.$emit('loading', false);
+    },
 }
 
 </script>

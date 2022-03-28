@@ -12,15 +12,16 @@
     </div>
     <div class="col-auto">
         <button>
-            <i class="fa fa-edit" @click="editLabel(label)" />
-        </button>   
+            <i class="fa-solid fa-pen-to-square" @click="editLabel"></i>
+        </button>
         <button>
-            <i class="fa fa-times" @click="deleteLabel(label)" />
+            <i class="fa-solid fa-xmark" @click="deleteLabel" />
         </button>
     </div>
 </template>
 
 <script>
+import { db } from "/db";
 export default {
     name: "Label",
     props: {
@@ -32,11 +33,18 @@ export default {
         }
     },
     methods: {
-        deleteLabel: function(label) {
-            this.$store.commit("deleteLabel", label);
+        deleteLabel: function(event) {
+            event.stopPropagation();
+            db.labels.delete(this.label.id);
+            db.annoData.where('labelId').equals(this.label.id).delete();
+            db.areas.where('labelId').equals(this.label.id).delete();
+            if(this.activeLabel === this.label){
+                this.$store.commit("toggleActiveLabel", null);
+            }
         },
-        editLabel: function(label) {
-            this.$emit("editLabel", label);
+        editLabel: function(event) {
+            event.stopPropagation();
+            this.$emit("editLabel", this.label);
         }
     },
     emits: ["editLabel"],
@@ -80,7 +88,7 @@ button {
     padding: 0 3px 0 3px;
 }
 
-.fa {
+.fa-solid {
     font-size: 1.25vw;
 }
 </style>

@@ -1,36 +1,37 @@
-import { createStore } from 'vuex'
-import { parse, stringify } from "@vanillaes/csv";
-import { DateTime } from "luxon";
+import { createStore } from 'vuex';
+import { parse } from "@vanillaes/csv";
+import { breakDownToSamplingrate } from '../util/model/ModelInstances';
 
 export default createStore({
     state: {
-        data: [],
-        currentSelectedData: 0,
-        annotations: [],
-        currAnn: 0,
+        data: {},
+        selectedData: null,
         activeLabel: null,
-        colors: ["red", "orange", "#FFD700", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
+        areasVisible: false,
+        colors: ["red", "orange", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
     },
     mutations: {
         addData: (state, payload) => {
             let data = parse(payload.result);
             let legende = data.shift();
             let timestamps = [];
-            let dataJson = [];
+            let axes = {};
 
-            // Get Timestamps
+            // Get Timestamps and create axes object
             let timestampLocation = -1;
+            let axesId = 0;
             for(let i = 0; i < legende.length; i++){
                 if(legende[i].toLowerCase() == "timestamp"){
                     timestampLocation = i;
                 }
                 else {
-                    dataJson.push({
-                        id: i,
+                    Object.assign(axes, {[axesId]: {
+                        id: axesId,
                         name: legende[i],
                         dataPoints: [],
                         color: state.colors[i % state.colors.length],
-                    });
+                    }});
+                    axesId += 1;
                 }
             }
             if(timestampLocation >= 0){
@@ -38,232 +39,120 @@ export default createStore({
                     timestamps.push(new Date(row[timestampLocation]).getTime());
                     row.splice(timestampLocation, 1);
                 });
-            
-                // Get dimensions in own arrays
-                for(let row = 0; row < data.length; row++){
-                    for(let column = 0; column < data[row].length; column++){
-                        dataJson[column].dataPoints.push([new Date(timestamps[row]).getTime(), data[row][column]]);   
-                    }
-                }
-                state.data.push({
-                    id: state.data.length,
-                    name: payload.name,
-                    dataPoints: dataJson,
-                    timestamps: timestamps,
-                    selectedAxes: [dataJson[0].id],
-                });
-            }
-        },
-        addAnnotationData: (state, payload) => {
-            let data = parse(payload.result);
-            let legende = data.shift();
-            let labels = {};
-            let newestLabelId = 0;
-            let dataArray = [];
-
-            // Get Timestamp and Label location
-            let timestampLocation = -1;
-            let labelLocation = -1;
-            for(let i = 0; i < legende.length; i++){
-                if(legende[i].toLowerCase() == "timestamp"){
-                    timestampLocation = i;
-                }
-                else if(legende[i].toLowerCase() == "label"){
-                    labelLocation = i;
-                }
-            }
-
-            for(let i = 0; i < data.length; i++){
-                let label = null;
-                for(let key in labels){
-                    if(labels[key].name === data[i][labelLocation]){
-                        label = labels[key];
-                    }
-                }
-                if(label == null){
-                    label = {
-                        id: newestLabelId,
-                        name: data[i][labelLocation],
-                        color: state.colors[i % state.colors.length],
-                    }
-                    labels[`${newestLabelId}`] = label;
-                    newestLabelId += 1;
-                }
-                dataArray.push({
-                    id: i,
-                    label: label.id,
-                    timestamp: new Date(data[i][timestampLocation]).getTime(),
-                });
-            }
-
-            state.annotations.push({
-                id: state.annotations.length,
-                name: payload.name,
-                data: dataArray,
-                labels: labels,
-            });
-        },
-        addNewAnnotationFile: (state, fileName) => {
-            state.annotations.push({
-                id: state.annotations.length,
-                name: fileName + ".csv",
-                data: [],
-                labels: {},
-            });
-        },
-        addAnnotationPoint: (state, timestamp) => {
-            if(state.activeLabel != null){
-                let time = new Date(timestamp).getTime();
-                let annotations = state.annotations[state.currAnn].data;
-                let inserted = false;
-                if (annotations.length == 0) {
-                    annotations.push({
-                        id: 0,
-                        label: state.activeLabel.id,
-                        timestamp: time,
-                    });
-                    return;
-                }
-                let newAnn = {
-                    id: annotations[annotations.length-1].id +1,
-                    label: state.activeLabel.id,
-                    timestamp: time,
-                }
-                for(let i = 0; i < annotations.length; i++){
-                    if(annotations[i].timestamp > time){
-                        annotations.splice(i, 0, newAnn);
-                        inserted = true;
+                
+                // Delete last not full second
+                const lastTimestamp = (timestamps[timestamps.length-1] - (timestamps[timestamps.length-1] - timestamps[0])%1000);
+                let time = timestamps[timestamps.length-1];
+                while(time > lastTimestamp){
+                    if(timestamps[timestamps.length-2] <= lastTimestamp){
                         break;
                     }
+                    time = timestamps.pop();
                 }
-                if(!inserted){
-                    annotations.push(newAnn);
+                // Get dimensions in own arrays
+                for(let row = 0; row < timestamps.length; row++){
+                    for(let column = 0; column < data[row].length; column++){
+                        axes[column].dataPoints.push([new Date(timestamps[row]).getTime(), data[row][column]]);   
+                    }
                 }
+                let id = 0;
+                if(Object.keys(state.data).length > 0){
+                    const keys = Object.keys(state.data);
+                    id = parseInt(keys[keys.length-1]) + 1;
+                }
+                Object.assign(state.data, {[id]: {
+                    id: id,
+                    name: payload.name,
+                    axes: axes,
+                    timestamps: timestamps,
+                    selectedAxes: [parseInt(Object.keys(axes)[0])],
+                }});
+                console.log(state.data);
+                state.selectedData = id;
             }
         },
-        addSelectedAxes: (state, axis) => {
-            state.data[state.currentSelectedData].selectedAxes.push(axis.id);
+        deleteData: (state) => {
+            delete state.data[state.selectedData];
+            if (Object.keys(state.data).length > 0) {
+                state.selectedData = parseInt(Object.keys(state.data)[0]);
+            }
+            else {
+                state.selectedData = null;
+            }
         },
-        deleteSelectedAxis(state, axis) {
-            let selectedAxes = state.data[state.currentSelectedData].selectedAxes;
+        addAxis: (state, payload) => {
+            const axes = state.data[state.selectedData].axes;
+            const axisData = axes[payload.axis.id].dataPoints;
+            let data = breakDownToSamplingrate([axisData], state.data[state.selectedData].timestamps, payload.samplingRate, payload.feature.id);
+            data = data[1].map((x) => { return [data[0][data[1].indexOf(x)], x[0]]; });
+            const keys = Object.keys(axes);
+            const id = parseInt(keys[keys.length-1]) + 1;
+            const axis = {
+                id: id,
+                name: payload.name,
+                dataPoints: data,
+                color: payload.color,
+                samplingRate: payload.samplingRate,
+                feature: payload.feature, 
+            };
+            Object.assign(axes, {[id]: axis});
+            state.data[state.selectedData].selectedAxes.push(axis.id);
+        },
+        updateAxis: (state, payload) => {
+            let axis = state.data[state.selectedData].axes[payload.id];
+            axis.name = payload.name;
+            axis.color = payload.color;
+        },
+        deleteAxis: (state, payload) => {
+            delete state.data[state.selectedData].axes[payload.id];
+        },
+        addSelectedAxes: (state, axis) => {
+            state.data[state.selectedData].selectedAxes.push(axis.id);
+        },
+        deleteSelectedAxis: (state, axis) => {
+            let selectedAxes = state.data[state.selectedData].selectedAxes;
             const index = selectedAxes.indexOf(axis.id);
             if (index > -1) {
                 selectedAxes.splice(index, 1);
             }
         },
-        changeAxisColor(state, changedAxis) {
-            let axes = state.data[state.currentSelectedData].dataPoints;
-            for (let i in axes) {
-                if (axes[i].id === changedAxis.id) {
-                    axes[i].color = changedAxis.color;
-                    break;
-                }
-            }
-        },
-        addLabel(state, label) {
-            const labelNumber = label.id;
-            state.annotations[state.currAnn].labels[labelNumber] = label;
-        },
-        editLabel(state, label) {
-            const labelNumber = label.id;
-            state.annotations[state.currAnn].labels[labelNumber] = label;
-        },
-        toggleActiveLabel(state, label) {
+        toggleActiveLabel: (state, label) => {
             state.activeLabel = label;
         },
-        async deleteLabel(state, label) {
-            let labels = state.annotations[state.currAnn].labels;
-            const key = Object.keys(labels).find(key => labels[key] === label);
-            this.commit("deleteAnnotationsWithLabel", key);
-            delete labels[key];
+        selectDataFile: (state, dataFileId) => {
+            state.selectedData = dataFileId;
         },
-        deleteAnnotation(state, annotation) {
-            let index = -1;
-            let annotations = state.annotations[state.currAnn].data;
-            for(let i = 0; i < annotations.length; i++){
-                if(annotations[i] === annotation){
-                    index = i;
-                    break;
-                }
-            }
-            if (index > -1) {
-                state.annotations[state.currAnn].data.splice(index, 1);
-            }
+        toggleAreasVisibility: (state) => {
+            state.areasVisible = !state.areasVisible;
         },
-        selectDataFile(state, dataFileId){
-            state.currentSelectedData = dataFileId;
-        },
-        selectAnnotationFile(state, annotationFileId){
-            state.currAnn = annotationFileId;
-        },
-        deleteAnnotationsWithLabel(state, labelNumber) {
-            let annotations = state.annotations[state.currAnn].data;
-            let annotationsToDelete = [];
-            for (let i = 0; i < annotations.length; i++) {
-                if (annotations[i].label == labelNumber) {
-                    annotationsToDelete.push(annotations[i]);
-                }
-            }
-            for (let i = 0; i < annotationsToDelete.length; i++) {
-                this.commit("deleteAnnotation", annotationsToDelete[i]);
-            }
-        }
     },
     getters: {
         getData: state => {
-            if(state.data.length > 0){
-                return state.data[state.currentSelectedData].dataPoints.filter(key => state.data[state.currentSelectedData].selectedAxes.includes(key.id));
+            if(Object.keys(state.data).length > 0) {
+                return Object.fromEntries(Object.entries(state.data[state.selectedData].axes).filter(key => state.data[state.selectedData].selectedAxes.includes(key[1].id)));
             }
             return [];
         },
-        getAnnotations: state => {
-            let data = [];
-            let annotations = state.annotations[state.currAnn];
-            let labels = annotations?.labels;
-            for(let key in annotations?.data){
-                data.push({
-                    id: annotations.data[key].id,
-                    label: annotations.data[key].label,
-                    timestamp: annotations.data[key].timestamp,
-                    name: labels[annotations.data[key].label].name,
-                    color: labels[annotations.data[key].label].color,
-                    annotationObject: annotations.data[key],
-                });
-            }
-            return data;
-        },
-        saveAnnotations: state => {
-            let annotations = state.annotations[state.currAnn];
-            let labels = annotations?.labels;
-            let data = [["Timestamp", "Label"]];
-            for(let key in annotations?.data){
-                data.push([DateTime.fromMillis(annotations.data[key].timestamp).toFormat('yyyy-MM-dd hh:mm:ss.SSS'), labels[annotations.data[key].label].name]);
-            }
-            return stringify(data);
-        },
         getAxes: state => {
-            if(state.data.length > 0){
-                return state.data[state.currentSelectedData].dataPoints;
+            if(Object.keys(state.data).length > 0){
+                return state.data[state.selectedData].axes;
             }
             return [];
         },
         timestamps: state => {
-            if(state.data.length > 0){
-                return state.data[state.currentSelectedData].timestamps;
+            if(Object.keys(state.data).length > 0){
+                return state.data[state.selectedData].timestamps;
             }
             return [];
         },
         selectedAxes: state => {
-            if(state.data.length > 0){
-                return state.data[state.currentSelectedData].selectedAxes;
+            if(Object.keys(state.data).length > 0){
+                return state.data[state.selectedData].selectedAxes;
             }
             return [];
         },
-        getLabels: state => {
-            return state.annotations[state.currAnn]?.labels;
-        },
         showGraph: state => {
-            if(state.data.length > 0){
+            if(Object.keys(state.data).length > 0){
                 return true;
             }
             else {
@@ -271,7 +160,4 @@ export default createStore({
             }
         }
     },
-    modules: {
-
-    },
-})
+});
