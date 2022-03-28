@@ -5,7 +5,6 @@ import { breakDownToSamplingrate } from '../util/model/ModelInstances';
 export default createStore({
     state: {
         data: {},
-        downSamplingData: [],
         selectedData: null,
         activeLabel: null,
         areasVisible: false,
@@ -126,9 +125,6 @@ export default createStore({
         toggleAreasVisibility: (state) => {
             state.areasVisible = !state.areasVisible;
         },
-        setDownsamplingData: (state, data) => {
-            state.downSamplingData = data;
-        },
     },
     getters: {
         getData: state => {
@@ -136,9 +132,6 @@ export default createStore({
                 return Object.fromEntries(Object.entries(state.data[state.selectedData].axes).filter(key => state.data[state.selectedData].selectedAxes.includes(key[1].id)));
             }
             return [];
-        },
-        getDownsamplingData: state => {
-            return state.downSamplingData;
         },
         getAxes: state => {
             if(Object.keys(state.data).length > 0){
