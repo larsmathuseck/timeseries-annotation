@@ -6,10 +6,15 @@
         </div>
     </div>
     <div class="row">
-        <label class="description-text" >Y-Axes</label>
+        <span class="description-text" >
+            <label>Axes</label>
+            <button type="button" class="btn btn-default btn-circle" @click="showAxesModal">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </span>
         <div id="scroll-container-axes">
             <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
-                <Axis :axis="axis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
+                <Axis :axis="axis" @editAxis="editAxis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
             </div>
         </div>
     </div>
@@ -23,7 +28,7 @@
         <span class="description-text" >
             <label>Labels</label>
             <button type="button" class="btn btn-default btn-circle" @click="showLabelModal">
-                <i class="fa fa-plus"></i>
+                <i class="fa-solid fa-plus"></i>
             </button>
         </span>
         <div class="row justify-content-start align-items-center">
@@ -45,14 +50,16 @@
     </div>
     <AnnotationModal :toggleModalVisibility="toggleAnnotationModalVisibility" />
     <LabelModal :addLabelKey="addLabelKey" :toggleModalVisibility="toggleLabelModalVisibility" :labelToEdit="labelToEdit" />
+    <AxesModal :toggleModalVisibility="toggleAxesModalVisibility" :title="axisModalTitle" :axisToEdit="axisToEdit"/>
 </template>
 
 <script>
-import Axis from "./Axis.vue"
-import Label from "./Label.vue"
-import AnnotationModal from "./AnnotationModal.vue"
-import LabelModal from "./LabelModal.vue"
-import FileSelect from "./FileSelect.vue"
+import Axis from "./Axis.vue";
+import Label from "./Label.vue";
+import AnnotationModal from "./AnnotationModal.vue";
+import LabelModal from "./LabelModal.vue";
+import AxesModal from "./AxesModal.vue";
+import FileSelect from "./FileSelect.vue";
 import { liveQuery } from "dexie";
 import { db } from "/db";
 import { useObservable } from "@vueuse/rxjs";
@@ -65,6 +72,7 @@ export default {
         AnnotationModal,
         LabelModal,
         FileSelect,
+        AxesModal,
     },
     setup: function(){
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
@@ -81,20 +89,26 @@ export default {
     },
     data() {
         return {
-            lastSelectedData: this.$store.state.currentSelectedData,
             lastSelectedAnnotation: 1,
             toggleAnnotationModalVisibility: false,
             toggleLabelModalVisibility: false,
+            toggleAxesModalVisibility: false,
             labelToEdit: null,
+            axisToEdit: null,
             addLabelKey: 0,
             acceptedKeys: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+            axisModalTitle: "Add Axis",
         }
     },
     computed: {
+        lastSelectedData: function() {
+            return this.$store.state.selectedData;
+        },
         data: function() {
             return this.$store.state.data;
         },
         axes: function() {
+            console.log(this.$store.getters.getAxes);
             return this.$store.getters.getAxes;
         },
         selectedAxes: function() {
@@ -122,6 +136,11 @@ export default {
             this.labelToEdit = label;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
         },
+        editAxis(axis) {
+            this.axisModalTitle = "Edit Axis";
+            this.axisToEdit = axis;
+            this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;
+        },
         showAnnotationModal() {
             this.toggleAnnotationModalVisibility = !this.toggleAnnotationModalVisibility;
         },
@@ -133,6 +152,11 @@ export default {
             }
             this.labelToEdit = null;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
+        },
+        showAxesModal() {
+            this.axisModalTitle = "Add Axis";
+            this.axisToEdit = null;
+            this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;
         },
         keyPressed: function(e) {
             let key = e.key;
@@ -187,16 +211,10 @@ export default {
     padding-right: 0;
 }
 
-.input-group-apend {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .btn-circle {
-    height: 2.5vw;
-    width: 2.5vw;
-    border-radius: 1.25vw;
+    height: 2vw;
+    width: 2vw;
+    border-radius: 1vw;
     text-align: center;
     font-size: 1vw;
     background-color: #bbb;
@@ -252,8 +270,6 @@ export default {
     font-family: Tahoma;
     font-weight: Bold;
     font-size: 1.5vw;
-    padding-top: 10px;
-    padding-bottom: 2px;
     margin: 0;
 }
 
@@ -265,11 +281,11 @@ export default {
     color: gray;
 }
 
-.fa-edit , .fa-times{
+.fa-pen-to-square , .fa-xmark{
     opacity: 0.5;
 }
 
-.fa-edit:hover, .fa-times:hover {
+.fa-pen-to-square:hover, .fa-xmark:hover {
     opacity: 1;
     cursor: pointer;
 }

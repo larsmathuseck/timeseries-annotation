@@ -6,16 +6,44 @@
             </div>
         </div>
         <form @submit="onSubmit">
-            <div class="row justify-content-center">
-                <div class="col-auto">
-                    <input id="featureModelFileInput" type="file" webkitdirectory directory v-on:change="onFileChange" hidden>
-                    <button @click="importButtonOnClick" type="button" class="btn btn-light styled-btn">
-                        <i class="fa fa-folder"></i>
-                        Choose Directory
-                    </button>
+            <div class="row">
+                <div class="col-6">
+                    <div class="row justify-content-end">
+                        <div class="col-auto">
+                            <input id="featureModelFileInput" type="file" webkitdirectory directory v-on:change="onFeatureModelFileChange" hidden>
+                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light styled-btn">
+                                <i class="fa-solid fa-folder"></i>
+                                Choose Directory
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-auto my-auto">
-                    <p class="m-0"> {{ featureModelFileName.length > 0 ? featureModelFileName : 'No Model selected yet' }}</p>
+                <div class="col-6 my-auto">
+                    <div class="row justify-content-start">
+                        <div class="col-auto my-auto">
+                            <p class="m-0"> {{ featureModelFileName.length > 0 ? featureModelFileName : 'No Model imported' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <div class="row justify-content-end">
+                        <div class="col-auto">
+                            <input id="featureConfigFileInput" type="file" v-on:change="onFeatureConfigFileChange" hidden>
+                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light styled-btn" :class="{disabled: featureModelFileName.length == 0}">
+                                <i class="fa-solid fa-folder"></i>
+                                Import Config File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 my-auto">
+                    <div class="row justify-content-start">
+                        <div class="col-auto my-auto">
+                            <p class="m-0"> {{ featureConfigName.length > 0 ? featureConfigName : 'No Config imported' }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row-justify-content-center">
@@ -28,34 +56,37 @@
                     <AddFeature @addFeature="addFeature" @setInvalidFeedback="setInvalidFeedback"/>
                     <div class="row mb-3 justify-content-center">
                         <div class="col-2"></div>
-                        <label for="slidingWindowInput" class="col-4 col-form-label">Sliding Window</label>
-                        <div class="col-2">
-                            <input v-model="slidingWindow" type="number" class="form-control" id="slidingWindowInput" placeholder="4" :disabled="featureModelFileName.length == 0" required>
-                        </div>
-                        <label class="col-2 col-lg-3 col-form-label text-start">Seconds</label>
-                        <div class="col-2 col-lg-1"></div>
-                    </div>
-                    <div class="row mb-3 justify-content-center">
-                        <div class="col-2"></div>
                         <label for="samplingRateInput" class="col-4 col-form-label">Sampling Rate</label>
                         <div class="col-2">
-                            <input v-model="samplingrate" type="number" class="form-control" id="samplingRateInput" placeholder="8" :disabled="featureModelFileName.length == 0" required>
+                            <input v-model="samplingRate" type="number" class="form-control" id="samplingRateInput" placeholder="8" :disabled="featureModelFileName.length == 0" required>
                         </div>
                         <label class="col-2 col-lg-3 col-form-label text-start">Hertz</label>
                         <div class="col-2 col-lg-1"></div>
                     </div>
+                    <div class="row mb-3 justify-content-center">
+                        <div class="col-2"></div>
+                        <label for="selectedDownsamplingMethod" class="col-4 col-form-label">Downsampling Method</label>
+                        <div class="col-4 col-lg-5">
+                            <select v-model="selectedDownsamplingMethod" id="selectedDownsamplingMethod" ref="select" class="form-select" :disabled="featureModelFileName.length == 0">
+                                <option v-for="method in downsamplingMethods" :key="method" v-bind:value="method" >
+                                    {{ method }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-2 col-lg-1"></div>
+                    </div>
                 </div>
                 <div class="col-12 col-lg-6">
-                    <div class="row mb-3 justify-content-center">
+                    <div class="row justify-content-center">
                         <p>Feature Order</p>
                     </div>
                     <div class="row mb-3 justify-content-center">
                         <draggable :disbaled="false " :list="features" item-key="id" class="list-group" ghost-class="ghost" >
                             <template #item="{ element  }">
                                 <div class="list-group-item"> 
-                                    {{ element.axis.name + "-" + element.feature.name + "-" + element.dataPointsPerInstance}}
+                                    {{ element.axis.name + "-" + element.feature.name + "-" + (element.slidingWindow*this.samplingRate)}}
                                     <button type="button" class="btn btn-default btn-circle trash-btn me-1" @click="deleteFeature(element)">
-                                        <i class="fa fa-trash"></i>
+                                        <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
                             </template>
@@ -65,7 +96,10 @@
             </div> 
             <div class="row justify-content-center">
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-primary" >Load Data in Model</button>
+                    <button type="submit" class="btn btn-primary" >
+                        <div v-if="loading" class="spinner-border spinner-border-sm"></div>
+                        Load Data in Model
+                    </button>
                 </div>
             </div>
         </form>
@@ -73,11 +107,14 @@
 </template>
 
 <script>
+import features from "../util/model/ModelFunctions";
 import * as tf from '@tensorflow/tfjs';
 import draggable from "vuedraggable";
 import AddFeature from "./AddFeature.vue";
-import { createFeatureInstances } from "../model/ModelInstances";
 import { db } from "/db";
+import { createFeatureInstances } from "../util/model/ModelInstances";
+import { createLabelsForAnnotation, createNewAnnotationFile, selectAnnotationFile } from "../util/DatabankManager";
+import { checkImportedFiles } from "../util/model/ImportModelManager";
 
 export default {
     name: "FeatureConfiguration",
@@ -89,55 +126,95 @@ export default {
         this.model = null;
         return {
             featureModelFileName: "",
+            featureConfigName: "",
             addFeatureVisible: false,
-            samplingrate: null,
-            slidingWindow: null,
+            samplingRate: null,
             features: [],
+            loading: false,
+            downsamplingMethods: ["First", "Last", "Median"],
+            selectedDownsamplingMethod: "First",
         }
     },
+    props: {
+        toggleConfigDownload: Boolean,
+    },
     methods: {
-        importButtonOnClick: function() {
+        modelImportButtonOnClick: function() {
             document.getElementById("featureModelFileInput").click()
         },
-        onFileChange: async function(e) {
-            const fileList = e.target.files;
-            let model;
-            const weights = [];
-            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const file = fileList[i];
-                if(file.name[0] != '.' && (file.type.includes("json") && file.name.includes("model"))) {
-                    model = file;
-                }
-                else if(file.name[0] != '.') {
-                    weights.push(file);
-                }
-            }
-            this.importModel(model, weights);
+        configImportButtonOnClick: function() {
+            document.getElementById("featureConfigFileInput").click()
         },
-        importModel: async function(modelFile, weights) {
-            tf.serialization.registerClass(L2);
-            const reader = new FileReader();
-            reader.readAsText(modelFile);
-            reader.onload = async () => {
-                const model = JSON.parse(reader.result);
-                const layers = model?.modelTopology?.model_config?.config.layers;
-                if(layers != null){
-                    layers.forEach(layer => {
-                        let config = layer.config;
-                        delete config.activity_regularizer;
-                    })
-                }
-                let modelArray = [new File([JSON.stringify(model)], "model.json")];
-                weights.forEach(weight => {
-                    modelArray.push(weight);
-                });
-                await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => this.modelLoaded(model, modelFile.name));
+        onFeatureModelFileChange: async function(e) {
+            try {
+                checkImportedFiles(e, this.modelLoaded);
+            } catch (error) {
+                this.$emit("setInvalidFeedback", error.message);
             }
         },
-        modelLoaded: async function(model, modelFileName) {
+        onFeatureConfigFileChange: function(e) {
+            const file = e.target.files[0];
+            if ((file.name.toLowerCase().includes("configuration") || file.name.toLowerCase().includes("config")) && file.type.toLowerCase().includes("json")) {
+                this.clearModelConfiguration();
+                this.setModelConfiguration(file);
+            }
+        },
+        modelLoaded: async function(model, modelFileName, config) {
             this.featureModelFileName = modelFileName;
             this.model = model;
-            console.log(this.featureModelFileName);
+            this.features = [];
+            if (config) {
+                this.setModelConfiguration(config);
+            }
+        },
+        setModelConfiguration: function(config) {
+            this.featureConfigName = config.name;
+            const reader = new FileReader();
+            reader.readAsText(config);
+            reader.onload = async () => { 
+                const json = JSON.parse(reader.result);
+                this.samplingRate = json.samplingRate;
+                const features = json.features;
+                this.selectedDownsamplingMethod = json.downsamplingMethod || this.selectedDownsamplingMethod;
+                if (features) {
+                    features.forEach(feature => {
+                        const func = this.featureExists(feature);
+                        if (func != null) {
+                            let featureToAdd = feature;
+                            featureToAdd.feature.func = func;
+                            this.features.push(featureToAdd);
+                        }
+                    });
+                }
+            }
+        },
+        clearModelConfiguration: function() {
+            this.samplingRate = null;
+            this.features = [];
+            this.selectedDownsamplingMethod = "First";
+        },
+        featureExists: function(feature) {
+            for (let i = 0; i < features.length; i++) {
+                if (features[i].name == feature.feature.name && features[i].id == feature.feature.id) {
+                    if(this.axisExists(feature.axis)) {
+                        return features[i].func;
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        },
+        axisExists: function(axis) {
+            const axes = this.$store.state.data[this.$store.state.selectedData].axes;
+            console.log(axis);
+            for (const i in Object.values(axes)) {
+                console.log(axes[i]);
+                console.log(axes[i].name == axis.name && axes[i].id == axis.id)
+                if (axes[i].name == axis.name && axes[i].id == axis.id) {
+                    return true;
+                }
+            }
+            return false;
         },
         addFeature: function(featureData) {
             this.features.push(featureData);
@@ -146,35 +223,47 @@ export default {
             this.$emit('setInvalidFeedback', invalidFeedback)
         },
         onSubmit: async function(e) {
+            this.loading = true;
             e.preventDefault();
             if (!this.validateInputs()) {
+                this.loading = false;
                 return;
             }
-            // TODO load data into model via this.$emit in ImportModelModal
-            const result = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, this.slidingWindow, this.samplingrate);
+            setTimeout(() => this.loadDataIntoModel(), 100);
+        },
+        loadDataIntoModel: async function() {
+            let result;
+            try {
+                result = createFeatureInstances(this.$store.state.data[this.$store.state.selectedData], this.features, this.samplingRate, this.selectedDownsamplingMethod);
+            } catch (error) {
+                this.loading = false;
+                this.$emit("setInvalidFeedback", error.messageback);
+                return;
+            }
             const instances = result[0];
             const offsetInSeconds = result[1];
+            const smallestFeatureWindow = result[2];
             let predictedValues = [];
             try {
                 const tensor = tf.tensor(instances);
                 const a = this.model.predict(tensor);
                 predictedValues.push({data: a.arraySync()});               
             } catch (error) {
-                console.log(error);
+                this.loading = false;
                 this.$emit("setInvalidFeedback", error.messageback);
                 return;
             }
-             // create annotation file
-            const annotationId = await this.createNewAnnotationFile();
+            // create annotation file
+            const annotationId = await createNewAnnotationFile();
             // create as many labels as needed
             const labelAmount = predictedValues[0].data[0].length;
-            await this.createLabelsForAnnotation(annotationId, labelAmount);
+            await createLabelsForAnnotation(annotationId, labelAmount, this.$store.state.colors);
             // create all the areas
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
-            let timestamp = this.$store.state.data[this.$store.state.currentSelectedData].timestamps[0] + 1000*offsetInSeconds;
+            let timestamp = this.$store.state.data[this.$store.state.selectedData].timestamps[0] + 1000*offsetInSeconds;
             let nextTimestamp;
             predictedValues[0].data.forEach(prediction => {
-                nextTimestamp = timestamp + 1000*this.slidingWindow;
+                nextTimestamp = timestamp + 1000*smallestFeatureWindow;
                 let max = Math.max(...prediction);
                 if(max){
                     let index = prediction.indexOf(max);
@@ -184,39 +273,33 @@ export default {
                         labelId: label.id,
                         firstTimestamp: timestamp,
                         secondTimestamp: nextTimestamp,
+                        y1: 0,
+                        y2: 1,
+                        yAmount: 1,
+                    });
+                    db.areas.add({
+                        annoId: annotationId,
+                        labelId: label.id,
+                        firstTimestamp: timestamp,
+                        secondTimestamp: nextTimestamp,
+                        yAmount: null,
                     });
                 }
                 timestamp = nextTimestamp;
             });
-            //this.modal.hide();
-        },
-        createNewAnnotationFile: async function() {
-            return await db.annotations.add({
-                name: "AnnotationCreatedByModel",
-                lastAdded: {},
-            });
-        },
-        createLabelsForAnnotation: async function(annotationId, amountOfLabels) {
-            for (let i = 0; i < amountOfLabels; i++) {
-                await db.labels.add({
-                    name: "label_" + i,
-                    color: this.$store.state.colors[i % this.$store.state.colors.length],
-                    annoId: annotationId,
-                });
+            await selectAnnotationFile(annotationId);
+            if (!this.$store.state.areasVisible) {
+                this.$store.commit("toggleAreasVisibility");
             }
+            this.loading = false;
+            this.$emit("closeModal");
         },
         validateInputs: function() {
             let invalidFeedback = "";
             if (this.model == null) {
                 invalidFeedback = "No Model imported yet!";
             }
-            else if (isNaN(this.slidingWindow)) {
-                invalidFeedback = "Sliding Window must be a number!";
-            }
-            else if (this.slidingWindow < 0) {
-                invalidFeedback = "Sliding Window can not be a negative Number!";
-            }
-            else if (this.samplingrate < 0) {
+            else if (this.samplingRate < 0) {
                 invalidFeedback = "Sampling Rate can not be a negative Number!";
             }
             else if (this.features.length == 0) {
@@ -232,15 +315,47 @@ export default {
         deleteFeature: function(feature) {
             const index = this.features.indexOf(feature);
             this.features.splice(index, 1);
+        },
+        prepareConfigDownload: function() {
+            const config = {
+                samplingRate: this.samplingRate,
+                features: this.features,
+            }
+            this.downloadConfig(config);
+        },
+        downloadConfig: async function(config) {
+            const content = JSON.stringify(config);
+            if (typeof showSaveFilePicker === 'undefined') {
+                var a = document.createElement("a");
+                a.href = window.URL.createObjectURL(new Blob([content], {type: "text/json"}));
+                a.download = "config";
+                a.click();
+            }
+            else {
+                try {
+                    const fileHandle = await self.showSaveFilePicker({
+                        suggestedName: "config",
+                        types: [{
+                            description: 'JSON files',
+                            accept: {
+                            'text/json': ['.json'],
+                            },
+                        }],
+                    });
+                    const fileStream = await fileHandle.createWritable();
+                    await fileStream.write(new Blob([content], {type: "text/plain;charset=utf-8"}));
+                    await fileStream.close();
+                } catch(error) {
+                    console.log(error);
+                }
+            }
         }
-    }
-}
-class L2 {
-    static className = 'L2';
-
-    constructor(config) {
-        return tf.regularizers.l1l2(config)
-    }
+    },
+    watch: {
+        toggleConfigDownload: function() {
+            this.prepareConfigDownload();
+        },
+    },
 }
 </script>
 

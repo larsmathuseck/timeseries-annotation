@@ -5,34 +5,26 @@
         </label>
     </div>
     <div class="col-auto">
-        <button @click="showColorPicker = !showColorPicker">
-            <i class="fa fa-tint" />
+        <button>
+            <i class="fa-solid fa-pen-to-square" @click="editAxis"></i>
         </button>
         <label class="switch">
             <input type="checkbox" v-model="selected" @change="toggleAxis" v-show="false">
             <span class="slider round"></span>
         </label>
     </div>
-    <div class="colorpicker-container" id="colorpicker-con">
-        <ColorPicker @axisColorPicked="setSelectedAxisColor" v-show="showColorPicker" :colorForAxis="true" />
-    </div>
 </template>
 
 <script>
-import ColorPicker from "./Colorpicker.vue"
 
 export default {
     name: "Axis",
-    components: {
-        ColorPicker,
-    },
     props: {
         axis: Object,
         isSelected: Boolean,
     },
     data() {
         return {
-            showColorPicker: false,
             selected: this.isSelected,
         }
     },
@@ -54,13 +46,12 @@ export default {
                 this.$store.commit("deleteSelectedAxis", this.axis);
             }
         },
-        setSelectedAxisColor(color) {
-            let newAxis = this.axis;
-            newAxis.color = color;
-            this.$store.commit("changeAxisColor", newAxis);
-            this.showColorPicker = false;
-        },
+        editAxis: function(event) {
+            event.stopPropagation();
+            this.$emit("editAxis", this.axis);
+        }
     },
+    emits: ["editAxis"],
 }
 </script>
 
@@ -94,7 +85,7 @@ button {
     justify-content: center;
 }
 
-.fa-tint {
+.fa-droplet {
     color: #2196F3;
     font-size: 1.2vw;
     display:inline-block;

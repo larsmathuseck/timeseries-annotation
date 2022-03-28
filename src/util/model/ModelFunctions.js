@@ -1,13 +1,15 @@
 
 const features = [
-    {id: 0, name: "Minimum", func: (df) => min(df)},
-    {id: 1, name: "Maximum", func: (df) => max(df)},
-    {id: 2, name: "Mean", func: (df) => mean(df)},
-    {id: 3, name: "Median", func: (df) => median(df)},
-    {id: 4, name: "Standard Deviation", func: (df) => std(df)},
-    {id: 5, name: "Varianz", func: (df) => varianz(df)},
-    {id: 6, name: "Slope", func: (df) => slope(df)},
-]
+    {id: 0, name: "Minimum", shortName: "min", func: (df) => min(df)},
+    {id: 1, name: "Maximum", shortName: "max", func: (df) => max(df)},
+    {id: 2, name: "Mean", shortName: "mean", func: (df) => mean(df)},
+    {id: 3, name: "Median", shortName: "median", func: (df) => median(df)},
+    {id: 4, name: "Standard Deviation", shortName: "std", func: (df) => std(df)},
+    {id: 5, name: "Varianz", shortName: "var", func: (df) => varianz(df)},
+    {id: 6, name: "Slope", shortName: "slp", func: (df) => slope(df)},
+    {id: 7, name: "First", shortName: "first", func: (df) => first(df)},
+    {id: 8, name: "Last", shortName: "last", func: (df) => last(df)},
+];
 
 function min(df){
     return df.min({ axis: 0 }).values[1];
@@ -31,6 +33,14 @@ function std(df){
 
 function varianz(df){
     return df.var({ axis: 0 }).values[1];
+}
+
+function first(df){
+    return parseFloat(df.head(1).values[0][1]);
+}
+
+function last(df){
+    return parseFloat(df.tail(1).values[0][1]);
 }
 
 function slope(df) {

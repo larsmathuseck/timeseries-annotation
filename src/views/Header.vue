@@ -6,33 +6,28 @@
         <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
             <ul class="nav nav-pills">
                 <li class="nav-item">
-                    <button type="button" class="btn btn-light" @click="changePage">
-                            {{ buttonText }}
-                    </button>
-                </li>
-                <li class="nav-item">
                     <input id="multipleFileUpload" type="file" webkitdirectory directory multiple v-on:change="onFileChange" hidden>
                     <button type="button" @click="chooseFiles" class="btn btn-light" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-content="All unsaved changes will be lost">
-                        <i class="fa fa-folder"></i>
+                        <i class="fa-solid fa-folder"></i>
                         Import Folder
                     </button>
                 </li>
                 <li class="nav-item" v-if="!debug">
                     <button type="button" class="btn btn-light" @click="saveAnnotation">
-                        <i class="fa fa-download"></i>
+                        <i class="fa-solid fa-download"></i>
                         Save Annotation
                     </button>
                 </li>
                 <li class="nav-item" v-if="!debug">
                     <button @click="toggleModelModalVisibility  = !toggleModelModalVisibility" type="button" class="btn btn-light">
-                        <i class="fa fa-wrench"></i>
+                        <i class="fa-solid fa-wrench"></i>
                         Model
                     </button>
                     <ImportModelModal :toggleModelModalVisibility="toggleModelModalVisibility" />
                 </li>
                 <li class="nav-item" v-if="!debug">
                     <button type="button" class="btn btn-light" @click="toggleTutorialModalVisibility  = !toggleTutorialModalVisibility">
-                        <i class="fa fa-file"></i>
+                        <i class="fa-solid fa-file"></i>
                         Tutorial
                     </button>
                     <TutorialModal :toggleTutorialModalVisibility="toggleTutorialModalVisibility" />
@@ -49,6 +44,7 @@ import { db } from "/db";
 import { DateTime } from "luxon";
 import { stringify } from "@vanillaes/csv";
 import { Popover } from "bootstrap";
+import { addAnnotationData } from "../util/DatabankManager";
 
 export default {
     name: "Header",
@@ -66,25 +62,7 @@ export default {
             toggleModelModalVisibility: false,
         }
     },
-    computed: {
-        buttonText: function(){
-            if(!this.debug){
-                return "Debbuger";
-            }
-            else{
-                return "Main";
-            }
-        }
-    },
     methods: {
-        changePage() {
-            if(!this.debug){
-                this.$router.push('/debug');
-            }
-            else{
-                this.$router.push('/');
-            }
-        },
         chooseFiles() {
             document.getElementById("multipleFileUpload").click();
         },
@@ -122,7 +100,7 @@ export default {
                         this.$store.commit("addData", {result: reader.result, name: fileName});
                     }
                     else if(file.name.includes("annotation") || file.name.includes("labels")){
-                        this.$store.commit("addAnnotationData", {result: reader.result, name: fileName});
+                        addAnnotationData(reader.result, file.name, this.$store.state.colors);
                     }
                 }
             }
