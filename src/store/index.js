@@ -16,21 +16,23 @@ export default createStore({
             let data = parse(payload.result);
             let legende = data.shift();
             let timestamps = [];
-            let axes = [];
+            let axes = {};
 
-            // Get Timestamps
+            // Get Timestamps and create axes object
             let timestampLocation = -1;
+            let axesId = 0;
             for(let i = 0; i < legende.length; i++){
                 if(legende[i].toLowerCase() == "timestamp"){
                     timestampLocation = i;
                 }
                 else {
-                    axes.push({
-                        id: i,
+                    Object.assign(axes, {[axesId]: {
+                        id: axesId,
                         name: legende[i],
                         dataPoints: [],
                         color: state.colors[i % state.colors.length],
-                    });
+                    }});
+                    axesId += 1;
                 }
             }
             if(timestampLocation >= 0){
@@ -48,7 +50,6 @@ export default createStore({
                     }
                     time = timestamps.pop();
                 }
-                
                 // Get dimensions in own arrays
                 for(let row = 0; row < timestamps.length; row++){
                     for(let column = 0; column < data[row].length; column++){
@@ -65,8 +66,9 @@ export default createStore({
                     name: payload.name,
                     axes: axes,
                     timestamps: timestamps,
-                    selectedAxes: [axes[0].id],
+                    selectedAxes: [parseInt(Object.keys(axes)[0])],
                 }});
+                console.log(state.data);
                 state.selectedData = id;
             }
         },
@@ -81,35 +83,29 @@ export default createStore({
         },
         addAxis: (state, payload) => {
             const axes = state.data[state.selectedData].axes;
-            const axisData = axes[payload.axis.id-1].dataPoints;
-            let data = breakDownToSamplingrate([axisData], state.data[state.currentSelectedDataIndex].timestamps, payload.samplingRate, payload.feature.id);
+            const axisData = axes[payload.axis.id].dataPoints;
+            let data = breakDownToSamplingrate([axisData], state.data[state.selectedData].timestamps, payload.samplingRate, payload.feature.id);
             data = data[1].map((x) => { return [data[0][data[1].indexOf(x)], x[0]]; });
+            const keys = Object.keys(axes);
+            const id = parseInt(keys[keys.length-1]) + 1;
             const axis = {
-                id: axisData[axisData.length-1] +1,
+                id: id,
                 name: payload.name,
                 dataPoints: data,
                 color: payload.color,
                 samplingRate: payload.samplingRate,
                 feature: payload.feature, 
             };
-            state.data[state.selectedData].axes.push(axis);
+            Object.assign(axes, {[id]: axis});
             state.data[state.selectedData].selectedAxes.push(axis.id);
         },
         updateAxis: (state, payload) => {
-            let axes = state.data[state.selectedData].axes;
-            axes.forEach(axis => {
-                if(axis.id == payload.id){
-                    axis.name = payload.name;
-                    axis.color = payload.color;
-                }
-            });
+            let axis = state.data[state.selectedData].axes[payload.id];
+            axis.name = payload.name;
+            axis.color = payload.color;
         },
         deleteAxis: (state, payload) => {
-            let axes = state.data[state.selectedData].axes;
-            if(axes.length > 1){
-                const index = axes.indexOf(payload);
-                axes.splice(index, 1);
-            }
+            delete state.data[state.selectedData].axes[payload.id];
         },
         addSelectedAxes: (state, axis) => {
             state.data[state.selectedData].selectedAxes.push(axis.id);
@@ -119,15 +115,6 @@ export default createStore({
             const index = selectedAxes.indexOf(axis.id);
             if (index > -1) {
                 selectedAxes.splice(index, 1);
-            }
-        },
-        changeAxisColor: (state, changedAxis) => {
-            let axes = state.data[state.selectedData].dataPoints;
-            for (let i in axes) {
-                if (axes[i].id === changedAxis.id) {
-                    axes[i].color = changedAxis.color;
-                    break;
-                }
             }
         },
         toggleActiveLabel: (state, label) => {
@@ -145,8 +132,8 @@ export default createStore({
     },
     getters: {
         getData: state => {
-            if(Object.keys(state.data).length > 0){
-                return state.data[state.selectedData].axes.filter(key => state.data[state.selectedData].selectedAxes.includes(key.id));
+            if(Object.keys(state.data).length > 0) {
+                return Object.fromEntries(Object.entries(state.data[state.selectedData].axes).filter(key => state.data[state.selectedData].selectedAxes.includes(key[1].id)));
             }
             return [];
         },

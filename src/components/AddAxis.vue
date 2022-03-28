@@ -115,7 +115,7 @@ export default {
             this.$emit('closeModal');
         },
         updateAxisName() {
-            if(this.axisToEdit == null && this.samplingRate && this.selectedFeature){
+            if(this.axisToEdit == null && this.samplingRate && this.selectedFeature && this.selectedAxis){
                 this.axisName = this.selectedAxis.name + "-" + this.selectedFeature.shortName + "-" + this.samplingRate;
             }
         },
