@@ -181,6 +181,7 @@ export default {
                 this.selectedDownsamplingMethod = json.downsamplingMethod || this.selectedDownsamplingMethod;
                 const selectedAxes = json.selectedAxes;
                 if (selectedAxes) {
+                    console.log(selectedAxes);
                     selectedAxes.forEach(axis => {
                         if (this.axisExists(axis)) {
                             this.selectedAxes.push(axis);
@@ -198,7 +199,7 @@ export default {
         },
         axisExists: function(axis) {
             const axes = this.axes;
-            for (let i = 0; i < axes.length; i++) {
+            for (const i in Object.values(axes)) {
                 if (axes[i].name == axis.name && axes[i].id == axis.id) {
                     return true;
                 }
@@ -260,16 +261,20 @@ export default {
             }
         },
         loadDataIntoModel: async function(modelConfiguration) {
+            console.log("angekommen")
             const model = modelConfiguration.model;
             let instances;
             let slotsNumber = 0;
             try {
+                console.log(this.$store.state);
                 instances = createInstances(this.$store.state, modelConfiguration);
                 slotsNumber = instances[1] / (modelConfiguration.samplingRate * modelConfiguration.windowShift);
                 instances = instances[0];
             } catch (error) {
                 this.loading = false
+                console.error(error);
                 this.$emit("setInvalidFeedback", error.message)
+                return;
             }
             let predictedValues = [];
             try {
@@ -280,6 +285,7 @@ export default {
                 });                
             } catch (error) {
                 this.loading = false;
+                console.error(error);
                 this.$emit("setInvalidFeedback", error.message)
                 return;
             }

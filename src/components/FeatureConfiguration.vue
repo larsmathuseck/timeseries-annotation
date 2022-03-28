@@ -205,8 +205,11 @@ export default {
             }
         },
         axisExists: function(axis) {
-            const axes = this.$store.state.data[this.$store.state.currentSelectedData].dataPoints;
-            for (let i = 0; i < axes.length; i++) {
+            const axes = this.$store.state.data[this.$store.state.selectedData].axes;
+            console.log(axis);
+            for (const i in Object.values(axes)) {
+                console.log(axes[i]);
+                console.log(axes[i].name == axis.name && axes[i].id == axis.id)
                 if (axes[i].name == axis.name && axes[i].id == axis.id) {
                     return true;
                 }
@@ -229,7 +232,14 @@ export default {
             setTimeout(() => this.loadDataIntoModel(), 100);
         },
         loadDataIntoModel: async function() {
-            const result = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, this.samplingRate, this.selectedDownsamplingMethod);
+            let result;
+            try {
+                result = createFeatureInstances(this.$store.state.data[this.$store.state.selectedData], this.features, this.samplingRate, this.selectedDownsamplingMethod);
+            } catch (error) {
+                this.loading = false;
+                this.$emit("setInvalidFeedback", error.messageback);
+                return;
+            }
             const instances = result[0];
             const offsetInSeconds = result[1];
             const smallestFeatureWindow = result[2];
@@ -250,7 +260,7 @@ export default {
             await createLabelsForAnnotation(annotationId, labelAmount, this.$store.state.colors);
             // create all the areas
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
-            let timestamp = this.$store.state.data[this.$store.state.currentSelectedData].timestamps[0] + 1000*offsetInSeconds;
+            let timestamp = this.$store.state.data[this.$store.state.selectedData].timestamps[0] + 1000*offsetInSeconds;
             let nextTimestamp;
             predictedValues[0].data.forEach(prediction => {
                 nextTimestamp = timestamp + 1000*smallestFeatureWindow;
