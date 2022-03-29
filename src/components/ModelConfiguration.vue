@@ -201,7 +201,6 @@ export default {
                 this.selectedDownsamplingMethod = json.downsamplingMethod || this.selectedDownsamplingMethod;
                 const selectedAxes = json.selectedAxes;
                 if (selectedAxes) {
-                    console.log(selectedAxes);
                     selectedAxes.forEach(axis => {
                         if (this.axisExists(axis)) {
                             this.selectedAxes.push(axis);
@@ -293,12 +292,10 @@ export default {
             }
         },
         loadDataIntoModel: async function(modelConfiguration) {
-            console.log("angekommen")
             const model = modelConfiguration.model;
             let instances;
             let slotsNumber = 0;
             try {
-                console.log(this.$store.state);
                 instances = createInstances(this.$store.state, modelConfiguration);
                 slotsNumber = instances[1] / (modelConfiguration.samplingRate * modelConfiguration.windowShift);
                 instances = instances[0];

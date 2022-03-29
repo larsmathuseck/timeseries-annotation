@@ -1,6 +1,7 @@
 <template>
     <div class="col-auto" :style="{ background: annotation.color }">
         <label class="annotation-name">
+            {{ index }}
             {{ annotation.name }}
             <i @click="deleteAnnotation(annotation)" class="fa-solid fa-xmark"></i>
         </label>
@@ -17,6 +18,7 @@ export default {
     name: "Annotation",
     props: {
         annotation: Object,
+        index: Number,
     },
     methods: {
         deleteAnnotation(annotation) {

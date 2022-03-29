@@ -213,10 +213,7 @@ export default {
         },
         axisExists: function(axis) {
             const axes = this.$store.state.data[this.$store.state.selectedData].axes;
-            console.log(axis);
             for (const i in Object.values(axes)) {
-                console.log(axes[i]);
-                console.log(axes[i].name == axis.name && axes[i].id == axis.id)
                 if (axes[i].name == axis.name && axes[i].id == axis.id) {
                     return true;
                 }
