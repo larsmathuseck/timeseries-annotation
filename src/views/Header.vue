@@ -104,6 +104,7 @@ export default {
                     }
                 }
             }
+            document.getElementById("multipleFileUpload").value = "";
         },
         async saveAnnotation() {
             const currAnn = await db.lastSelected.where('id').equals(1).first();

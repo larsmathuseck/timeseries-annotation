@@ -55,6 +55,7 @@ export default {
                 const file = fileList[i];
                 this.readFile(file);
             }
+            document.getElementById("fileUpload").value = "";
         },
         readFile(file){
             const reader = new FileReader();

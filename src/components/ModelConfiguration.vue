@@ -173,6 +173,7 @@ export default {
             } catch (error) {
                 this.setInvalidFeedback(error.message);
             }
+            document.getElementById("modelFileInput").value = "";
         },
         onConfigFileChange: function(e) {
             const file = e.target.files[0];
@@ -180,6 +181,7 @@ export default {
                 this.clearModelConfiguration();
                 this.setModelConfiguration(file);
             }
+            document.getElementById("configFileInput").value = "";
         },
         modelLoaded: async function(model, modelFileName, config) {
             this.modelFileName = modelFileName;

@@ -158,6 +158,7 @@ export default {
             } catch (error) {
                 this.setInvalidFeedback(error.message);
             }
+            document.getElementById("featureModelFileInput").value = "";
         },
         onFeatureConfigFileChange: function(e) {
             const file = e.target.files[0];
@@ -165,6 +166,7 @@ export default {
                 this.clearModelConfiguration();
                 this.setModelConfiguration(file);
             }
+            document.getElementById("featureConfigFileInput").value = "";
         },
         modelLoaded: async function(model, modelFileName, config) {
             this.featureModelFileName = modelFileName;
@@ -212,7 +214,11 @@ export default {
             }
         },
         axisExists: function(axis) {
-            const axes = this.$store.state.data[this.$store.state.selectedData].axes;
+            const selectedData = this.$store.state.data[this.$store.state.selectedData];
+            if (!selectedData) {
+                return false;
+            }
+            const axes = selectedData.axes;
             for (const i in Object.values(axes)) {
                 if (axes[i].name == axis.name && axes[i].id == axis.id) {
                     return true;
