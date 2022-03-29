@@ -130,6 +130,7 @@ export default {
             this.dataZoomEnd = this.tempDataZoomEnd;
             this.$emit('loading', true);
             setTimeout(() => {
+                this.$refs.charts?.clear();
                 this.option = getOption(this.graphData, this.$store.getters.timestamps, this.annoData, this.areaData, this.areasVisible, this.sizeOfGraph, this.dataZoomStart, this.dataZoomEnd);
             }, 10);
         },
