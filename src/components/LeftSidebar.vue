@@ -108,7 +108,6 @@ export default {
             return this.$store.state.data;
         },
         axes: function() {
-            console.log(this.$store.getters.getAxes);
             return this.$store.getters.getAxes;
         },
         selectedAxes: function() {

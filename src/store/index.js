@@ -67,7 +67,6 @@ export default createStore({
                     timestamps: timestamps,
                     selectedAxes: [parseInt(Object.keys(axes)[0])],
                 }});
-                console.log(state.data);
                 state.selectedData = id;
             }
         },
