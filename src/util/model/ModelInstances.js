@@ -73,18 +73,26 @@ export function createInstances(state, modelConfiguration) {
     const selectedAxes = modelConfiguration.selectedAxes;
     const downsamplingMethod = modelConfiguration.downsamplingMethod;
     const valuesPerInstance = slidingWindow * samplingrate;
-    const allAxes = state.data[state.currentSelectedData].dataPoints;
-    const timestamps = state.data[state.currentSelectedData].timestamps;
+    console.log(state.data[state.selectedData])
+    const allAxes = state.data[state.selectedData].axes;
+    const timestamps = state.data[state.selectedData].timestamps;
     let windowShift = modelConfiguration.windowShift;
     let allInstances = [];
     let dataPoints = [];
+    console.log(selectedAxes);
+    console.log(typeof selectedAxes);
+    console.log(selectedAxes.length);
+    console.log(allAxes);
     selectedAxes.forEach(axis => {
-        for (let i = 0; i < allAxes.length; i++) {
-            if (allAxes[i].id == axis.id) {
-                dataPoints.push(allAxes[i].dataPoints);
-                break;
-            }
-        }
+        console.log(axis);
+        console.log(allAxes[axis.id]);
+        dataPoints.push(allAxes[axis.id].dataPoints);
+        // for (let i = 0; i < allAxes.length; i++) {
+        //     if (allAxes[i].id == axis.id) {
+        //         dataPoints.push(allAxes[i].dataPoints);
+        //         break;
+        //     }
+        // }
     });
     const featureIndex = getFeatureIndex(downsamplingMethod);
     if (featureIndex == -1) {
@@ -133,13 +141,14 @@ export function createFeatureInstances(data, selectedFeatures, samplingRate, dow
         if(parseFloat(feature.slidingWindow) < smallestFeatureWindow){
             smallestFeatureWindow = parseFloat(feature.slidingWindow);
         }
-        data.dataPoints.forEach(axis => {
+        for (const i in Object.values(data.axes)) {
+            const axis = data.axes[i];
             if(axis.id == feature.axis.id){
                 let sampeledData = breakDownToSamplingrate([axis.dataPoints], data.timestamps, samplingRate, featureIndex);
                 sampeledData = sampeledData[1].map((x) => { return [sampeledData[0][sampeledData[1].indexOf(x)], x[0]]; });
                 dataPoints.push(sampeledData);
             }
-        });
+        }
     });
     const dataPointsLength = dataPoints[0].length;
     let i = parseInt(largestFeatureWindow*samplingRate);

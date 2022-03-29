@@ -3,8 +3,8 @@
         <div class="row mb-3 justify-content-center">
             <label for="selectedAxis" class="col-4 col-form-label">Axis</label>
             <div class="col-4 col-lg-8">
-                <select v-model="selectedAxis" id="selectedAxis" ref="select" class="form-select" required>
-                    <option v-for="axis in axes" :key="axis.id" v-bind:value="{name: axis.name, id: axis.id}" >
+                <select :disabled="axisToEdit != null" v-model="selectedAxis" id="selectedAxis" ref="select" class="form-select" required>
+                    <option v-for="axis in axes" :key="axis.id" v-bind:value="axis" >
                         {{ axis.name }}
                     </option>
                 </select>
@@ -13,7 +13,7 @@
         <div class="row mb-3 justify-content-center">
             <label for="selectedFeature" class="col-4 col-form-label">Method</label>
             <div class="col-4 col-lg-8">
-                <select v-model="selectedFeature" id="selectedFeature" ref="select" class="form-select" required>
+                <select :disabled="axisToEdit != null" v-model="selectedFeature" id="selectedFeature" ref="select" class="form-select" required>
                     <option v-for="feature in features" :key="feature.id" v-bind:value="feature" >
                         {{ feature.name }}
                     </option>
@@ -23,7 +23,7 @@
         <div class="row mb-3 justify-content-center">
             <label for="samplingRate" class="col-4 col-form-label">Samplingrate</label>
             <div class="col-lg-8">
-                <input v-model="samplingRate" type="number" class="form-control" id="samplingRate" required>
+                <input :disabled="axisToEdit != null" v-model="samplingRate" type="number" class="form-control" id="samplingRate">
             </div>
         </div>
         <div class="row mb-3 justify-content-center">
@@ -60,6 +60,7 @@
             </div>
         </div>
         <div class="modal-footer">
+            <button type="button" class="btn btn-danger" v-if="axisToEdit" @click="deleteAxis">Delete</button>
             <button type="button" class="btn btn-secondary" @click="$emit('closeModal')">Close</button>
             <button id="submitButton" class="btn btn-primary" type="submit">Save</button>
         </div>
@@ -87,8 +88,11 @@ export default {
             error: "",
         }
     },
+    props: {
+        axisToEdit: Object,
+    },
     computed: {
-        axes: function() {
+        axes() {
             return this.$store.getters.getAxes;
         },
     },
@@ -97,15 +101,29 @@ export default {
             this.axisColor = color;
             this.showColorPicker = false;
         },
-        onSubmit: function(e) {
+        onSubmit(e) {
             e.preventDefault();
             if (!this.validateInputs()) {
                 return;
             }
-            this.$store.commit("addAxis", {name: this.axisName, axis: this.selectedAxis, color: this.axisColor, feature: this.selectedFeature, samplingRate: this.samplingRate});
+            if(this.axisToEdit != null) {
+                this.$store.commit("updateAxis", {id: this.axisToEdit.id, name: this.axisName, color: this.axisColor});
+            }
+            else {
+                this.$store.commit("addAxis", {name: this.axisName, axis: this.selectedAxis, color: this.axisColor, feature: this.selectedFeature, samplingRate: this.samplingRate});
+            }
             this.$emit('closeModal');
         },
-        validateInputs: function() {
+        updateAxisName() {
+            if(this.axisToEdit == null && this.samplingRate && this.selectedFeature && this.selectedAxis){
+                this.axisName = this.selectedAxis.name + "-" + this.selectedFeature.shortName + "-" + this.samplingRate;
+            }
+        },
+        deleteAxis() {
+            this.$store.commit("deleteAxis", this.axisToEdit);
+            this.$emit('closeModal');
+        },
+        validateInputs() {
             if (isNaN(this.samplingRate)) {
                 this.error = "Samplingrate must be a number!";
                 return false;
@@ -118,22 +136,44 @@ export default {
         }
     },
     watch: {
-        axes: function() {
-            if (this.axes != undefined && this.axes.length != 0) {
-                const temp = {
-                    name: this.axes[0].name, 
-                    id: this.axes[0].id
+        axisToEdit() {
+            if(this.axisToEdit != null) {
+                if(this.axisToEdit.samplingRate == null) {
+                    this.samplingRate = null;
+                    this.selectedFeature = null;
+                    this.features = null;
                 }
-                this.selectedAxis = temp;
-                this.axisName = this.selectedAxis.name + "-" + this.selectedFeature.shortName;
+                else {
+                    this.samplingRate = this.axisToEdit.samplingRate;
+                    this.selectedFeature = this.axisToEdit.feature;
+                }
+                this.selectedAxis = this.axisToEdit;
+                this.axisColor = this.axisToEdit.color;
+                this.axisName = this.axisToEdit.name;
+            }
+            else {
+                this.selectedAxis = this.axes[0];
+                this.features = features;
+                this.selectedFeature = features[0];
+                this.axisColor = "blue";
+                this.samplingRate =  32;
             }
         },
-        selectedFeature: function(){
-            this.axisName = this.selectedAxis.name + "-" + this.selectedFeature.shortName;
+        axes() {
+            if (this.axes != undefined && this.axes.length != 0) {
+                this.selectedAxis = this.axes[0];
+                this.updateAxisName();
+            }
         },
-        selectedAxis: function(){
-            this.axisName = this.selectedAxis.name + "-" + this.selectedFeature.shortName;
-        }
+        selectedFeature() {
+            this.updateAxisName();
+        },
+        selectedAxis() {
+            this.updateAxisName();
+        },
+        samplingRate() {
+            this.updateAxisName();
+        },
     },
 }
 

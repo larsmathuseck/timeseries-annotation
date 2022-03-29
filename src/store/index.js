@@ -1,14 +1,11 @@
 import { createStore } from 'vuex';
 import { parse } from "@vanillaes/csv";
-import { db } from "/db";
 import { breakDownToSamplingrate } from '../util/model/ModelInstances';
 
 export default createStore({
     state: {
-        data: [],
-        downSamplingData: [],
-        currentSelectedData: 0,
-        currentSelectedDataIndex: 0,
+        data: {},
+        selectedData: null,
         activeLabel: null,
         areasVisible: false,
         colors: ["red", "orange", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown", "grey"],
@@ -18,21 +15,23 @@ export default createStore({
             let data = parse(payload.result);
             let legende = data.shift();
             let timestamps = [];
-            let axes = [];
+            let axes = {};
 
-            // Get Timestamps
+            // Get Timestamps and create axes object
             let timestampLocation = -1;
+            let axesId = 0;
             for(let i = 0; i < legende.length; i++){
                 if(legende[i].toLowerCase() == "timestamp"){
                     timestampLocation = i;
                 }
                 else {
-                    axes.push({
-                        id: i,
+                    Object.assign(axes, {[axesId]: {
+                        id: axesId,
                         name: legende[i],
                         dataPoints: [],
                         color: state.colors[i % state.colors.length],
-                    });
+                    }});
+                    axesId += 1;
                 }
             }
             if(timestampLocation >= 0){
@@ -50,157 +49,110 @@ export default createStore({
                     }
                     time = timestamps.pop();
                 }
-                
                 // Get dimensions in own arrays
                 for(let row = 0; row < timestamps.length; row++){
                     for(let column = 0; column < data[row].length; column++){
                         axes[column].dataPoints.push([new Date(timestamps[row]).getTime(), data[row][column]]);   
                     }
                 }
-                
-                state.data.push({
-                    id: state.data.length,
+                let id = 0;
+                if(Object.keys(state.data).length > 0){
+                    const keys = Object.keys(state.data);
+                    id = parseInt(keys[keys.length-1]) + 1;
+                }
+                Object.assign(state.data, {[id]: {
+                    id: id,
                     name: payload.name,
-                    dataPoints: axes,
+                    axes: axes,
                     timestamps: timestamps,
-                    selectedAxes: [axes[0].id],
-                });
+                    selectedAxes: [parseInt(Object.keys(axes)[0])],
+                }});
+                console.log(state.data);
+                state.selectedData = id;
             }
         },
         deleteData: (state) => {
-            const data = state.data;
-            data.splice(state.currentSelectedDataIndex, 1);
-            if (data.length > 0) {
-                state.currentSelectedData = data[0].id;
-                state.currentSelectedDataIndex = 0;
+            delete state.data[state.selectedData];
+            if (Object.keys(state.data).length > 0) {
+                state.selectedData = parseInt(Object.keys(state.data)[0]);
+            }
+            else {
+                state.selectedData = null;
             }
         },
         addAxis: (state, payload) => {
-            const axisData = state.data[state.currentSelectedDataIndex].dataPoints[payload.axis.id-1].dataPoints;
-            let data = breakDownToSamplingrate([axisData], state.data[state.currentSelectedDataIndex].timestamps, payload.samplingRate, payload.feature.id);
+            const axes = state.data[state.selectedData].axes;
+            const axisData = axes[payload.axis.id].dataPoints;
+            let data = breakDownToSamplingrate([axisData], state.data[state.selectedData].timestamps, payload.samplingRate, payload.feature.id);
             data = data[1].map((x) => { return [data[0][data[1].indexOf(x)], x[0]]; });
-            const dataPoints = state.data[state.currentSelectedDataIndex].dataPoints;
+            const keys = Object.keys(axes);
+            const id = parseInt(keys[keys.length-1]) + 1;
             const axis = {
-                id: dataPoints[dataPoints.length-1] +1,
+                id: id,
                 name: payload.name,
                 dataPoints: data,
-                color: payload.color, 
+                color: payload.color,
+                samplingRate: payload.samplingRate,
+                feature: payload.feature, 
             };
-            state.data[state.currentSelectedData].dataPoints.push(axis);
-            state.data[state.currentSelectedData].selectedAxes.push(axis.id);
+            Object.assign(axes, {[id]: axis});
+            state.data[state.selectedData].selectedAxes.push(axis.id);
         },
-        addAnnotationData: async (state, payload) => {
-            let data = parse(payload.result);
-            let legende = data.shift();
-            let lastAnn = {};
-
-            let anno = await db.annotations.add({
-                name: payload.name,
-                lastAdded: lastAnn,
-            });
-
-            // Get Timestamp and Label location
-            let timestampLocation = -1;
-            let labelLocation = -1;
-            for(let i = 0; i < legende.length; i++){
-                if(legende[i].toLowerCase() == "timestamp"){
-                    timestampLocation = i;
-                }
-                else if(legende[i].toLowerCase() == "label"){
-                    labelLocation = i;
-                }
-            }
-
-            for(let i = 0; i < data.length; i++){
-                let label = await db.labels.where('[annoId+name]').equals([anno, data[i][labelLocation]]).toArray();
-                if(label.length === 0){
-                    label = await db.labels.add({
-                        name: data[i][labelLocation],
-                        color: state.colors[i % state.colors.length],
-                        annoId: anno,
-                    });
-                }
-                else{
-                    label = label[0].id;
-                }
-                const newAnn = await db.annoData.add({
-                    labelId: label,
-                    annoId: anno,
-                    timestamp: new Date(data[i][timestampLocation]).getTime(),
-                });
-                lastAnn = newAnn;
-            }
-            await db.lastSelected.put({id: 1, annoId: anno});
-            anno = await db.annotations.update(anno, {lastAdded: lastAnn});
+        updateAxis: (state, payload) => {
+            let axis = state.data[state.selectedData].axes[payload.id];
+            axis.name = payload.name;
+            axis.color = payload.color;
+        },
+        deleteAxis: (state, payload) => {
+            delete state.data[state.selectedData].axes[payload.id];
         },
         addSelectedAxes: (state, axis) => {
-            state.data[state.currentSelectedDataIndex].selectedAxes.push(axis.id);
+            state.data[state.selectedData].selectedAxes.push(axis.id);
         },
         deleteSelectedAxis: (state, axis) => {
-            let selectedAxes = state.data[state.currentSelectedDataIndex].selectedAxes;
+            let selectedAxes = state.data[state.selectedData].selectedAxes;
             const index = selectedAxes.indexOf(axis.id);
             if (index > -1) {
                 selectedAxes.splice(index, 1);
-            }
-        },
-        changeAxisColor: (state, changedAxis) => {
-            let axes = state.data[state.currentSelectedDataIndex].dataPoints;
-            for (let i in axes) {
-                if (axes[i].id === changedAxis.id) {
-                    axes[i].color = changedAxis.color;
-                    break;
-                }
             }
         },
         toggleActiveLabel: (state, label) => {
             state.activeLabel = label;
         },
         selectDataFile: (state, dataFileId) => {
-            state.currentSelectedData = dataFileId;
-            for (let i = 0; i < state.data.length; i++) {
-                if (state.data[i].id == dataFileId) {
-                    state.currentSelectedDataIndex = i;
-                    return;
-                }
-            }
+            state.selectedData = dataFileId;
         },
         toggleAreasVisibility: (state) => {
             state.areasVisible = !state.areasVisible;
         },
-        setDownsamplingData: (state, data) => {
-            state.downSamplingData = data;
-        },
     },
     getters: {
         getData: state => {
-            if(state.data?.length > 0){
-                return state.data[state.currentSelectedDataIndex].dataPoints.filter(key => state.data[state.currentSelectedDataIndex].selectedAxes.includes(key.id));
+            if(Object.keys(state.data).length > 0) {
+                return Object.fromEntries(Object.entries(state.data[state.selectedData].axes).filter(key => state.data[state.selectedData].selectedAxes.includes(key[1].id)));
             }
             return [];
         },
-        getDownsamplingData: state => {
-            return state.downSamplingData;
-        },
         getAxes: state => {
-            if(state.data?.length > 0){
-                return state.data[state.currentSelectedDataIndex].dataPoints;
+            if(Object.keys(state.data).length > 0){
+                return state.data[state.selectedData].axes;
             }
             return [];
         },
         timestamps: state => {
-            if(state.data?.length > 0){
-                return state.data[state.currentSelectedDataIndex].timestamps;
+            if(Object.keys(state.data).length > 0){
+                return state.data[state.selectedData].timestamps;
             }
             return [];
         },
         selectedAxes: state => {
-            if(state.data?.length > 0){
-                return state.data[state.currentSelectedDataIndex].selectedAxes;
+            if(Object.keys(state.data).length > 0){
+                return state.data[state.selectedData].selectedAxes;
             }
             return [];
         },
         showGraph: state => {
-            if(state.data?.length > 0){
+            if(Object.keys(state.data).length > 0){
                 return true;
             }
             else {

@@ -14,7 +14,7 @@
         </span>
         <div id="scroll-container-axes">
             <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
-                <Axis :axis="axis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
+                <Axis :axis="axis" @editAxis="editAxis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
             </div>
         </div>
     </div>
@@ -50,7 +50,7 @@
     </div>
     <AnnotationModal :toggleModalVisibility="toggleAnnotationModalVisibility" />
     <LabelModal :addLabelKey="addLabelKey" :toggleModalVisibility="toggleLabelModalVisibility" :labelToEdit="labelToEdit" />
-    <AxesModal :toggleModalVisibility="toggleAxesModalVisibility"/>
+    <AxesModal :toggleModalVisibility="toggleAxesModalVisibility" :title="axisModalTitle" :axisToEdit="axisToEdit"/>
 </template>
 
 <script>
@@ -94,18 +94,21 @@ export default {
             toggleLabelModalVisibility: false,
             toggleAxesModalVisibility: false,
             labelToEdit: null,
+            axisToEdit: null,
             addLabelKey: 0,
             acceptedKeys: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+            axisModalTitle: "Add Axis",
         }
     },
     computed: {
         lastSelectedData: function() {
-            return this.$store.state.currentSelectedData;
+            return this.$store.state.selectedData;
         },
         data: function() {
             return this.$store.state.data;
         },
         axes: function() {
+            console.log(this.$store.getters.getAxes);
             return this.$store.getters.getAxes;
         },
         selectedAxes: function() {
@@ -133,6 +136,11 @@ export default {
             this.labelToEdit = label;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
         },
+        editAxis(axis) {
+            this.axisModalTitle = "Edit Axis";
+            this.axisToEdit = axis;
+            this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;
+        },
         showAnnotationModal() {
             this.toggleAnnotationModalVisibility = !this.toggleAnnotationModalVisibility;
         },
@@ -146,6 +154,8 @@ export default {
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
         },
         showAxesModal() {
+            this.axisModalTitle = "Add Axis";
+            this.axisToEdit = null;
             this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;
         },
         keyPressed: function(e) {

@@ -23,7 +23,7 @@ export default {
     name: "FileSelect",
     props: {
         type: String,
-        data: Array,
+        data: Object,
         selected: Number,
     },
     emits: ['annoModal'],
