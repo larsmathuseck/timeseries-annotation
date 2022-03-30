@@ -83,15 +83,11 @@ export function getOption(graphData, timestamps, annotations,  areas, areasVisib
             type: "line",
             showSymbol: false,
             emphasis: {
-                scale: false,
-                lineStyle: {
-                    width: 2,
-                    color: graphData[key].color,
-                },
+                disabled: true,
             },
             lineStyle: {
                 color: graphData[key].color,
-                width: 2,
+                width: 1.5,
             },
             data: graphData[key].dataPoints,
         });

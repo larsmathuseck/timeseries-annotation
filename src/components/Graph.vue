@@ -162,7 +162,12 @@ export default {
         },
         data: {
             handler() {
-                this.graphData = Object.fromEntries(Object.entries(this.data.axes).filter(key => this.data.selectedAxes.includes(key[1].id)));
+                if(this.data != null) {
+                    this.graphData = Object.fromEntries(Object.entries(this.data.axes).filter(key => this.data.selectedAxes.includes(key[1].id)));
+                }
+                else {
+                    this.graphData = null;
+                }
                 this.updateGraph();
             },
             deep: true,
