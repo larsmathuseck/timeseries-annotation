@@ -6,7 +6,7 @@ export function getOption(graphData, timestamps, annotations,  areas, areasVisib
     let ann;
     let ml;
     let area;
-    if (graphData.length == 0) {
+    if (graphData == null) {
         return;
     }
     if(annotations != undefined){

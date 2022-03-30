@@ -165,7 +165,8 @@ export default {
                 this.graphData = Object.fromEntries(Object.entries(this.data.axes).filter(key => this.data.selectedAxes.includes(key[1].id)));
                 this.updateGraph();
             },
-            deep: true
+            deep: true,
+            immediate: true,
         }
     },
     mounted: function(){
