@@ -4,8 +4,8 @@
             Annotations
         </label>
         <div id="scroll-container-annotations">
-            <div class="d-flex justify-content-between annotation-container" v-for="annotation in annotations" :key="annotation.id">
-                <Annotation :annotation="annotation" />
+            <div class="d-flex justify-content-between annotation-container" v-for="(annotation, index) in annotations" :key="annotation.id">
+                <Annotation :annotation="annotation" :index="index+1"/>
             </div>
         </div>
     </div>
@@ -49,7 +49,6 @@ export default {
                     annoData[i].timestamp = DateTime.fromMillis(annoData[i].timestamp).toFormat('hh:mm:ss SSS');
                 }
             }
-            
             return annoData;
         }
     },

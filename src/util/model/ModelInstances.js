@@ -19,6 +19,7 @@ export function breakDownToSamplingrate(dataPoints, timestamps, samplingRate, fe
         let arrayToPush = [];
         dataFrames.forEach(df => {
             let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
+            newFrame = newFrame.asType("1", "float32");
             const func = features[feature].func;
             arrayToPush.push(func(newFrame));
         });
@@ -28,7 +29,22 @@ export function breakDownToSamplingrate(dataPoints, timestamps, samplingRate, fe
     return [segments[0], result];
 }
 
-function calcSegements(timestamps, samplingRate){
+export function breakDownAxisToSamplingrate(data, segments, feature) {
+    let df = new DataFrame(data, {dtypes: ["int32", "float32"]});
+    let oldsegment = 0;
+    let result = [];
+    segments[1].forEach(segment => {
+        segment = oldsegment + segment;
+        let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
+        newFrame = newFrame.asType("1", "float32");
+        const func = features[feature].func;
+        result.push(func(newFrame));
+        oldsegment = segment;
+    });
+    return result;
+}
+
+export function calcSegements(timestamps, samplingRate){
     let segments = [];
     let segmentTimestamps = [];
     const lastTimestamp = timestamps[timestamps.length -1];
@@ -46,6 +62,8 @@ function calcSegements(timestamps, samplingRate){
         counter += 1;
         currentTimestamp += 1;
     }
+    // Push last Timestamp, so that in case that the last segment ends exactly on the last timestamp, it can be showed correctly in the graph
+    segmentTimestamps.push(lastTimestamp);
     return [segmentTimestamps, segments];
 }
 
@@ -55,19 +73,20 @@ export function createInstances(state, modelConfiguration) {
     const selectedAxes = modelConfiguration.selectedAxes;
     const downsamplingMethod = modelConfiguration.downsamplingMethod;
     const valuesPerInstance = slidingWindow * samplingrate;
-    const allAxes = state.data[state.currentSelectedData].dataPoints;
-    const timestamps = state.data[state.currentSelectedData].timestamps;
+    const allAxes = state.data[state.selectedData].axes;
+    const timestamps = state.data[state.selectedData].timestamps;
     let windowShift = modelConfiguration.windowShift;
     let allInstances = [];
     let dataPoints = [];
     selectedAxes.forEach(axis => {
-        for (let i = 0; i < allAxes.length; i++) {
-            if (allAxes[i].id == axis.id) {
-                dataPoints.push(allAxes[i].dataPoints);
-                break;
-            }
-        }
-    })
+        dataPoints.push(allAxes[axis.id].dataPoints);
+        // for (let i = 0; i < allAxes.length; i++) {
+        //     if (allAxes[i].id == axis.id) {
+        //         dataPoints.push(allAxes[i].dataPoints);
+        //         break;
+        //     }
+        // }
+    });
     const featureIndex = getFeatureIndex(downsamplingMethod);
     if (featureIndex == -1) {
         throw new Error("Downsampling Method not found! Can't break down to sampling rate!");
@@ -91,7 +110,7 @@ export function createInstances(state, modelConfiguration) {
         }
         allInstances.push([timeArray, dataArray]);
     }
-    return allInstances;
+    return [allInstances, segments.length];
 }
 
 /* function to get feature instances for supplied data
@@ -115,13 +134,14 @@ export function createFeatureInstances(data, selectedFeatures, samplingRate, dow
         if(parseFloat(feature.slidingWindow) < smallestFeatureWindow){
             smallestFeatureWindow = parseFloat(feature.slidingWindow);
         }
-        data.dataPoints.forEach(axis => {
+        for (const i in Object.values(data.axes)) {
+            const axis = data.axes[i];
             if(axis.id == feature.axis.id){
                 let sampeledData = breakDownToSamplingrate([axis.dataPoints], data.timestamps, samplingRate, featureIndex);
                 sampeledData = sampeledData[1].map((x) => { return [sampeledData[0][sampeledData[1].indexOf(x)], x[0]]; });
                 dataPoints.push(sampeledData);
             }
-        });
+        }
     });
     const dataPointsLength = dataPoints[0].length;
     let i = parseInt(largestFeatureWindow*samplingRate);

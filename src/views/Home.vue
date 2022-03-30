@@ -7,8 +7,9 @@
             </div>
             <div class="col col-lg-8 col-md-8 col-sm-12 col-12">
                 <div class="graphDiv">
-                    <graph ref="graphRef" v-if="showGraph" class="chart" />
+                    <Graph class="chart" v-if="showGraph" @loading="loadingChange"/>
                     <GraphPlaceholder v-if="!showGraph" />
+                    <div v-if="loading&&showGraph" id="spinner" class="spinner-border spinner-border-lg"></div>
                 </div>
             </div>
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
@@ -19,7 +20,7 @@
 </template>
 
 <script>
-import graph from "../components/Graph.vue"
+import Graph from "../components/Graph.vue"
 import Header from "./Header.vue"
 import LeftSidebar from "../components/LeftSidebar.vue"
 import RightSidebar from "../components/RightSidebar.vue"
@@ -28,7 +29,7 @@ import GraphPlaceholder from "../components/GraphPlaceholder.vue";
 export default {  
     name: "Home",
     components: {
-        graph,
+        Graph,
         Header,
         LeftSidebar,
         RightSidebar,
@@ -36,13 +37,19 @@ export default {
     },
     data() {
         return {
+            loading: false,
         }
     },
     computed: {
-        showGraph: function(){
+        showGraph: function() {
             return this.$store.getters.showGraph;
         }
     },
+    methods: {
+        loadingChange: function(loading) {
+            this.loading = loading;
+        }
+    }
 };
 </script>
 
@@ -53,5 +60,12 @@ export default {
 
 #main-row {
     padding-top: 20px;
+}
+
+#spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 10;
 }
 </style>

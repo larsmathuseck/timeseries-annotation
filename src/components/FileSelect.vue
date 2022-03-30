@@ -23,7 +23,7 @@ export default {
     name: "FileSelect",
     props: {
         type: String,
-        data: Array,
+        data: Object,
         selected: Number,
     },
     emits: ['annoModal'],
@@ -55,6 +55,7 @@ export default {
                 const file = fileList[i];
                 this.readFile(file);
             }
+            document.getElementById("fileUpload").value = "";
         },
         readFile(file){
             const reader = new FileReader();
@@ -72,7 +73,7 @@ export default {
                 this.$store.commit("deleteData", this.lastSelected);
             }
             else if(this.type == "annotation"){
-                deleteAnnotationFile();
+                await deleteAnnotationFile();
             }
         }
     },

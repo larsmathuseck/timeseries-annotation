@@ -1,6 +1,6 @@
 <template>
     <div ref="chartDiv" @mouseup="chartClicked" @mousedown="dragDetection">
-        <v-chart ref="charts" class="chart" :option="option" @datazoom="zoom"/>
+        <v-chart ref="charts" class="chart" :option="option2" @datazoom="zoom"/>
     </div>
 </template>
 
@@ -82,6 +82,7 @@ export default {
             sizeOfGraph: 0,
             clickX: 0,
             clickY: 0,
+            option2: null,
         };
     },
     provide: {
@@ -122,83 +123,108 @@ export default {
         },
         resizeChart: function () {
             this.$refs.charts?.resize();
-        }
+        },
     },
     computed: {
+        graphData: function(){
+            return this.$store.getters.getData;
+        },
         option: function () {
             let series = [];
-            let graphData = this.$store.getters.getData;
             let legende = [];
             let annotations = this.annoData;
             let areas = this.areaData;
             let ann;
             let ml;
             let area;
-            if (graphData.length == 0) {
+            if (this.graphData.length == 0) {
                 return;
             }
             if(annotations != undefined){
                 ann = annotations.map((x, i) => {
-                    return {
-                        symbol: "pin",
-                        itemStyle: {
-                        color: x.label.color
-                        },
-                        name: (i + 1).toString() + " " + x.label.name,
-                        xAxis: new Date(x.timestamp),
-                        y: "75"
-                    };
+                    if (x.label) {
+                        return {
+                            symbol: "pin",
+                            itemStyle: {
+                            color: x.label.color
+                            },
+                            name: (i + 1).toString() + " " + x.label.name,
+                            xAxis: new Date(x.timestamp),
+                            y: "75"
+                        };
+                    }
                 });
                 ml = annotations.map(x => {
-                    return {
-                        itemStyle: {
-                            color: x.label.color
-                        },
-                        xAxis: new Date(x.timestamp),
-                    };
+                    if (x.label) {
+                        return {
+                            itemStyle: {
+                                color: x.label.color
+                            },
+                            xAxis: new Date(x.timestamp),
+                        };
+                    }
                 });
             }
             if (this.areasVisible && areas != undefined) {
                 if (areas.length != 0) {
                     area = areas.map(x => {
-                        return [
-                            {
-                                xAxis: new Date(x.firstTimestamp),
-                                itemStyle: {
-                                    color: x.label.color,
-                                    opacity: 0.2,
-                                    borderColor: "black",
-                                    borderWidth: 1,
-                                    borderType: "solid"
+                        if(x.yAmount != null) {
+                            return [
+                                {
+                                    xAxis: new Date(x.firstTimestamp),
+                                    itemStyle: {
+                                        color: x.label.color,
+                                        opacity: 0.2,
+                                        borderColor: "black",
+                                        borderWidth: 0.5,
+                                        borderType: "solid"
+                                    },
+                                    y: 30 + (((this.sizeOfGraph - 20)*0.95)/(x.yAmount))*x.y1,
                                 },
-                                y: x.y1 + '%',
-                            },
-                            {
-                                xAxis: new Date(x.secondTimestamp),
-                                y: x.y2 + '%',
-                            }
-                        ];
+                                {
+                                    xAxis: new Date(x.secondTimestamp),
+                                    y: 30 + (((this.sizeOfGraph - 20)*0.95)/(x.yAmount))*x.y2,
+                                }
+                            ];
+                        }
+                        else {
+                            return [
+                                {
+                                    xAxis: new Date(x.firstTimestamp),
+                                    itemStyle: {
+                                        color: x.label.color,
+                                        opacity: 0.5,
+                                    },
+                                    y: 30 + ((this.sizeOfGraph - 20)*0.95),
+                                },
+                                {
+                                    xAxis: new Date(x.secondTimestamp),
+                                    y: 30 + ((this.sizeOfGraph - 20)),
+                                }
+                            ];
+                        }
+                        
                     });
                 }
             }
-            for(let key in graphData){
-                legende.push(graphData[key].name);
+            for(let key in this.graphData){
+                legende.push(this.graphData[key].name);
                 series.push({
-                    name: graphData[key].name,
+                    name: this.graphData[key].name,
                     type: "line",
                     showSymbol: false,
                     emphasis: {
                         scale: false,
                         lineStyle: {
                             width: 1.5,
-                            color: graphData[key].color,
+                            color: this.graphData[key].color,
                         },
                     },
                     lineStyle: {
-                        color: graphData[key].color,
+                        color: this.graphData[key].color,
                         width: 1.5,
                     },
-                    data: graphData[key].dataPoints,
+                    data: this.graphData[key].dataPoints,
                 });
             }
             series[0].markPoint = {
@@ -299,11 +325,15 @@ export default {
     },
     watch:{
         option: function(){
-            this.$refs.charts?.clear();
+            this.$emit('loading', true);
             this.dataZoomStart = this.tempDataZoomStart;
             this.dataZoomEnd = this.tempDataZoomEnd;
             this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
-        }
+            setTimeout(() => {
+                this.$refs.charts?.clear();
+                this.option2 = this.option
+            }, 10);
+        },
     },
     created: function(){
         this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
@@ -311,7 +341,10 @@ export default {
             this.resizeChart();
             this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
         })
-    }
+    },
+    updated: function(){
+        this.$emit('loading', false);
+    },
 }
 
 </script>

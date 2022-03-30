@@ -66,7 +66,7 @@
                     <div class="row mb-3 justify-content-center">
                         <div class="col-2"></div>
                         <label for="selectedDownsamplingMethod" class="col-4 col-form-label">Downsampling Method</label>
-                        <div class="col-4 col-lg-5">
+                        <div class="col-4 col-lg-5 my-auto">
                             <select v-model="selectedDownsamplingMethod" id="selectedDownsamplingMethod" ref="select" class="form-select" :disabled="featureModelFileName.length == 0">
                                 <option v-for="method in downsamplingMethods" :key="method" v-bind:value="method" >
                                     {{ method }}
@@ -81,7 +81,7 @@
                         <p>Feature Order</p>
                     </div>
                     <div class="row mb-3 justify-content-center">
-                        <draggable :disbaled="false " :list="features" item-key="id" class="list-group" ghost-class="ghost" >
+                        <draggable :disbaled="false " :list="features" item-key="id" class="list-group p-0" ghost-class="ghost" >
                             <template #item="{ element  }">
                                 <div class="list-group-item"> 
                                     {{ element.axis.name + "-" + element.feature.name + "-" + (element.slidingWindow*this.samplingRate)}}
@@ -94,8 +94,14 @@
                     </div>
                 </div>
             </div> 
+            <div class="row justify-content-center my-3">
+                <label for="annotationFileNameInput" class="col-5 col-lg-3 col-form-label">Annotation Filename</label>
+                <div class="col-5 col-lg-3">
+                    <input v-model="annotationFileName" type="text" class="form-control" id="annotationFileNameInput" :disabled="featureModelFileName.length == 0" required>
+                </div>
+            </div>
             <div class="row justify-content-center">
-                <div class="col-auto">
+                <div class="col">
                     <button type="submit" class="btn btn-primary" >
                         <div v-if="loading" class="spinner-border spinner-border-sm"></div>
                         Load Data in Model
@@ -113,7 +119,7 @@ import draggable from "vuedraggable";
 import AddFeature from "./AddFeature.vue";
 import { db } from "/db";
 import { createFeatureInstances } from "../util/model/ModelInstances";
-import { createLabelsForAnnotation, createNewAnnotationFile } from "../util/DatabankManager";
+import { createLabelsForAnnotation, createNewAnnotationFile, selectAnnotationFile } from "../util/DatabankManager";
 import { checkImportedFiles } from "../util/model/ImportModelManager";
 
 export default {
@@ -127,6 +133,7 @@ export default {
         return {
             featureModelFileName: "",
             featureConfigName: "",
+            annotationFileName: "ModelAnnotation",
             addFeatureVisible: false,
             samplingRate: null,
             features: [],
@@ -149,8 +156,9 @@ export default {
             try {
                 checkImportedFiles(e, this.modelLoaded);
             } catch (error) {
-                this.$emit("setInvalidFeedback", error.message);
+                this.setInvalidFeedback(error.message);
             }
+            document.getElementById("featureModelFileInput").value = "";
         },
         onFeatureConfigFileChange: function(e) {
             const file = e.target.files[0];
@@ -158,6 +166,7 @@ export default {
                 this.clearModelConfiguration();
                 this.setModelConfiguration(file);
             }
+            document.getElementById("featureConfigFileInput").value = "";
         },
         modelLoaded: async function(model, modelFileName, config) {
             this.featureModelFileName = modelFileName;
@@ -205,8 +214,12 @@ export default {
             }
         },
         axisExists: function(axis) {
-            const axes = this.$store.state.data[this.$store.state.currentSelectedData].dataPoints;
-            for (let i = 0; i < axes.length; i++) {
+            const selectedData = this.$store.state.data[this.$store.state.selectedData];
+            if (!selectedData) {
+                return false;
+            }
+            const axes = selectedData.axes;
+            for (const i in Object.values(axes)) {
                 if (axes[i].name == axis.name && axes[i].id == axis.id) {
                     return true;
                 }
@@ -217,7 +230,7 @@ export default {
             this.features.push(featureData);
         },
         setInvalidFeedback: function(invalidFeedback) {
-            this.$emit('setInvalidFeedback', invalidFeedback)
+            this.$emit("setInvalidFeedback", invalidFeedback)
         },
         onSubmit: async function(e) {
             this.loading = true;
@@ -229,7 +242,14 @@ export default {
             setTimeout(() => this.loadDataIntoModel(), 100);
         },
         loadDataIntoModel: async function() {
-            const result = createFeatureInstances(this.$store.state.data[this.$store.state.currentSelectedData], this.features, this.samplingRate, this.selectedDownsamplingMethod);
+            let result;
+            try {
+                result = createFeatureInstances(this.$store.state.data[this.$store.state.selectedData], this.features, this.samplingRate, this.selectedDownsamplingMethod);
+            } catch (error) {
+                this.loading = false;
+                this.$emit("setInvalidFeedback", error.messageback);
+                return;
+            }
             const instances = result[0];
             const offsetInSeconds = result[1];
             const smallestFeatureWindow = result[2];
@@ -240,17 +260,17 @@ export default {
                 predictedValues.push({data: a.arraySync()});               
             } catch (error) {
                 this.loading = false;
-                this.$emit("setInvalidFeedback", error.messageback);
+                this.setInvalidFeedback(error.message);
                 return;
             }
-             // create annotation file
-            const annotationId = await createNewAnnotationFile();
+            // create annotation file
+            const annotationId = await createNewAnnotationFile(this.annotationFileName);
             // create as many labels as needed
             const labelAmount = predictedValues[0].data[0].length;
             await createLabelsForAnnotation(annotationId, labelAmount, this.$store.state.colors);
             // create all the areas
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
-            let timestamp = this.$store.state.data[this.$store.state.currentSelectedData].timestamps[0] + 1000*offsetInSeconds;
+            let timestamp = this.$store.state.data[this.$store.state.selectedData].timestamps[0] + 1000*offsetInSeconds;
             let nextTimestamp;
             predictedValues[0].data.forEach(prediction => {
                 nextTimestamp = timestamp + 1000*smallestFeatureWindow;
@@ -263,11 +283,21 @@ export default {
                         labelId: label.id,
                         firstTimestamp: timestamp,
                         secondTimestamp: nextTimestamp,
+                        y1: 0,
+                        y2: 1,
+                        yAmount: 1,
+                    });
+                    db.areas.add({
+                        annoId: annotationId,
+                        labelId: label.id,
+                        firstTimestamp: timestamp,
+                        secondTimestamp: nextTimestamp,
+                        yAmount: null,
                     });
                 }
                 timestamp = nextTimestamp;
             });
-            db.lastSelected.update(1, {annoId: parseInt(annotationId)});
+            await selectAnnotationFile(annotationId);
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
             }
@@ -288,7 +318,7 @@ export default {
             if (invalidFeedback.length == 0) {
                 return true;
             } else {
-                this.$emit("setInvalidFeedback", invalidFeedback)
+                this.setInvalidFeedback(invalidFeedback)
                 return false;
             }
         },

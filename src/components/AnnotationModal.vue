@@ -63,8 +63,9 @@
 </template>
 
 <script>
-import { Modal } from 'bootstrap'
+import { Modal } from 'bootstrap';
 import { db } from "/db";
+import { addAnnotationData } from "../util/DatabankManager";
 
 export default {
     name: "AnnotationModal",
@@ -96,7 +97,7 @@ export default {
                     reader.readAsText(file);
                     reader.onload = () => {
                         if(file.name.includes("annotation") || file.name.includes("labels")){
-                            this.$store.commit("addAnnotationData", {result: reader.result, name: file.name});
+                            addAnnotationData(reader.result, file.name, this.$store.state.colors);
                             annotationFileImported = true;
                         }
                         if (!annotationFileImported) { // check if file is correct if not show error 

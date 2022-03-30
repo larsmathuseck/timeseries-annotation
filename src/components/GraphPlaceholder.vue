@@ -57,6 +57,7 @@ export default {
                 const newFile = new File([blob], fileName, {type: file.type, webkitRelativePath: file.webkitRelativePath});
                 this.readFile(newFile);
             }
+            document.getElementById("folderUpload").value = "";
         },
         chooseFile(){
             document.getElementById("fileUpload").click();
@@ -67,6 +68,7 @@ export default {
                 const file = fileList[i];
                 this.readFile(file);
             }
+            document.getElementById("fileUpload").value = "";
         },
         readFile(file){
             const reader = new FileReader();

@@ -56,7 +56,7 @@
                     <div class="row mb-3 justify-content-center">
                         <label for="slidingWindowInput" class="col-6 col-form-label">Sliding Window</label>
                         <div class="col-2 col-lg-3">
-                            <input v-model="slidingWindow" type="number" class="form-control" id="slidingWindowInput" placeholder="4" :disabled="modelFileName.length == 0" required>
+                            <input v-model="slidingWindow" type="text" class="form-control" id="slidingWindowInput" placeholder="4" :disabled="modelFileName.length == 0" required>
                         </div>
                         <label class="col-4 col-lg-3 col-form-label text-left">Seconds</label>
                     </div>
@@ -70,7 +70,7 @@
                     <div class="row mb-3 justify-content-center">
                         <label for="overlapValue" class="col-6 col-form-label">Window Shift</label>
                         <div class="col-2 col-lg-3">
-                            <input v-model="windowShift" class="form-control" type="text" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0" required>
+                            <input v-model="windowShift" type="text" class="form-control" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0" required>
                         </div>
                         <label class="col-4 col-lg-3 col-form-label text-left">Seconds</label>
                     </div>
@@ -87,29 +87,48 @@
                     </div>
                 </div>
                 <div class="col-12 col-lg-6">
-                    <p>Axis Selection</p>
-                    <div class="list-group">
-                        <label class="list-group-item" v-for="axis in axes" :key="axis.id">
-                            <input class="form-check-input me-1" type="checkbox" v-bind:value="{id: axis.id, name: axis.name}" v-model="selectedAxes" :disabled="modelFileName.length == 0">
-                            {{ axis.name }}
-                        </label>
-                    </div>
-                    <div class="col-auto">
-                        <label class="pe-2" v-for="axis in selectedAxes" :key="axis.id">
-                            {{ (selectedAxes.indexOf(axis) + 1) + ". " + axis.name + ",\t"}}
-                        </label>
+                    <div class="row">
+                        <div class="container-fluid">
+                            <p>Axis Selection</p>
+                            <div class="row justify-content-center">
+                                <div class="list-group px-2">
+                                    <label class="list-group-item" v-for="axis in axes" :key="axis.id">
+                                        <input class="form-check-input me-1" type="checkbox" v-bind:value="{id: axis.id, name: axis.name}" v-model="selectedAxes" :disabled="modelFileName.length == 0">
+                                        {{ axis.name }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-auto">
+                                    <label class="pe-2" v-for="axis in selectedAxes" :key="axis.id">
+                                        {{ (selectedAxes.indexOf(axis) + 1) + ". " + axis.name + ",\t"}}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center py-3">
+                                <div class="col-auto">
+                                    <button type="button" class="btn btn-danger" @click="resetAxisSelection" >Clear Axis Selection</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="row justify-content-center">
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary">
-                    <div v-if="loading" class="spinner-border spinner-border-sm"></div>
-                    Load Data in Model
-                </button>
+        <div class="row justify-content-center my-3">
+                <label for="annotationFileNameInput" class="col-5 col-lg-3 col-form-label">Annotation Filename</label>
+                <div class="col-5 col-lg-3">
+                    <input v-model="annotationFileName" type="text" class="form-control" id="annotationFileNameInput" :disabled="modelFileName.length == 0" required>
+                </div>
             </div>
-        </div>
+            <div class="row justify-content-center">
+                <div class="col">
+                    <button type="submit" class="btn btn-primary" >
+                        <div v-if="loading" class="spinner-border spinner-border-sm"></div>
+                        Load Data in Model
+                    </button>
+                </div>
+            </div>
     </form>
 </template>
 
@@ -118,7 +137,7 @@ import * as tf from '@tensorflow/tfjs';
 import { db } from "/db";
 import { createInstances } from "../util/model/ModelInstances";
 import { checkImportedFiles } from "../util/model/ImportModelManager";
-import { createNewAnnotationFile, createLabelsForAnnotation } from "../util/DatabankManager";
+import { createNewAnnotationFile, createLabelsForAnnotation, selectAnnotationFile } from "../util/DatabankManager";
 
 export default {
     name: "ModelConfiguration",
@@ -127,6 +146,7 @@ export default {
         return {
             modelFileName: "",
             configName: "",
+            annotationFileName: "ModelAnnotation",
             slidingWindow: null,
             samplingRate: null,
             windowShift: null,
@@ -151,8 +171,9 @@ export default {
             try {
                 checkImportedFiles(e, this.modelLoaded);
             } catch (error) {
-                this.$emit("setInvalidFeedback", error.message);
+                this.setInvalidFeedback(error.message);
             }
+            document.getElementById("modelFileInput").value = "";
         },
         onConfigFileChange: function(e) {
             const file = e.target.files[0];
@@ -160,6 +181,7 @@ export default {
                 this.clearModelConfiguration();
                 this.setModelConfiguration(file);
             }
+            document.getElementById("configFileInput").value = "";
         },
         modelLoaded: async function(model, modelFileName, config) {
             this.modelFileName = modelFileName;
@@ -198,12 +220,18 @@ export default {
         },
         axisExists: function(axis) {
             const axes = this.axes;
-            for (let i = 0; i < axes.length; i++) {
+            for (const i in Object.values(axes)) {
                 if (axes[i].name == axis.name && axes[i].id == axis.id) {
                     return true;
                 }
             }
             return false;
+        },
+        resetAxisSelection: function() {
+            this.selectedAxes = [];
+        },
+        setInvalidFeedback: function(invalidFeedback) {
+            this.$emit("setInvalidFeedback", invalidFeedback)
         },
         onSubmit: function(e) {
             this.loading = true;
@@ -228,6 +256,9 @@ export default {
             if (this.model == null) {
                 invalidFeedback = "No Model imported yet!";
             }
+            else if (isNaN(this.slidingWindow)) {
+                invalidFeedback ="Sliding Window must be a number!";
+            }
             else if (this.slidingWindow < 0) {
                 invalidFeedback = "Sliding Window can not be a negative Number!";
             }
@@ -246,6 +277,9 @@ export default {
             else if (this.windowShift != 0 && this.isMultiple(this.slidingWindow, this.windowShift) != 0) {
                 invalidFeedback = "Sliding Window must be a multiple from Window Shift!";
             }
+            else if (this.isMultiple(this.samplingRate * this.windowShift, 1) != 0) {
+                invalidFeedback = "Sliding Window * Sampling Rate must be an Integer!";
+            }
             else if (data.length == 0) {
                 invalidFeedback = "Please upload data first!"
             }
@@ -255,18 +289,21 @@ export default {
             if (invalidFeedback.length == 0) {
                 return true;
             } else {
-                this.$emit("setInvalidFeedback", invalidFeedback)
+                this.setInvalidFeedback(invalidFeedback)
                 return false;
             }
         },
         loadDataIntoModel: async function(modelConfiguration) {
             const model = modelConfiguration.model;
             let instances;
+            let slotsNumber = 0;
             try {
                 instances = createInstances(this.$store.state, modelConfiguration);
+                slotsNumber = instances[1] / (modelConfiguration.samplingRate * modelConfiguration.windowShift);
+                instances = instances[0];
             } catch (error) {
                 this.loading = false
-                this.$emit("setInvalidFeedback", error.message)
+                this.setInvalidFeedback(error.message)
             }
             let predictedValues = [];
             try {
@@ -277,17 +314,16 @@ export default {
                 });                
             } catch (error) {
                 this.loading = false;
-                this.$emit("setInvalidFeedback", error.message)
+                this.setInvalidFeedback(error.message)
                 return;
             }
             // create annotation file
-            const annotationId = await createNewAnnotationFile();
+            const annotationId = await createNewAnnotationFile(this.annotationFileName);
             // create as many labels as needed
             const labelAmount = predictedValues[0].data[0].length;
             await createLabelsForAnnotation(annotationId, labelAmount, this.$store.state.colors);
             // create all the areas
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
-            const areaHeight = 77 / predictedValues.length;
             let predIndex = 0;
             predictedValues.forEach(prediction => {
                 for (let i = 0; i < prediction.data.length; i++) {
@@ -300,19 +336,83 @@ export default {
                             labelId: label.id,
                             firstTimestamp: prediction.timestamps[i][0],
                             secondTimestamp: prediction.timestamps[i][1],
-                            y1: 4.5 + predIndex*areaHeight,
-                            y2: 4.5 + (predIndex+1) * areaHeight,
+                            y1: predIndex,
+                            y2: predIndex+1,
+                            yAmount: predictedValues.length,
                         });
                     }
                 }
                 predIndex += 1;
             })
-            db.lastSelected.update(1, {annoId: parseInt(annotationId)});
+
+            if(modelConfiguration.windowShift > 0){
+                await this.addCompleteResultOverview(predictedValues, slotsNumber, allLabels, annotationId, modelConfiguration.windowShift, predIndex);
+            }
+
+            await selectAnnotationFile(annotationId);
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
             }
             this.loading = false;
             this.$emit("closeModal");
+        },
+        addCompleteResultOverview: async function (predictedValues, slotsNumber, allLabels, annotationId, windowShift, predIndex){
+            let timestamp = predictedValues[0].timestamps[0][0];
+            let currentPosition = [];
+            for(let i = 0; i < predictedValues.length; i++){
+                currentPosition.push(null);
+            }
+            for(let i = 0; i < slotsNumber; i++){
+                let position = i%predictedValues.length;
+                if(currentPosition[position] == null){
+                    currentPosition[position] = 0;
+                }
+                else{
+                    currentPosition[position] += 1;
+                    if(currentPosition[position] >= predictedValues[0].data.length){
+                        currentPosition[position] = null;
+                    }
+                }
+                let indices = {};
+                for(let j = 0; j < predictedValues.length; j++){
+                    let data = predictedValues[j].data[currentPosition[j]];
+                    let index = data?.indexOf(Math.max(...data));
+                    let label = allLabels[index]?.id;
+                    if(label == null){
+                        continue;
+                    }
+                    else {
+                        if (!indices[label]) {
+                            indices[label] = 1;
+                        } else {
+                            indices[label] += 1;
+                        }
+                    }
+                }
+                let result = Object.keys(indices).reduce(function(a, b){ 
+                    if(indices[a] > indices[b]){
+                        return a;
+                    }
+                    else if(indices[a] < indices[b]){
+                        return b;
+                    }
+                    else{
+                        return null; 
+                    }
+                });
+                if(result != null){
+                    db.areas.add({
+                            annoId: annotationId,
+                            labelId: parseInt(result),
+                            firstTimestamp: timestamp,
+                            secondTimestamp: timestamp + windowShift*1000,
+                            y1: predIndex,
+                            y2: predIndex+1,
+                            yAmount: null,
+                        });
+                }
+                timestamp += windowShift*1000;
+            }
         },
         getOrCreateLabel: async function(labelName, annotationId) {
             const amountOfLabels = await db.labels.where("annoId").equals(annotationId).toArray();
