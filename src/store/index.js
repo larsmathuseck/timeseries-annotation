@@ -103,6 +103,13 @@ export default createStore({
         },
         deleteAxis: (state, payload) => {
             delete state.data[state.selectedData].axes[payload.id];
+            let selectedAxes = state.data[state.selectedData].selectedAxes;
+            const axes = state.data[state.selectedData].axes;
+            if(selectedAxes.length == 1 && selectedAxes[0] == payload.id) {
+                const id = Object.keys(axes)[0];
+                selectedAxes.push(parseInt(id));
+            }
+            selectedAxes.splice(selectedAxes.indexOf(payload.id), 1);
         },
         addSelectedAxes: (state, axis) => {
             state.data[state.selectedData].selectedAxes.push(axis.id);
