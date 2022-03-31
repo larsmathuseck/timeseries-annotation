@@ -13,7 +13,7 @@
             </button>
         </span>
         <div id="scroll-container-axes">
-            <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
+            <div class="row axis-annotation-container" v-for="axis in this.axes" :key="axis.id" >
                 <Axis :axis="axis" @editAxis="editAxis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
             </div>
         </div>
@@ -186,24 +186,22 @@ export default {
 </script>
 
 <style scoped>
-.axis-container {
-    margin-left: 12px;
-    padding: 12px;
-    padding-left: 0px;
-    border-bottom: 0.1vw solid rgb(128, 128, 128, 0.5);
-    text-align: left;
-    align-items: center;
-}
-
 #scroll-container-axes {
     padding: 0px;
     overflow-y: auto;
     scrollbar-width: none;
     max-height: 25vh;
 }
+
 #scroll-container-axes::-webkit-scrollbar {
     width: 0;
     height: 0;
+}
+
+.axis-annotation-container {
+    margin-left: 12px;
+    padding-right: 12px;
+    padding-left: 0px;
 }
 
 .input-group {
@@ -264,23 +262,14 @@ export default {
 </style>
 
 <style>
-.description-text {
-    text-align: left;
-    font-family: Tahoma;
-    font-weight: Bold;
-    font-size: 1.5vw;
-    margin: 0;
-}
-
 .description-text-sm {
     text-align: left;
-    font-family: Tahoma;
-    font-size: 1vw;
+    font-size: 1rem;
     margin: 2px;
     color: gray;
 }
 
-.fa-pen-to-square , .fa-xmark{
+.fa-pen-to-square, .fa-xmark{
     opacity: 0.5;
 }
 

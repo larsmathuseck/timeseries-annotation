@@ -8,7 +8,7 @@
         <button>
             <i class="fa-solid fa-pen-to-square" @click="editAxis"></i>
         </button>
-        <label class="switch">
+        <label class="switch my-auto">
             <input type="checkbox" v-model="selected" @change="toggleAxis" v-show="false">
             <span class="slider round"></span>
         </label>
@@ -57,102 +57,21 @@ export default {
 
 <style scoped>
 .col-auto {
-    text-align: center;
-    width: fit-content;
-    height: fit-content;
     border-radius: 10px;
     margin: 0px;
     padding: 0px;
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
 }
 
 label {
-    font-family: Tahoma;
-    font-size: 1vw;
+    font-size: 0.9rem;
     color: white;
-    padding: 5px;
+    padding: 4px;
     margin: 0px;
 }
 
 button {
-    text-align: center;
     background-color: rgb(255, 255, 255, 0);
     border-color: rgb(255, 255, 255, 0);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.fa-droplet {
-    color: #2196F3;
-    font-size: 1.2vw;
-    display:inline-block;
-    text-align: center;
-    vertical-align: bottom;
-}
-
-.colorpicker-container {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: stretch;
-    width: 100%;
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 3vw;
-  height: 1.5vw;
-  margin-top: auto;
-  margin-bottom: auto;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 1.15vw;
-  width: 1.15vw;
-  left: 0.25vw;
-  bottom: 0.2vw;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-input:checked + .slider {
-  background-color: #2196F3;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(1.25vw);
-  -ms-transform: translateX(1.25vw);
-  transform: translateX(1.3vw);
-}
-
-.slider.round {
-  border-radius: 1vw;
-}
-
-.slider.round:before {
-  border-radius: 50%;
 }
 </style>

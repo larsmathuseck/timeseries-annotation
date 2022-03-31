@@ -4,7 +4,7 @@
             Annotations
         </label>
         <div id="scroll-container-annotations">
-            <div class="d-flex justify-content-between annotation-container" v-for="(annotation, index) in annotations" :key="annotation.id">
+            <div class="row axis-annotation-container ps-0" v-for="(annotation, index) in annotations" :key="annotation.id">
                 <Annotation :annotation="annotation" :index="index+1"/>
             </div>
         </div>
@@ -63,11 +63,6 @@ export default {
 #scroll-container-annotations::-webkit-scrollbar {
     width: 0px;
     height: 0px;
-}
-
-.annotation-container {
-    padding: 0.3vw 0.3vw 0.3vw 0vw;
-    border-bottom: 0.1vw solid rgb(128, 128, 128, 0.5);
 }
 
 .annotation-container:hover {
