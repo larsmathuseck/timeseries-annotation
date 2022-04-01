@@ -23,7 +23,7 @@
                         <i class="fa-solid fa-wrench"></i>
                         Model
                     </button>
-                    <ImportModelModal v-if="showModelModal" :toggleModelModalVisibility="toggleModelModalVisibility" />
+                    <ImportModelModal :toggleModelModalVisibility="toggleModelModalVisibility" />
                 </li>
                 <li class="nav-item" v-if="!debug">
                     <button type="button" class="btn btn-light main-btn" @click="toggleTutorialModalVisibility  = !toggleTutorialModalVisibility">
@@ -37,8 +37,7 @@
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue'
-const ImportModelModal = defineAsyncComponent(() => import("@/components/ImportModelModal.vue"));
+import ImportModelModal from "../components/ImportModelModal.vue";
 import { db } from "/db";
 import { DateTime } from "luxon";
 import { stringify } from "@vanillaes/csv";
@@ -58,8 +57,6 @@ export default {
         return {
             toggleTutorialModalVisibility: false,
             toggleModelModalVisibility: false,
-            showModal: false,
-            showModelModal: false,
         }
     },
     methods: {
