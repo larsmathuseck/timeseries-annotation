@@ -212,10 +212,6 @@ export default {
     margin-left: 10px;
 }
 
-.btn-circle:hover { 
-    opacity: 1;
-}
-
 #scroll-container-labels {
     padding: 0px;
     overflow-y: auto;

@@ -11,7 +11,7 @@
                     <div class="row justify-content-end">
                         <div class="col-auto">
                             <input id="featureModelFileInput" type="file" webkitdirectory directory v-on:change="onFeatureModelFileChange" hidden>
-                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light styled-btn">
+                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light main-btn">
                                 <i class="fa-solid fa-folder"></i>
                                 Choose Directory
                             </button>
@@ -31,7 +31,7 @@
                     <div class="row justify-content-end">
                         <div class="col-auto">
                             <input id="featureConfigFileInput" type="file" v-on:change="onFeatureConfigFileChange" hidden>
-                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light styled-btn" :class="{disabled: featureModelFileName.length == 0}">
+                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light main-btn" :class="{disabled: featureModelFileName.length == 0}">
                                 <i class="fa-solid fa-folder"></i>
                                 Import Config File
                             </button>
@@ -370,21 +370,6 @@ export default {
 </script>
 
 <style scoped>
-.styled-btn {
-    background-color: #e1e1e5;
-}
-
-/**needed to hide arrows in number field */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number] {
-  -moz-appearance: textfield;
-}
-
 input { 
     text-align: center; 
 }
