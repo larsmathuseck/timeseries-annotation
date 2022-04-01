@@ -65,7 +65,7 @@
 <script>
 import { Modal } from 'bootstrap';
 import { db } from "/db";
-import { addAnnotationData } from "../util/DatabankManager";
+import { addAnnotationData } from "../../util/DatabankManager";
 
 export default {
     name: "AnnotationModal",

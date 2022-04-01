@@ -20,11 +20,11 @@
 </template>
 
 <script>
-import Graph from "../components/Graph.vue"
+import Graph from "../components/graph/Graph.vue"
 import Header from "./Header.vue"
-import LeftSidebar from "../components/LeftSidebar.vue"
-import RightSidebar from "../components/RightSidebar.vue"
-import GraphPlaceholder from "../components/GraphPlaceholder.vue";
+import LeftSidebar from "./LeftSidebar.vue"
+import RightSidebar from "./RightSidebar.vue"
+import GraphPlaceholder from "../components/graph/GraphPlaceholder.vue";
 
 export default {  
     name: "Home",

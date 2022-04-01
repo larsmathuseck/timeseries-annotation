@@ -113,14 +113,14 @@
 </template>
 
 <script>
-import features from "../util/model/ModelFunctions";
+import features from "../../util/model/ModelFunctions";
 import * as tf from '@tensorflow/tfjs';
 import draggable from "vuedraggable";
 import AddFeature from "./AddFeature.vue";
 import { db } from "/db";
-import { createFeatureInstances } from "../util/model/ModelInstances";
-import { createLabelsForAnnotation, createNewAnnotationFile, selectAnnotationFile } from "../util/DatabankManager";
-import { checkImportedFiles } from "../util/model/ImportModelManager";
+import { createFeatureInstances } from "../../util/model/ModelInstances";
+import { createLabelsForAnnotation, createNewAnnotationFile, selectAnnotationFile } from "../../util/DatabankManager";
+import { checkImportedFiles } from "../../util/model/ImportModelManager";
 
 export default {
     name: "FeatureConfiguration",

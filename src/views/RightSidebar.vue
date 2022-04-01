@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import Annotation from "./Annotation.vue"
+import Annotation from "../components/annotation/Annotation.vue"
 import { DateTime } from "luxon"
 import { liveQuery } from "dexie";
 import { db } from "/db";

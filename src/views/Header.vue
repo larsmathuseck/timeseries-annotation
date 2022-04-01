@@ -30,7 +30,6 @@
                         <i class="fa-solid fa-file"></i>
                         Tutorial
                     </button>
-                    <TutorialModal v-if="showModal" :toggleTutorialModalVisibility="toggleTutorialModalVisibility" />
                 </li>
             </ul>
         </div>
@@ -39,7 +38,6 @@
 
 <script>
 import { defineAsyncComponent } from 'vue'
-const TutorialModal = defineAsyncComponent(() => import("@/components/TutorialModal.vue"))
 const ImportModelModal = defineAsyncComponent(() => import("@/components/ImportModelModal.vue"));
 import { db } from "/db";
 import { DateTime } from "luxon";
@@ -50,7 +48,6 @@ import { addAnnotationData } from "../util/DatabankManager";
 export default {
     name: "Header",
     components: {
-        TutorialModal,
         ImportModelModal,
     },
     props: {

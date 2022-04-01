@@ -32,8 +32,8 @@
 
 <script>
 import { Modal } from 'bootstrap'
-import ModelConfiguration from "./ModelConfiguration.vue";
-import FeatureConfiguration from "./FeatureConfiguration.vue";
+import ModelConfiguration from "./model/ModelConfiguration.vue";
+import FeatureConfiguration from "./featureModel/FeatureConfiguration.vue";
 
 export default {
     name: "ImportModelModal",

@@ -68,8 +68,8 @@
 </template>
 
 <script>
-import ColorPicker from "./Colorpicker.vue";
-import features from "../util/model/ModelFunctions";
+import ColorPicker from "../Colorpicker.vue";
+import features from "../../util/model/ModelFunctions";
 
 export default {
     name: "AddAxis",

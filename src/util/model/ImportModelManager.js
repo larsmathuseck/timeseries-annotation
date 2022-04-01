@@ -35,20 +35,20 @@ export async function importModel(modelFile, weights, config, callback) {
             layers.forEach(layer => {
                 let config = layer.config;
                 delete config.activity_regularizer;
-            })
+            });
         }
         let modelArray = [new File([JSON.stringify(model)], "model.json")];
         weights.forEach(weight => {
             modelArray.push(weight);
         });
         await tf.loadLayersModel(tf.io.browserFiles(modelArray)).then((model) => callback(model, modelFile.name, config));
-    }
+    };
 }
 
 class L2 {
     static className = 'L2';
 
     constructor(config) {
-        return tf.regularizers.l1l2(config)
+        return tf.regularizers.l1l2(config);
     }
 }

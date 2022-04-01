@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import features from "../util/model/ModelFunctions"
+import features from "../../util/model/ModelFunctions"
 export default {
     name: "AddFeature",
     data() {

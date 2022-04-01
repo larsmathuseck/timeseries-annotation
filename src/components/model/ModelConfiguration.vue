@@ -135,9 +135,9 @@
 <script>
 import * as tf from '@tensorflow/tfjs';
 import { db } from "/db";
-import { createInstances } from "../util/model/ModelInstances";
-import { checkImportedFiles } from "../util/model/ImportModelManager";
-import { createNewAnnotationFile, createLabelsForAnnotation, selectAnnotationFile } from "../util/DatabankManager";
+import { createInstances } from "../../util/model/ModelInstances";
+import { checkImportedFiles } from "../../util/model/ImportModelManager";
+import { createNewAnnotationFile, createLabelsForAnnotation, selectAnnotationFile } from "../../util/DatabankManager";
 
 export default {
     name: "ModelConfiguration",
