@@ -110,20 +110,3 @@ export default {
     }
 }
 </script>
-
-<style scoped>
-/**needed to hide arrows in number field */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number] {
-  -moz-appearance: textfield;
-}
-
-input { 
-    text-align: center; 
-}
-</style>

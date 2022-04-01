@@ -48,7 +48,7 @@
             </div>
             <div class="row-justify-content-center">
                 <div class="col-12">
-                    <div class="separator"></div>
+                    <div class="separator-model"></div>
                 </div>
             </div>
             <div class="row">
@@ -85,7 +85,7 @@
                             <template #item="{ element  }">
                                 <div class="list-group-item"> 
                                     {{ element.axis.name + "-" + element.feature.name + "-" + (element.slidingWindow*this.samplingRate)}}
-                                    <button type="button" class="btn btn-default btn-circle trash-btn me-1" @click="deleteFeature(element)">
+                                    <button type="button" class="btn btn-default btn-circle me-1" @click="deleteFeature(element)">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
@@ -374,20 +374,6 @@ export default {
     background-color: #e1e1e5;
 }
 
-.separator {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    margin: 10px 0 10px 0;    
-}
-
-.separator::before,
-.separator::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid grey;
-}
-
 /**needed to hide arrows in number field */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -423,15 +409,7 @@ input {
     text-align: center;
     background-color: #bbb;
     opacity: 0.7;
-    margin-top: auto;
-    margin-bottom: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     padding: 0px;
-}
-
-.btn-circle:hover { 
-    opacity: 1;
+    font-size: 0.75rem;
 }
 </style>

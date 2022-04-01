@@ -5,7 +5,7 @@
             {{ label.name }}
         </label>
     </div>
-    <div id="label-active-container" class="col-auto ms-1 p-0 me-auto my-auto">
+    <div class="col-auto ms-1 p-0 me-auto my-auto">
         <label class="label-active" v-show="activeLabel != null && label.id === activeLabel.id">
             Active
         </label>
@@ -56,12 +56,23 @@ export default {
     text-align: right;
     display: block;
     color: rgb(128, 128, 128, 0.5);
-    font-size: 0.75rem;
 }
 
 button {
     background-color: rgb(255, 255, 255, 0);
     border: 0px;
     padding: 0 3px 0 3px;
+}
+
+@media (max-width: 1200px) {
+    .label-active {
+        font-size: 0.625rem;
+    }
+}
+
+@media (min-width: 1201px) {
+    .label-active {
+        font-size: 0.75rem;
+    }
 }
 </style>

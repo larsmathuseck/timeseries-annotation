@@ -6,7 +6,7 @@
     </select>
     <div class="input-group-apend my-auto">
         <input id="fileUpload" type="file" accept=".csv" multiple v-on:change="onFileChange" hidden>
-        <button type="button" class="btn btn-default btn-circle trash-btn me-1" @click="deleteFile()">
+        <button type="button" class="btn btn-default btn-circle me-1" @click="deleteFile()">
             <i class="fa-solid fa-trash"></i>
         </button>
         <button type="button" class="btn btn-default btn-circle" @click="chooseFile()">
@@ -87,38 +87,6 @@ export default {
 
 <style scoped>
 .form-select {
-    margin-right: 0.7vw;
-}
-
-.btn-circle {
-    height: 2vw;
-    width: 2vw;
-    border-radius: 1vw;
-    text-align: center;
-    font-size: 1vw;
-    background-color: #bbb;
-    opacity: 0.7;
-    margin-top: auto;
-    margin-bottom: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0px;
-}
-
-.btn-circle:hover { 
-    opacity: 1;
-}
-
-.trash-btn {
-    font-size: 1vw;
-}
-
-.fa-plus {
-    max-height: fit-content;
-    max-width: fit-content;
-    display:inline-block;
-    text-align: center;
-    vertical-align: bottom;
+    margin-right: 10px;
 }
 </style>

@@ -209,30 +209,11 @@ export default {
 }
 
 .btn-circle {
-    height: 2vw;
-    width: 2vw;
-    border-radius: 1vw;
-    text-align: center;
-    font-size: 1vw;
-    background-color: #bbb;
-    opacity: 0.7;
-    margin-left: 1vw;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0px;
+    margin-left: 10px;
 }
 
 .btn-circle:hover { 
     opacity: 1;
-}
-
-.fa-plus {
-    max-height: fit-content;
-    max-width: fit-content;
-    display:inline-block;
-    text-align: center;
-    vertical-align: bottom;
 }
 
 #scroll-container-labels {
@@ -246,32 +227,24 @@ export default {
     height: 0;
 }
 
-</style>
-
-<style>
-.description-text-sm {
-    text-align: left;
-    font-size: 1rem;
-    margin: 2px;
-    color: gray;
-}
-
-.fa-pen-to-square, .fa-xmark{
-    opacity: 0.5;
-}
-
-.fa-pen-to-square:hover, .fa-xmark:hover {
-    opacity: 1;
-    cursor: pointer;
-}
-
 #area-p {
     margin-bottom: 0;
-    font-size: 0.75rem;
 }
 
 .area-visibility-container {
     height: fit-content;
     display: inline-flex;
+}
+
+@media (max-width: 1200px) {
+    #area-p {
+        font-size: 0.75rem;
+    }
+}
+
+@media (min-width: 1201px) {
+    #area-p {
+        font-size: 1rem;
+    }
 }
 </style>

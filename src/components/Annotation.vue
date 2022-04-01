@@ -52,9 +52,4 @@ export default {
 i {
     margin-left: 1px;
 }
-
-button {
-    background-color: rgb(255, 255, 255, 0);
-    border: 0;
-}
 </style>

@@ -48,7 +48,7 @@
             </div>
             <div class="row-justify-content-center">
                 <div class="col-12">
-                    <div class="separator"></div>
+                    <div class="separator-model"></div>
                 </div>
             </div>
             <div class="row">
@@ -486,27 +486,8 @@ export default {
 </script>
 
 <style scoped>
-.styled-btn {
-    background-color: #e1e1e5;
-}
-
 .text-left {
     text-align: left;
-}
-
-/**needed to hide arrows in number field */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number] {
-  -moz-appearance: textfield;
-}
-
-input { 
-    text-align: center; 
 }
 
 .list-group {
@@ -518,19 +499,5 @@ input {
 .list-group-item {
     border: 1px solid rgba(0,0,0,.125) !important;
     border-radius: 0rem;
-}
-
-.separator {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    margin: 10px 0 10px 0;    
-}
-
-.separator::before,
-.separator::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid grey;
 }
 </style>

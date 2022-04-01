@@ -14,7 +14,7 @@
                         <input type="text" v-model="labelColor" class="form-control" id="validationLabelColor" required>
                     </div>
                     <div class="col col-2" id="submitButtonContainer">
-                        <button id="colorButton" class="btn rounded" type="button" @click="showColorPicker = !showColorPicker">
+                        <button class="btn btn-droplet" type="button" @click="showColorPicker = !showColorPicker">
                             <i class="fa-solid fa-droplet"></i>
                         </button>
                     </div>
@@ -110,16 +110,6 @@ export default {
     padding: 1rem;
 }
 
-#colorButton {
-    align-self: center;
-    background-color: #2196F3;
-    opacity: 0.7;
-}
-
-#colorButton:hover { 
-    opacity: 1;
-}
-
 #colorInputContainer {
     padding-right: 0px;
 }
@@ -131,21 +121,6 @@ export default {
 .alert-danger {
     margin-top: 1.5rem;
     margin-bottom: 0px;
-}
-
-.fa-droplet {
-    height: 0.75rem;
-    width: 0.75rem;
-    color: white;
-    opacity: 1;
-}
-
-.colorpicker-container {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: stretch;
-    width: 100%;
 }
 
 .modal-footer {
