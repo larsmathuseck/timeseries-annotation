@@ -16,8 +16,9 @@
 </template>
 
 <script>
-import { db } from "/db"
-import { deleteAnnotationFile } from "../util/DatabankManager"
+import { db } from "/db";
+import { deleteAnnotationFile } from "../util/DatabankManager";
+import { readDataFiles } from "../util/inputOutput.js";
 
 export default {
     name: "FileSelect",
@@ -50,23 +51,8 @@ export default {
             }
         },
         onFileChange(e) {
-            const fileList = e.target.files;
-            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const file = fileList[i];
-                this.readFile(file);
-            }
+            readDataFiles(e.target.files);
             document.getElementById("fileUpload").value = "";
-        },
-        readFile(file){
-            const reader = new FileReader();
-            if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
-                reader.readAsText(file);
-                reader.onload = () => {
-                    if(file.name.includes("data")){
-                        this.$store.commit("addData", {result: reader.result, name: file.name});
-                    }
-                }
-            }
         },
         async deleteFile() {
             if(this.type == "data"){

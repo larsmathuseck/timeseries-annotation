@@ -42,7 +42,7 @@ import { db } from "/db";
 import { DateTime } from "luxon";
 import { stringify } from "@vanillaes/csv";
 import { Popover } from "bootstrap";
-import { addAnnotationData } from "../util/DatabankManager";
+import { loadFolder } from "../util/inputOutput.js";
 import { download } from "../util/inputOutput.js";
 
 export default {
@@ -65,45 +65,7 @@ export default {
             document.getElementById("multipleFileUpload").click();
         },
         onFileChange(e) {
-            const fileList = e.target.files;
-            let filesToUpload = [];
-            let fileNames = {};
-            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const file = fileList[i];
-                if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
-                    filesToUpload.push(file);
-                    if (fileNames[file.name] == undefined) {
-                        fileNames[file.name] = 1;
-                    } else {
-                        fileNames[file.name] += 1;
-                    }
-                }
-            }
-            if (filesToUpload.length > 1) {
-                db.annotations.clear();
-                db.annoData.clear();
-                db.labels.clear();
-                db.areas.clear();
-            }
-            for (let i in filesToUpload) {
-                const file = filesToUpload[i];
-                let fileName = file.name;
-                if (fileNames[file.name] > 1) {
-                    const path = file.webkitRelativePath;
-                    const directories = path.split("/");
-                    fileName = directories.slice(-2)[0] + "/" + directories.slice(-1);
-                }
-                const reader = new FileReader();
-                reader.readAsText(file);
-                reader.onload = () => {
-                    if(file.name.includes("data")){
-                        this.$store.commit("addData", {result: reader.result, name: fileName});
-                    }
-                    else if(file.name.includes("annotation") || file.name.includes("labels")){
-                        addAnnotationData(reader.result, file.name, this.$store.state.colors);
-                    }
-                }
-            }
+            loadFolder(e.target.files);
             document.getElementById("multipleFileUpload").value = "";
         },
         async saveAnnotation() {

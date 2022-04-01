@@ -106,7 +106,7 @@ export default {
                             this.error = "";
                             this.modal.hide();
                         }
-                    }
+                    };
                 }
             }
             document.getElementById("annotationFileUpload").value = ""; // reset file input so when same file chosen again its an "onChange"

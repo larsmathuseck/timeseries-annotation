@@ -23,6 +23,9 @@
 </template>
 
 <script>
+import { readDataFiles } from "../../util/inputOutput.js";
+import { loadFolder } from "../../util/inputOutput.js";
+
 export default {
     name: "ImportGraph",
     methods: {
@@ -30,56 +33,15 @@ export default {
             document.getElementById("folderUpload").click();
         },
         onFolderChange(e) {
-            const fileList = e.target.files;
-            let filesToUpload = [];
-            let fileNames = {};
-            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const file = fileList[i];
-                if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
-                    filesToUpload.push(file);
-                    if (fileNames[file.name] == undefined) {
-                        fileNames[file.name] = 1;
-                    } else {
-                        fileNames[file.name] += 1;
-                    }
-                }
-            }
-            for (let i in filesToUpload) {
-                const file = filesToUpload[i];
-                let fileName = file.name;
-                if (fileNames[file.name] > 1) {
-                    const path = file.webkitRelativePath;
-                    const directories = path.split("/");
-                    fileName = directories.slice(-2)[0] + "/" + directories.slice(-1);
-                }
-                // create same file again but with correct name because file.name = ... is not allowed
-                const blob = file.slice(0, file.size, file.type);
-                const newFile = new File([blob], fileName, {type: file.type, webkitRelativePath: file.webkitRelativePath});
-                this.readFile(newFile);
-            }
+            loadFolder(e.target.files);
             document.getElementById("folderUpload").value = "";
         },
         chooseFile(){
             document.getElementById("fileUpload").click();
         },
         onFileChange(e) {
-            const fileList = e.target.files;
-            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const file = fileList[i];
-                this.readFile(file);
-            }
+            readDataFiles(e.target.files);
             document.getElementById("fileUpload").value = "";
-        },
-        readFile(file){
-            const reader = new FileReader();
-            if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
-                reader.readAsText(file);
-                reader.onload = () => {
-                    if(file.name.includes("data")){
-                        this.$store.commit("addData", {result: reader.result, name: file.name});
-                    }
-                }
-            }
         },
     }
 }
