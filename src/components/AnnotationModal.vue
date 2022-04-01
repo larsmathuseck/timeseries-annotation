@@ -16,7 +16,7 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-2">
+                            <div class="col-2 ps-0">
                                 <input id="annotationFileUpload" type="file" accept=".csv" multiple v-on:change="onAnnotationFileChange" hidden>
                                 <button type="button" class="btn btn-default btn-circle" @click="chooseAnnotationFile">
                                     <i class="fa-solid fa-folder"></i>
@@ -140,13 +140,6 @@ export default {
 </script>
 
 <style scoped>
-.col-8 {
-    display: inline-flex;
-    align-items: center;
-}
-.col-2 {
-    padding-left: 0;
-}
 .modal-description-text {
     font-size: 14px;
     align-self: center;
@@ -160,14 +153,7 @@ export default {
     font-size: 12px;
     background-color: #bbb;
     opacity: 0.7;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     padding: 0px;
-}
-
-.btn-circle:hover { 
-    opacity: 1;
 }
 
 .separator {

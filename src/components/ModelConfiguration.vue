@@ -48,7 +48,7 @@
             </div>
             <div class="row-justify-content-center">
                 <div class="col-12">
-                    <div class="separator"></div>
+                    <div class="separator-model"></div>
                 </div>
             </div>
             <div class="row">
@@ -173,6 +173,7 @@ export default {
             } catch (error) {
                 this.setInvalidFeedback(error.message);
             }
+            document.getElementById("modelFileInput").value = "";
         },
         onConfigFileChange: function(e) {
             const file = e.target.files[0];
@@ -180,6 +181,7 @@ export default {
                 this.clearModelConfiguration();
                 this.setModelConfiguration(file);
             }
+            document.getElementById("configFileInput").value = "";
         },
         modelLoaded: async function(model, modelFileName, config) {
             this.modelFileName = modelFileName;
@@ -201,7 +203,6 @@ export default {
                 this.selectedDownsamplingMethod = json.downsamplingMethod || this.selectedDownsamplingMethod;
                 const selectedAxes = json.selectedAxes;
                 if (selectedAxes) {
-                    console.log(selectedAxes);
                     selectedAxes.forEach(axis => {
                         if (this.axisExists(axis)) {
                             this.selectedAxes.push(axis);
@@ -293,12 +294,10 @@ export default {
             }
         },
         loadDataIntoModel: async function(modelConfiguration) {
-            console.log("angekommen")
             const model = modelConfiguration.model;
             let instances;
             let slotsNumber = 0;
             try {
-                console.log(this.$store.state);
                 instances = createInstances(this.$store.state, modelConfiguration);
                 slotsNumber = instances[1] / (modelConfiguration.samplingRate * modelConfiguration.windowShift);
                 instances = instances[0];
@@ -487,27 +486,8 @@ export default {
 </script>
 
 <style scoped>
-.styled-btn {
-    background-color: #e1e1e5;
-}
-
 .text-left {
     text-align: left;
-}
-
-/**needed to hide arrows in number field */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number] {
-  -moz-appearance: textfield;
-}
-
-input { 
-    text-align: center; 
 }
 
 .list-group {
@@ -519,19 +499,5 @@ input {
 .list-group-item {
     border: 1px solid rgba(0,0,0,.125) !important;
     border-radius: 0rem;
-}
-
-.separator {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    margin: 10px 0 10px 0;    
-}
-
-.separator::before,
-.separator::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid grey;
 }
 </style>

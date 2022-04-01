@@ -48,7 +48,7 @@
             </div>
             <div class="row-justify-content-center">
                 <div class="col-12">
-                    <div class="separator"></div>
+                    <div class="separator-model"></div>
                 </div>
             </div>
             <div class="row">
@@ -85,7 +85,7 @@
                             <template #item="{ element  }">
                                 <div class="list-group-item"> 
                                     {{ element.axis.name + "-" + element.feature.name + "-" + (element.slidingWindow*this.samplingRate)}}
-                                    <button type="button" class="btn btn-default btn-circle trash-btn me-1" @click="deleteFeature(element)">
+                                    <button type="button" class="btn btn-default btn-circle me-1" @click="deleteFeature(element)">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
@@ -158,6 +158,7 @@ export default {
             } catch (error) {
                 this.setInvalidFeedback(error.message);
             }
+            document.getElementById("featureModelFileInput").value = "";
         },
         onFeatureConfigFileChange: function(e) {
             const file = e.target.files[0];
@@ -165,6 +166,7 @@ export default {
                 this.clearModelConfiguration();
                 this.setModelConfiguration(file);
             }
+            document.getElementById("featureConfigFileInput").value = "";
         },
         modelLoaded: async function(model, modelFileName, config) {
             this.featureModelFileName = modelFileName;
@@ -212,11 +214,12 @@ export default {
             }
         },
         axisExists: function(axis) {
-            const axes = this.$store.state.data[this.$store.state.selectedData].axes;
-            console.log(axis);
+            const selectedData = this.$store.state.data[this.$store.state.selectedData];
+            if (!selectedData) {
+                return false;
+            }
+            const axes = selectedData.axes;
             for (const i in Object.values(axes)) {
-                console.log(axes[i]);
-                console.log(axes[i].name == axis.name && axes[i].id == axis.id)
                 if (axes[i].name == axis.name && axes[i].id == axis.id) {
                     return true;
                 }
@@ -371,20 +374,6 @@ export default {
     background-color: #e1e1e5;
 }
 
-.separator {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    margin: 10px 0 10px 0;    
-}
-
-.separator::before,
-.separator::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid grey;
-}
-
 /**needed to hide arrows in number field */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -420,15 +409,7 @@ input {
     text-align: center;
     background-color: #bbb;
     opacity: 0.7;
-    margin-top: auto;
-    margin-bottom: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     padding: 0px;
-}
-
-.btn-circle:hover { 
-    opacity: 1;
+    font-size: 0.75rem;
 }
 </style>

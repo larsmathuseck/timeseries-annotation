@@ -7,13 +7,13 @@
             <div class="col">
                 <h1>Import Data to get started</h1>
                 <input id="folderUpload" type="file" webkitdirectory directory multiple v-on:change="onFolderChange" hidden>
-                <button type="button" @click="chooseFolder" class="btn btn-light me-2">
+                <button type="button" @click="chooseFolder" class="btn btn-light main-btn me-2">
                     <i class="fa-solid fa-folder"></i>
                     Import Folder
                 </button>
                 <p>or</p>
                 <input id="fileUpload" type="file" accept=".csv" multiple v-on:change="onFileChange" hidden>
-                <button type="button" @click="chooseFile" class="btn btn-light ms-2">
+                <button type="button" @click="chooseFile" class="btn main-btn ms-2">
                     <i class="fa-solid fa-file"></i>
                     Import Files
                 </button>
@@ -57,6 +57,7 @@ export default {
                 const newFile = new File([blob], fileName, {type: file.type, webkitRelativePath: file.webkitRelativePath});
                 this.readFile(newFile);
             }
+            document.getElementById("folderUpload").value = "";
         },
         chooseFile(){
             document.getElementById("fileUpload").click();
@@ -67,6 +68,7 @@ export default {
                 const file = fileList[i];
                 this.readFile(file);
             }
+            document.getElementById("fileUpload").value = "";
         },
         readFile(file){
             const reader = new FileReader();
@@ -86,11 +88,6 @@ export default {
 <style scoped>
 #icon-row {
     padding-top: 20%
-}
-
-button {
-    background-color: #e1e1e5;
-    font-size: 1vw;
 }
 
 p {

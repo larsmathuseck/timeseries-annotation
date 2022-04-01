@@ -36,7 +36,7 @@
                         <input type="text" v-model="axisColor" class="form-control" id="validationLabelColor" required>
                     </div>
                     <div class="col-2" id="submitButtonContainer">
-                        <button id="colorButton" class="btn rounded" type="button" @click="showColorPicker = !showColorPicker">
+                        <button class="btn btn-droplet" type="button" @click="showColorPicker = !showColorPicker">
                             <i class="fa-solid fa-droplet"></i>
                         </button>
                     </div>
@@ -189,16 +189,6 @@ export default {
     padding: 1rem;
 }
 
-#colorButton {
-    align-self: center;
-    background-color: #2196F3;
-    opacity: 0.7;
-}
-
-#colorButton:hover { 
-    opacity: 1;
-}
-
 #colorInputContainer {
     padding-right: 0px;
 }
@@ -212,33 +202,7 @@ export default {
     margin-bottom: 0px;
 }
 
-.fa-droplet {
-    height: 0.75rem;
-    width: 0.75rem;
-    color: white;
-    opacity: 1;
-}
-
-.colorpicker-container {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: stretch;
-    width: 100%;
-}
-
 .modal-footer {
     margin-top: 1.75rem;
-}
-
-/**needed to hide arrows in number field */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number] {
-  -moz-appearance: textfield;
 }
 </style>

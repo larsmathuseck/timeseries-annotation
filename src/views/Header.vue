@@ -1,32 +1,32 @@
 <template>
     <div class="row justify-content-between">
-        <div id="col-header-title" class="col col-lg-auto col-md-auto col-sm-12 col-12">
+        <div id="col-header-title" class="col col-md-auto col-12">
             <h1>{{ title }}</h1>
         </div>
-        <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
+        <div id="col-header-buttons" class="col col-md-auto col-12">
             <ul class="nav nav-pills">
                 <li class="nav-item">
                     <input id="multipleFileUpload" type="file" webkitdirectory directory multiple v-on:change="onFileChange" hidden>
-                    <button type="button" @click="chooseFiles" class="btn btn-light" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-content="All unsaved changes will be lost">
+                    <button type="button" @click="chooseFiles" class="btn btn-light main-btn" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-content="All unsaved changes will be lost">
                         <i class="fa-solid fa-folder"></i>
                         Import Folder
                     </button>
                 </li>
                 <li class="nav-item" v-if="!debug">
-                    <button type="button" class="btn btn-light" @click="saveAnnotation">
+                    <button type="button" class="btn btn-light main-btn" @click="saveAnnotation">
                         <i class="fa-solid fa-download"></i>
                         Save Annotation
                     </button>
                 </li>
                 <li class="nav-item" v-if="!debug">
-                    <button @click="toggleModelModalVisibility  = !toggleModelModalVisibility" type="button" class="btn btn-light">
+                    <button type="button" @click="toggleModelModalVisibility  = !toggleModelModalVisibility" class="btn btn-light main-btn">
                         <i class="fa-solid fa-wrench"></i>
                         Model
                     </button>
                     <ImportModelModal :toggleModelModalVisibility="toggleModelModalVisibility" />
                 </li>
                 <li class="nav-item" v-if="!debug">
-                    <button type="button" class="btn btn-light" @click="toggleTutorialModalVisibility  = !toggleTutorialModalVisibility">
+                    <button type="button" class="btn btn-light main-btn" @click="toggleTutorialModalVisibility  = !toggleTutorialModalVisibility">
                         <i class="fa-solid fa-file"></i>
                         Tutorial
                     </button>
@@ -106,6 +106,7 @@ export default {
                     }
                 }
             }
+            document.getElementById("multipleFileUpload").value = "";
         },
         async saveAnnotation() {
             const currAnn = await db.lastSelected.where('id').equals(1).first();
@@ -180,14 +181,5 @@ export default {
 
 li {
     margin: 5px;
-}
-
-button {
-    background-color: #e1e1e5;
-    font-size: 1vw;
-}
-
-h1 {
-    font-size: 2.5vw;
 }
 </style>

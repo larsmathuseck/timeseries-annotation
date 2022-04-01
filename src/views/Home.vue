@@ -1,7 +1,7 @@
 <template>
     <div class="container-fluid d-flex h-100 flex-column">
         <Header title="TF Annotator" />
-        <div class="row h-100" id="main-row">
+        <div class="row h-100 mt-2">
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
                 <LeftSidebar/>
             </div>
@@ -56,10 +56,6 @@ export default {
 <style scoped>
 .graphDiv {
     height: 100%;
-}
-
-#main-row {
-    padding-top: 20px;
 }
 
 #spinner {
