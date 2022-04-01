@@ -93,7 +93,12 @@ export default {
     },
     computed: {
         axes() {
-            return this.$store.getters.getAxes;
+            if(this.axisToEdit) {
+                return this.$store.getters.getAxes;
+            }
+            else {
+                return Object.fromEntries(Object.entries(this.$store.getters.getAxes).filter(key => (!key[1].samplingRate)));
+            }
         },
     },
     methods: {

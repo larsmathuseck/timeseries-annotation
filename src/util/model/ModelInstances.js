@@ -80,12 +80,6 @@ export function createInstances(state, modelConfiguration) {
     let dataPoints = [];
     selectedAxes.forEach(axis => {
         dataPoints.push(allAxes[axis.id].dataPoints);
-        // for (let i = 0; i < allAxes.length; i++) {
-        //     if (allAxes[i].id == axis.id) {
-        //         dataPoints.push(allAxes[i].dataPoints);
-        //         break;
-        //     }
-        // }
     });
     const featureIndex = getFeatureIndex(downsamplingMethod);
     if (featureIndex == -1) {

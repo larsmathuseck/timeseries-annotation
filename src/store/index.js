@@ -98,12 +98,18 @@ export default createStore({
             state.data[state.selectedData].selectedAxes.push(axis.id);
         },
         updateAxis: (state, payload) => {
-            let axis = state.data[state.selectedData].axes[payload.id];
-            axis.name = payload.name;
-            axis.color = payload.color;
+            state.data[state.selectedData].axes[payload.id].name = payload.name;
+            state.data[state.selectedData].axes[payload.id].color = payload.color;
         },
         deleteAxis: (state, payload) => {
             delete state.data[state.selectedData].axes[payload.id];
+            let selectedAxes = state.data[state.selectedData].selectedAxes;
+            const axes = state.data[state.selectedData].axes;
+            if(selectedAxes.length == 1 && selectedAxes[0] == payload.id) {
+                const id = Object.keys(axes)[0];
+                selectedAxes.push(parseInt(id));
+            }
+            selectedAxes.splice(selectedAxes.indexOf(payload.id), 1);
         },
         addSelectedAxes: (state, axis) => {
             state.data[state.selectedData].selectedAxes.push(axis.id);
@@ -126,12 +132,6 @@ export default createStore({
         },
     },
     getters: {
-        getData: state => {
-            if(Object.keys(state.data).length > 0) {
-                return Object.fromEntries(Object.entries(state.data[state.selectedData].axes).filter(key => state.data[state.selectedData].selectedAxes.includes(key[1].id)));
-            }
-            return [];
-        },
         getAxes: state => {
             if(Object.keys(state.data).length > 0){
                 return state.data[state.selectedData].axes;
