@@ -11,7 +11,7 @@
                     <div class="row justify-content-end">
                         <div class="col-auto">
                             <input id="modelFileInput" type="file" webkitdirectory directory v-on:change="onModelFileChange" hidden>
-                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light styled-btn">
+                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light main-btn">
                                 <i class="fa-solid fa-folder"></i>
                                 Choose Directory
                             </button>
@@ -31,7 +31,7 @@
                     <div class="row justify-content-end">
                         <div class="col-auto">
                             <input id="configFileInput" type="file" v-on:change="onConfigFileChange" hidden>
-                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light styled-btn" :class="{disabled: modelFileName.length == 0}">
+                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light main-btn" :class="{disabled: modelFileName.length == 0}">
                                 <i class="fa-solid fa-folder"></i>
                                 Import Config File
                             </button>
@@ -486,6 +486,10 @@ export default {
 </script>
 
 <style scoped>
+input { 
+    text-align: center; 
+}
+
 .text-left {
     text-align: left;
 }

@@ -18,6 +18,10 @@ html, body {
     background-color: #e1e1e58a;
 }
 
+.btn-circle:hover { 
+    opacity: 1;
+}
+
 .col-auto.axis-annotation-col {
     border-radius: 10px;
     margin: 0px;
@@ -129,10 +133,6 @@ input::-webkit-inner-spin-button {
 
 input[type=number] {
     -moz-appearance: textfield;
-}
-
-input { 
-    text-align: center; 
 }
 
 /* Same separator for Model and FeautureModel screen */
