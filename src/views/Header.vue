@@ -67,10 +67,6 @@ export default {
             document.getElementById("multipleFileUpload").click();
         },
         onFileChange(e) {
-            db.annotations.clear();
-            db.annoData.clear();
-            db.labels.clear();
-            db.areas.clear();
             const fileList = e.target.files;
             let filesToUpload = [];
             let fileNames = {};
@@ -84,6 +80,12 @@ export default {
                         fileNames[file.name] += 1;
                     }
                 }
+            }
+            if (filesToUpload.length > 1) {
+                db.annotations.clear();
+                db.annoData.clear();
+                db.labels.clear();
+                db.areas.clear();
             }
             for (let i in filesToUpload) {
                 const file = filesToUpload[i];
