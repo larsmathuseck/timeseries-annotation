@@ -23,7 +23,7 @@ export default {
         index: Number,
     },
     methods: {
-        deleteAnnotation(annotation) {
+        deleteAnnotation: function(annotation) {
             db.annoData.delete(annotation.id);
         }
     },

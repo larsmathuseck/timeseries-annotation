@@ -128,7 +128,7 @@ export default {
         draggable,
         AddFeature,
     },
-    data() {
+    data: function() {
         this.model = null;
         return {
             featureModelFileName: "",
@@ -275,7 +275,7 @@ export default {
             predictedValues[0].data.forEach(prediction => {
                 nextTimestamp = timestamp + 1000*smallestFeatureWindow;
                 let max = Math.max(...prediction);
-                if(max){
+                if(max) {
                     let index = prediction.indexOf(max);
                     const label = allLabels[index];
                     db.areas.add({

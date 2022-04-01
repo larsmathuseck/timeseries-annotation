@@ -28,7 +28,7 @@ export default {
         axisToEdit: Object,
         title: String,
     },
-    data() {
+    data: function() {
         return {
             modal: null,
         }
@@ -44,7 +44,7 @@ export default {
         },
     },
 
-    mounted() {
+    mounted: function() {
         this.modal = new Modal(this.$refs.axesModal)
     },
 }

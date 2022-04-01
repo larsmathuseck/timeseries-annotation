@@ -29,7 +29,7 @@ export default {
         labelToEdit: Object,
         addLabelKey: Number,
     },
-    data() {
+    data: function() {
         return {
             modal: null,
         }
@@ -38,12 +38,12 @@ export default {
         closeModal: function() {
             this.modal.hide();
         },
-        async onLabelCreated(label) {
+        onLabelCreated: async function(label) {
             const currAnn = await db.lastSelected.where('id').equals(1).first();
             db.labels.add({name: label.name, color: label.color, annoId: currAnn.annoId});
             this.modal.hide();
         },
-        labelEdited(label) {
+        labelEdited: function(label) {
             db.labels.update(label.id, {name: label.name, color: label.color});
             this.modal.hide();
         }

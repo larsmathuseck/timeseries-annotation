@@ -38,7 +38,7 @@ export default {
             db.labels.delete(this.label.id);
             db.annoData.where('labelId').equals(this.label.id).delete();
             db.areas.where('labelId').equals(this.label.id).delete();
-            if(this.activeLabel === this.label){
+            if(this.activeLabel === this.label) {
                 this.$store.commit("toggleActiveLabel", null);
             }
         },

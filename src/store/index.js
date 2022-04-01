@@ -20,8 +20,8 @@ export default createStore({
             // Get Timestamps and create axes object
             let timestampLocation = -1;
             let axesId = 0;
-            for(let i = 0; i < legende.length; i++){
-                if(legende[i].toLowerCase() == "timestamp"){
+            for(let i = 0; i < legende.length; i++) {
+                if(legende[i].toLowerCase() == "timestamp") {
                     timestampLocation = i;
                 }
                 else {
@@ -34,7 +34,7 @@ export default createStore({
                     axesId += 1;
                 }
             }
-            if(timestampLocation >= 0){
+            if(timestampLocation >= 0) {
                 data.forEach(row => {
                     timestamps.push(new Date(row[timestampLocation]).getTime());
                     row.splice(timestampLocation, 1);
@@ -43,20 +43,20 @@ export default createStore({
                 // Delete last not full second
                 const lastTimestamp = (timestamps[timestamps.length-1] - (timestamps[timestamps.length-1] - timestamps[0])%1000);
                 let time = timestamps[timestamps.length-1];
-                while(time > lastTimestamp){
-                    if(timestamps[timestamps.length-2] <= lastTimestamp){
+                while(time > lastTimestamp) {
+                    if(timestamps[timestamps.length-2] <= lastTimestamp) {
                         break;
                     }
                     time = timestamps.pop();
                 }
                 // Get dimensions in own arrays
-                for(let row = 0; row < timestamps.length; row++){
-                    for(let column = 0; column < data[row].length; column++){
+                for(let row = 0; row < timestamps.length; row++) {
+                    for(let column = 0; column < data[row].length; column++) {
                         axes[column].dataPoints.push([new Date(timestamps[row]).getTime(), data[row][column]]);   
                     }
                 }
                 let id = 0;
-                if(Object.keys(state.data).length > 0){
+                if(Object.keys(state.data).length > 0) {
                     const keys = Object.keys(state.data);
                     id = parseInt(keys[keys.length-1]) + 1;
                 }
@@ -133,25 +133,25 @@ export default createStore({
     },
     getters: {
         getAxes: state => {
-            if(Object.keys(state.data).length > 0){
+            if(Object.keys(state.data).length > 0) {
                 return state.data[state.selectedData].axes;
             }
             return [];
         },
         timestamps: state => {
-            if(Object.keys(state.data).length > 0){
+            if(Object.keys(state.data).length > 0) {
                 return state.data[state.selectedData].timestamps;
             }
             return [];
         },
         selectedAxes: state => {
-            if(Object.keys(state.data).length > 0){
+            if(Object.keys(state.data).length > 0) {
                 return state.data[state.selectedData].selectedAxes;
             }
             return [];
         },
         showGraph: state => {
-            if(Object.keys(state.data).length > 0){
+            if(Object.keys(state.data).length > 0) {
                 return true;
             }
             else {

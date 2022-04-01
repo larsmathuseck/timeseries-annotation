@@ -52,7 +52,7 @@ export default {
     props: {
         labelToEdit: Object,
     },
-    data() {
+    data: function() {
         return {
             labelName: "",
             labelColor: "",
@@ -61,10 +61,10 @@ export default {
         }
     },
     methods: {
-        colorPicked(color) {
+        colorPicked: function(color) {
             this.labelColor = color
         },
-        async onSubmit(e) {
+        onSubmit: async function(e) {
             e.preventDefault();
             if (this.labelToEdit === null) {
                 const currAnn = await db.lastSelected.where('id').equals(1).first();

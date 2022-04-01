@@ -56,17 +56,17 @@ export default {
         title: String,
         debug: Boolean,
     },
-    data() {
+    data: function() {
         return {
             toggleTutorialModalVisibility: false,
             toggleModelModalVisibility: false,
         }
     },
     methods: {
-        chooseFiles() {
+        chooseFiles: function() {
             document.getElementById("multipleFileUpload").click();
         },
-        onFileChange(e) {
+        onFileChange: function(e) {
             const fileList = e.target.files;
             let filesToUpload = [];
             let fileNames = {};
@@ -98,23 +98,23 @@ export default {
                 const reader = new FileReader();
                 reader.readAsText(file);
                 reader.onload = () => {
-                    if(file.name.includes("data")){
+                    if(file.name.includes("data")) {
                         this.$store.commit("addData", {result: reader.result, name: fileName});
                     }
-                    else if(file.name.includes("annotation") || file.name.includes("labels")){
+                    else if(file.name.includes("annotation") || file.name.includes("labels")) {
                         addAnnotationData(reader.result, file.name, this.$store.state.colors);
                     }
                 }
             }
             document.getElementById("multipleFileUpload").value = "";
         },
-        async saveAnnotation() {
+        saveAnnotation: async function() {
             const currAnn = await db.lastSelected.where('id').equals(1).first();
-            if (currAnn){
+            if (currAnn) {
                 const content = await this.loadAnnotations(currAnn);
                 const annotationFile = await db.annotations.where('id').equals(currAnn.annoId).first();
-                if(content.length > 1 && annotationFile.name){
-                    if (typeof showSaveFilePicker === 'undefined'){
+                if(content.length > 1 && annotationFile.name) {
+                    if (typeof showSaveFilePicker === 'undefined') {
                         var a = document.createElement("a");
                         a.href = window.URL.createObjectURL(new Blob([content], {type: "text/csv"}));
                         a.download = annotationFile.name;
@@ -134,14 +134,14 @@ export default {
                             const fileStream = await fileHandle.createWritable();
                             await fileStream.write(new Blob([content], {type: "text/csv;charset=utf-8;"}));
                             await fileStream.close();
-                        } catch(error){
+                        } catch(error) {
                             console.log(error);
                         }
                     }
                 }
             }
         },
-        async loadAnnotations(currAnn) {
+        loadAnnotations: async function(currAnn) {
             if (currAnn) {
                 const annotations = await db.annoData.where('annoId').equals(parseInt(currAnn.annoId)).sortBy('timestamp');
                 await Promise.all (annotations.map (async anno => {
@@ -158,7 +158,7 @@ export default {
             return [];
         }
     },
-    mounted() {
+    mounted: function() {
         var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
         popoverTriggerList.map(function (popoverTriggerEl) {
             return new Popover(popoverTriggerEl)

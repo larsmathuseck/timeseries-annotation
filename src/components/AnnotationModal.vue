@@ -72,7 +72,7 @@ export default {
     props: {
         toggleModalVisibility: Boolean,
     },
-    data() {
+    data: function() {
         return {
             modal: null,
             fileName: "",
@@ -84,10 +84,10 @@ export default {
         closeModal: function() {
             this.modal.hide();
         },
-        chooseAnnotationFile() {
+        chooseAnnotationFile: function() {
             document.getElementById("annotationFileUpload").click()
         },
-        onAnnotationFileChange(e) {
+        onAnnotationFileChange: function(e) {
             const fileList = e.target.files;
             let annotationFileImported = false;
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
@@ -96,7 +96,7 @@ export default {
                 if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
                     reader.readAsText(file);
                     reader.onload = () => {
-                        if(file.name.includes("annotation") || file.name.includes("labels")){
+                        if(file.name.includes("annotation") || file.name.includes("labels")) {
                             addAnnotationData(reader.result, file.name, this.$store.state.colors);
                             annotationFileImported = true;
                         }
@@ -111,7 +111,7 @@ export default {
             }
             document.getElementById("annotationFileUpload").value = ""; // reset file input so when same file chosen again its an "onChange"
         },
-        async onSubmit(e) {
+        onSubmit: async function(e) {
             e.preventDefault();
             if(!this.fileName.toLowerCase().includes("annotation") && !this.fileName.toLowerCase().includes("labels")) {
                 this.showInvalidFeedback = true;
@@ -133,7 +133,7 @@ export default {
         },
     },
 
-    mounted() {
+    mounted: function() {
         this.modal = new Modal(this.$refs.annotationModal)
     },
 }

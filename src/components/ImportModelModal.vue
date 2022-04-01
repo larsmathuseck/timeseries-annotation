@@ -41,7 +41,7 @@ export default {
         ModelConfiguration,
         FeatureConfiguration,
     },
-    data() {
+    data: function() {
         return {
             modal: null,
             showFeatureConfiguration: false,
@@ -82,7 +82,7 @@ export default {
             return this.$store.getters.getAxes;
         },
     },
-    mounted() {
+    mounted: function() {
         this.modal = new Modal(this.$refs.ImportModelModal);
     },
 }

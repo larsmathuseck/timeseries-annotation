@@ -31,7 +31,7 @@ export async function importModel(modelFile, weights, config, callback) {
     reader.onload = async () => {
         const model = JSON.parse(reader.result);
         const layers = model?.modelTopology?.model_config?.config.layers;
-        if(layers != null){
+        if(layers != null) {
             layers.forEach(layer => {
                 let config = layer.config;
                 delete config.activity_regularizer;

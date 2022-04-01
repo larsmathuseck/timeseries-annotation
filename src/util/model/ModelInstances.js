@@ -3,7 +3,7 @@ import features from "./ModelFunctions";
 
 
 export function breakDownToSamplingrate(dataPoints, timestamps, samplingRate, feature) {
-    if(!Array.isArray(dataPoints)){
+    if(!Array.isArray(dataPoints)) {
         return [];
     }
     let dataFrames = [];
@@ -44,7 +44,7 @@ export function breakDownAxisToSamplingrate(data, segments, feature) {
     return result;
 }
 
-export function calcSegements(timestamps, samplingRate){
+export function calcSegements(timestamps, samplingRate) {
     let segments = [];
     let segmentTimestamps = [];
     const lastTimestamp = timestamps[timestamps.length -1];
@@ -52,8 +52,8 @@ export function calcSegements(timestamps, samplingRate){
     let currentTimestamp = 0;
     let nextTimestamp = timestamps[0] + samplingWindow;
     let counter = 0;
-    while(timestamps[currentTimestamp] <= lastTimestamp){
-        if(timestamps[currentTimestamp] >= nextTimestamp){
+    while(timestamps[currentTimestamp] <= lastTimestamp) {
+        if(timestamps[currentTimestamp] >= nextTimestamp) {
             segments.push(counter);
             segmentTimestamps.push(nextTimestamp - samplingWindow);
             counter = 0;
@@ -111,7 +111,7 @@ export function createInstances(state, modelConfiguration) {
  * data = data object with all axes
  * selectedFeatures = features with axis data
 */ 
-export function createFeatureInstances(data, selectedFeatures, samplingRate, downsamplingMethod){
+export function createFeatureInstances(data, selectedFeatures, samplingRate, downsamplingMethod) {
     let instances = [];
     let dataPoints = [];
     let largestFeatureWindow = 0;
@@ -122,15 +122,15 @@ export function createFeatureInstances(data, selectedFeatures, samplingRate, dow
     }
     // Downsample dataPoints of selected axis
     selectedFeatures.forEach(feature => {
-        if(parseFloat(feature.slidingWindow) > largestFeatureWindow){
+        if(parseFloat(feature.slidingWindow) > largestFeatureWindow) {
             largestFeatureWindow = parseFloat(feature.slidingWindow);
         }
-        if(parseFloat(feature.slidingWindow) < smallestFeatureWindow){
+        if(parseFloat(feature.slidingWindow) < smallestFeatureWindow) {
             smallestFeatureWindow = parseFloat(feature.slidingWindow);
         }
         for (const i in Object.values(data.axes)) {
             const axis = data.axes[i];
-            if(axis.id == feature.axis.id){
+            if(axis.id == feature.axis.id) {
                 let sampeledData = breakDownToSamplingrate([axis.dataPoints], data.timestamps, samplingRate, featureIndex);
                 sampeledData = sampeledData[1].map((x) => { return [sampeledData[0][sampeledData[1].indexOf(x)], x[0]]; });
                 dataPoints.push(sampeledData);
@@ -140,7 +140,7 @@ export function createFeatureInstances(data, selectedFeatures, samplingRate, dow
     const dataPointsLength = dataPoints[0].length;
     let i = parseInt(largestFeatureWindow*samplingRate);
     // calculate the feature for every slidingWindow and selectedFeature
-    while(i < dataPointsLength){
+    while(i < dataPointsLength) {
         const result = [];
         for (let j = 0; j < selectedFeatures.length; j++) {
             const feature = selectedFeatures[j];
@@ -155,7 +155,7 @@ export function createFeatureInstances(data, selectedFeatures, samplingRate, dow
     return([instances, offset, smallestFeatureWindow]);
 }
 
-function calcFeature(data, feature){
+function calcFeature(data, feature) {
     let df = new DataFrame(data, {dtypes: ["int32", "float32"]});
     return feature.func(df);
 }

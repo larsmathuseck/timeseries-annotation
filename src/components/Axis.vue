@@ -25,7 +25,7 @@ export default {
         axis: Object,
         isSelected: Boolean,
     },
-    data() {
+    data: function() {
         return {
             selected: this.isSelected,
         }
@@ -36,7 +36,7 @@ export default {
         }
     },
     methods: {
-        toggleAxis() {
+        toggleAxis: function() {
             if (this.selected) {
                 this.$store.commit("addSelectedAxes", this.axis);
             } else {

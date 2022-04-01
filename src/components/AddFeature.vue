@@ -47,7 +47,7 @@
 import features from "../util/model/ModelFunctions"
 export default {
     name: "AddFeature",
-    data() {
+    data: function() {
         return {
             counter: 0,
             features: features,

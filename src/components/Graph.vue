@@ -44,7 +44,7 @@ export default {
     components: {
         VChart,
     },
-    setup: function(){
+    setup: function() {
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
         const annoData = useObservable(liveQuery(async () => {
             const curr = await db.lastSelected.where('id').equals(1).first();
@@ -94,7 +94,7 @@ export default {
         chartClicked: function (event) {
             const diffX = Math.abs(event.pageX - this.clickX);
             const diffY = Math.abs(event.pageY - this.clickY);
-            if(diffX < 3 && diffY < 3){
+            if(diffX < 3 && diffY < 3) {
                 let pointInPixel = [event.offsetX, event.offsetY];
                 if (this.$refs.charts.containPixel("grid", pointInPixel)) {
                     let pointInGrid = this.$refs.charts.convertFromPixel("grid", pointInPixel);
@@ -106,7 +106,7 @@ export default {
             let time = new Date(timestamp).getTime();
             let label = this.$store.state.activeLabel;
             let currAnn = this.currAnn;
-            if(label != null && currAnn != undefined){
+            if(label != null && currAnn != undefined) {
                 db.annoData.add({labelId: label.id, annoId: currAnn.annoId, timestamp: time});
             }
         },
@@ -126,7 +126,7 @@ export default {
         resizeChart: function () {
             this.$refs.charts?.resize();
         },
-        updateGraph() {
+        updateGraph: function() {
             this.dataZoomStart = this.tempDataZoomStart;
             this.dataZoomEnd = this.tempDataZoomEnd;
             this.$emit('loading', true);
@@ -174,14 +174,14 @@ export default {
             immediate: true,
         }
     },
-    mounted: function(){
+    mounted: function() {
         this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
         window.addEventListener("resize", () => {
             this.resizeChart();
             this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
         })
     },
-    updated: function(){
+    updated: function() {
         this.$emit('loading', false);
     },
 }

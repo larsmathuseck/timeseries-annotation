@@ -74,7 +74,7 @@ export default {
         FileSelect,
         AxesModal,
     },
-    setup: function(){
+    setup: function() {
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
         const labels = useObservable(liveQuery(async () => {
             const curr = await db.lastSelected.where('id').equals(1).first();
@@ -87,7 +87,7 @@ export default {
             currAnn,
         }
     },
-    data() {
+    data: function() {
         return {
             lastSelectedAnnotation: 1,
             toggleAnnotationModalVisibility: false,
@@ -114,36 +114,36 @@ export default {
             return this.$store.getters.selectedAxes;
         },
         areasVisible: {
-            get() {
+            get: function() {
                 return this.$store.state.areasVisible;
             },
-            set() {
+            set: function() {
                 this.$store.commit("toggleAreasVisibility");
             }
         },
     },
     watch: {
-        currAnn: function(){
+        currAnn: function() {
             this.lastSelectedAnnotation = this.currAnn?.annoId;
         },
     },
     methods: {
-        labelOnClick(label) {
+        labelOnClick: function(label) {
             this.$store.commit("toggleActiveLabel", label);
         },
-        editLabel(label) {
+        editLabel: function(label) {
             this.labelToEdit = label;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
         },
-        editAxis(axis) {
+        editAxis: function(axis) {
             this.axisModalTitle = "Edit Axis";
             this.axisToEdit = axis;
             this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;
         },
-        showAnnotationModal() {
+        showAnnotationModal: function() {
             this.toggleAnnotationModalVisibility = !this.toggleAnnotationModalVisibility;
         },
-        showLabelModal() {
+        showLabelModal: function() {
             if (this.addLabelKey == 0) {
                 this.addLabelKey = 1;
             } else {
@@ -152,7 +152,7 @@ export default {
             this.labelToEdit = null;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
         },
-        showAxesModal() {
+        showAxesModal: function() {
             this.axisModalTitle = "Add Axis";
             this.axisToEdit = null;
             this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;

@@ -27,29 +27,29 @@ export default {
         selected: Number,
     },
     emits: ['annoModal'],
-    data() {
+    data: function() {
         return {
             lastSelected: this.selected,
         }
     },
     methods: {
-        selectFile(){
-            if(this.type == "data"){
+        selectFile: function() {
+            if(this.type == "data") {
                 this.$store.commit("selectDataFile", this.lastSelected);
             }
-            else if(this.type == "annotation"){
+            else if(this.type == "annotation") {
                 db.lastSelected.update(1, {annoId: parseInt(this.$refs.select.value)});
             }
         },
-        chooseFile(){
-            if(this.type == "data"){
+        chooseFile: function() {
+            if(this.type == "data") {
                 document.getElementById("fileUpload").click();
             }
-            else if(this.type == "annotation"){
+            else if(this.type == "annotation") {
                 this.$emit("annoModal");
             }
         },
-        onFileChange(e) {
+        onFileChange: function(e) {
             const fileList = e.target.files;
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
                 const file = fileList[i];
@@ -57,22 +57,22 @@ export default {
             }
             document.getElementById("fileUpload").value = "";
         },
-        readFile(file){
+        readFile: function(file) {
             const reader = new FileReader();
             if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
                 reader.readAsText(file);
                 reader.onload = () => {
-                    if(file.name.includes("data")){
+                    if(file.name.includes("data")) {
                         this.$store.commit("addData", {result: reader.result, name: file.name});
                     }
                 }
             }
         },
-        async deleteFile() {
-            if(this.type == "data"){
+        deleteFile: async function() {
+            if(this.type == "data") {
                 this.$store.commit("deleteData", this.lastSelected);
             }
-            else if(this.type == "annotation"){
+            else if(this.type == "annotation") {
                 await deleteAnnotationFile();
             }
         }
