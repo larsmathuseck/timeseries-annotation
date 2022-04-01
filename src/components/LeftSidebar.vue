@@ -6,10 +6,15 @@
         </div>
     </div>
     <div class="row">
-        <label class="description-text" >Y-Axes</label>
+        <span class="description-text" >
+            <label>Axes</label>
+            <button type="button" class="btn btn-default btn-circle" @click="showAxesModal">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </span>
         <div id="scroll-container-axes">
-            <div class="row axis-container" v-for="axis in this.axes" :key="axis.id" >
-                <Axis :axis="axis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
+            <div class="row axis-annotation-container" v-for="axis in this.axes" :key="axis.id" >
+                <Axis :axis="axis" @editAxis="editAxis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
             </div>
         </div>
     </div>
@@ -23,12 +28,12 @@
         <span class="description-text" >
             <label>Labels</label>
             <button type="button" class="btn btn-default btn-circle" @click="showLabelModal">
-                <i class="fa fa-plus"></i>
+                <i class="fa-solid fa-plus"></i>
             </button>
         </span>
         <div class="row justify-content-start align-items-center">
             <div class="col-auto area-visibility-container">
-                <p class="area-p">Areas visible</p>
+                <p id="area-p">Areas visible</p>
             </div>
             <div class="col-auto area-visibility-container px-0">
                 <label class="switch">
@@ -38,21 +43,23 @@
             </div>
         </div>
         <div id="scroll-container-labels">
-            <div class="row label-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
+            <div class="row axis-annotation-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
                 <Label :label="label" @editLabel="editLabel" />
             </div>
         </div>
     </div>
     <AnnotationModal :toggleModalVisibility="toggleAnnotationModalVisibility" />
     <LabelModal :addLabelKey="addLabelKey" :toggleModalVisibility="toggleLabelModalVisibility" :labelToEdit="labelToEdit" />
+    <AxesModal :toggleModalVisibility="toggleAxesModalVisibility" :title="axisModalTitle" :axisToEdit="axisToEdit"/>
 </template>
 
 <script>
-import Axis from "./Axis.vue"
-import Label from "./Label.vue"
-import AnnotationModal from "./AnnotationModal.vue"
-import LabelModal from "./LabelModal.vue"
-import FileSelect from "./FileSelect.vue"
+import Axis from "./Axis.vue";
+import Label from "./Label.vue";
+import AnnotationModal from "./AnnotationModal.vue";
+import LabelModal from "./LabelModal.vue";
+import AxesModal from "./AxesModal.vue";
+import FileSelect from "./FileSelect.vue";
 import { liveQuery } from "dexie";
 import { db } from "/db";
 import { useObservable } from "@vueuse/rxjs";
@@ -65,6 +72,7 @@ export default {
         AnnotationModal,
         LabelModal,
         FileSelect,
+        AxesModal,
     },
     setup: function(){
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
@@ -81,16 +89,21 @@ export default {
     },
     data() {
         return {
-            lastSelectedData: this.$store.state.currentSelectedData,
             lastSelectedAnnotation: 1,
             toggleAnnotationModalVisibility: false,
             toggleLabelModalVisibility: false,
+            toggleAxesModalVisibility: false,
             labelToEdit: null,
+            axisToEdit: null,
             addLabelKey: 0,
             acceptedKeys: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+            axisModalTitle: "Add Axis",
         }
     },
     computed: {
+        lastSelectedData: function() {
+            return this.$store.state.selectedData;
+        },
         data: function() {
             return this.$store.state.data;
         },
@@ -122,6 +135,11 @@ export default {
             this.labelToEdit = label;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
         },
+        editAxis(axis) {
+            this.axisModalTitle = "Edit Axis";
+            this.axisToEdit = axis;
+            this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;
+        },
         showAnnotationModal() {
             this.toggleAnnotationModalVisibility = !this.toggleAnnotationModalVisibility;
         },
@@ -133,6 +151,11 @@ export default {
             }
             this.labelToEdit = null;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
+        },
+        showAxesModal() {
+            this.axisModalTitle = "Add Axis";
+            this.axisToEdit = null;
+            this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;
         },
         keyPressed: function(e) {
             let key = e.key;
@@ -163,118 +186,48 @@ export default {
 </script>
 
 <style scoped>
-.axis-container {
-    margin-left: 12px;
-    padding: 12px;
-    padding-left: 0px;
-    border-bottom: 0.1vw solid rgb(128, 128, 128, 0.5);
-    text-align: left;
-    align-items: center;
-}
-
 #scroll-container-axes {
     padding: 0px;
     overflow-y: auto;
     scrollbar-width: none;
     max-height: 25vh;
 }
+
 #scroll-container-axes::-webkit-scrollbar {
     width: 0;
     height: 0;
+}
+
+.axis-annotation-container {
+    margin-left: 12px;
+    padding-right: 12px;
+    padding-left: 0px;
 }
 
 .input-group {
     padding-right: 0;
 }
 
-.input-group-apend {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .btn-circle {
-    height: 2.5vw;
-    width: 2.5vw;
-    border-radius: 1.25vw;
-    text-align: center;
-    font-size: 1vw;
-    background-color: #bbb;
-    opacity: 0.7;
-    margin-left: 1vw;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0px;
+    margin-left: 10px;
 }
 
 .btn-circle:hover { 
     opacity: 1;
 }
 
-.fa-plus {
-    max-height: fit-content;
-    max-width: fit-content;
-    display:inline-block;
-    text-align: center;
-    vertical-align: bottom;
-}
-
-.label-container {
-    margin-left: 12px;
-    padding: 12px;
-    padding-left: 0px;
-    border-bottom: 0.1vw solid rgb(128, 128, 128, 0.5);
-    text-align: left;
-    align-items: center;
-}
-
-.label-container:hover {
-    background-color: rgb(128, 128, 128, 0.1);
-}
-
 #scroll-container-labels {
     padding: 0px;
     overflow-y: auto;
     scrollbar-width: none;
-    max-height: 30vh;
+    max-height: 25vh;
 }
 #scroll-container-labels::-webkit-scrollbar { 
     width: 0;
     height: 0;
 }
 
-</style>
-
-<style>
-.description-text {
-    text-align: left;
-    font-family: Tahoma;
-    font-weight: Bold;
-    font-size: 1.5vw;
-    padding-top: 10px;
-    padding-bottom: 2px;
-    margin: 0;
-}
-
-.description-text-sm {
-    text-align: left;
-    font-family: Tahoma;
-    font-size: 1vw;
-    margin: 2px;
-    color: gray;
-}
-
-.fa-edit , .fa-times{
-    opacity: 0.5;
-}
-
-.fa-edit:hover, .fa-times:hover {
-    opacity: 1;
-    cursor: pointer;
-}
-
-.area-p {
+#area-p {
     margin-bottom: 0;
 }
 
@@ -283,59 +236,15 @@ export default {
     display: inline-flex;
 }
 
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 3vw;
-  height: 1.5vw;
-  margin-top: auto;
-  margin-bottom: auto;
+@media (max-width: 1200px) {
+    #area-p {
+        font-size: 0.75rem;
+    }
 }
 
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
+@media (min-width: 1201px) {
+    #area-p {
+        font-size: 1rem;
+    }
 }
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 1.15vw;
-  width: 1.15vw;
-  left: 0.25vw;
-  bottom: 0.2vw;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-input:checked + .slider {
-  background-color: #2196F3;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(1.25vw);
-  -ms-transform: translateX(1.25vw);
-  transform: translateX(1.3vw);
-}
-
-.slider.round {
-  border-radius: 1vw;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
-
 </style>

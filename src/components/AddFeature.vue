@@ -27,16 +27,16 @@
             </div>
             <div class="row mb-3 justify-content-center">
                 <div class="col-2"></div>
-                <label for="dataPointsPerInstanceInput" class="col-4 col-form-label">Datapoints</label>
+                <label for="slidingWindowInput" class="col-4 col-form-label">Sliding Window</label>
                 <div class="col-2">
-                    <input v-model="dataPointsPerInstance" type="text" class="form-control" id="dataPointsPerInstanceInput" placeholder="4" required>
+                    <input v-model="slidingWindow" type="text" class="form-control" id="slidingWindowInput" placeholder="4" required>
                 </div>
-                <label class="col-2 col-lg-3 col-form-label text-start"></label>
+                <label class="col-2 col-lg-3 col-form-label text-start">Seconds</label>
                 <div class="col-2 col-lg-1"></div>
             </div>
             <div class="row mb-3 justify-content-center">
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-primary">Add <i class="fa fa-plus"></i></button>
+                    <button type="submit" class="btn btn-primary">Add <i class="fa-solid fa-plus"></i></button>
                 </div>
             </div>
         </form>
@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import features from "../model/ModelFunctions"
+import features from "../util/model/ModelFunctions"
 export default {
     name: "AddFeature",
     data() {
@@ -52,7 +52,7 @@ export default {
             counter: 0,
             features: features,
             selectedFeature: features[0],
-            dataPointsPerInstance: null,
+            slidingWindow: null,
             selectedAxis: null,
         }
     },
@@ -70,7 +70,7 @@ export default {
             const featureConfiguration = {
                 id: this.counter,
                 feature: feature,
-                dataPointsPerInstance: this.dataPointsPerInstance,
+                slidingWindow: this.slidingWindow,
                 axis: this.selectedAxis,
             }
             this.counter++;
@@ -78,11 +78,11 @@ export default {
         },
         validateInputs: function() {
             let invalidFeedback = "";
-            if (isNaN(this.dataPointsPerInstance)) {
-                invalidFeedback ="Data Points must be a number!";
+            if (isNaN(this.slidingWindow)) {
+                invalidFeedback ="Sliding Window must be a number!";
             }
-            else if (this.dataPointsPerInstance < 0) {
-                invalidFeedback = "Data Points can not be a negative Number!";
+            else if (this.slidingWindow < 0) {
+                invalidFeedback = "Sliding Window can not be a negative Number!";
             }
             if (invalidFeedback.length == 0) {
                 return true;
@@ -99,7 +99,6 @@ export default {
     },
     watch: {
         axes: function() {
-            console.log(this.axes);
             if (this.axes != undefined && this.axes.length != 0) {
                 const temp = {
                     name: this.axes[0].name, 
@@ -111,20 +110,3 @@ export default {
     }
 }
 </script>
-
-<style scoped>
-/**needed to hide arrows in number field */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number] {
-  -moz-appearance: textfield;
-}
-
-input { 
-    text-align: center; 
-}
-</style>

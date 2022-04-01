@@ -1,6 +1,6 @@
 <template>
     <div ref="chartDiv" @mouseup="chartClicked" @mousedown="dragDetection">
-        <v-chart ref="charts" class="chart" :option="option" @datazoom="zoom"/>
+        <v-chart ref="charts" class="chart" :init-options="init" :option="option" @datazoom="zoom"/>
     </div>
 </template>
 
@@ -20,10 +20,10 @@ import {
     MarkAreaComponent,
 } from "echarts/components";
 import VChart, { THEME_KEY } from "vue-echarts";
-import { DateTime } from "luxon";
 import { liveQuery } from "dexie";
 import { db } from "/db";
 import { useObservable } from "@vueuse/rxjs";
+import { getOption } from "../util/graphOptions";
 
 use([
     CanvasRenderer,
@@ -82,6 +82,9 @@ export default {
             sizeOfGraph: 0,
             clickX: 0,
             clickY: 0,
+            option: null,
+            graphData: null,
+            init: { useDirtyRect: true },
         };
     },
     provide: {
@@ -122,191 +125,65 @@ export default {
         },
         resizeChart: function () {
             this.$refs.charts?.resize();
-        }
+        },
+        updateGraph() {
+            this.dataZoomStart = this.tempDataZoomStart;
+            this.dataZoomEnd = this.tempDataZoomEnd;
+            this.$emit('loading', true);
+            setTimeout(() => {
+                this.$refs.charts?.clear();
+                this.option = getOption(this.graphData, this.$store.getters.timestamps, this.annoData, this.areaData, this.areasVisible, this.sizeOfGraph, this.dataZoomStart, this.dataZoomEnd);
+            }, 10);
+        },
     },
     computed: {
-        option: function () {
-            let series = [];
-            let graphData = this.$store.getters.getData;
-            let legende = [];
-            let annotations = this.annoData;
-            let areas = this.areaData;
-            let ann;
-            let ml;
-            let area;
-            if(annotations != undefined){
-                ann = annotations.map((x, i) => {
-                    return {
-                        symbol: "pin",
-                        itemStyle: {
-                        color: x.label.color
-                        },
-                        name: (i + 1).toString() + " " + x.label.name,
-                        xAxis: new Date(x.timestamp),
-                        y: "75"
-                    };
-                });
-                ml = annotations.map(x => {
-                    return {
-                        itemStyle: {
-                            color: x.label.color
-                        },
-                        xAxis: new Date(x.timestamp),
-                    };
-                });
-            }
-            if (this.areasVisible && areas != undefined) {
-                if (areas.length != 0) {
-                    area = areas.map(x => {
-                        return [
-                            {
-                                xAxis: new Date(x.firstTimestamp),
-                                itemStyle: {
-                                    color: x.label.color,
-                                    opacity: 0.5,
-                                    borderColor: "black",
-                                    borderWidth: 0.2,
-                                    borderType: "solid"
-                                },
-                            },
-                            {
-                                xAxis: new Date(x.secondTimestamp),
-                            }
-                        ];
-                    });
-                }
-            }
-            for(let key in graphData){
-                legende.push(graphData[key].name);
-                series.push({
-                    name: graphData[key].name,
-                    type: "line",
-                    showSymbol: false,
-                    emphasis: {
-                        scale: false,
-                        lineStyle: {
-                            width: 1.5,
-                            color: graphData[key].color,
-                        },
-                    },
-                    lineStyle: {
-                        color: graphData[key].color,
-                        width: 1.5,
-                    },
-                    data: graphData[key].dataPoints,
-                });
-            }
-            series[0].markPoint = {
-                                animation: true,
-                                symbol: "pin",
-                                label: {
-                                    show: true,
-                                    padding: 5,
-                                    distance: 5,
-                                    formatter: (value) => {
-                                        return value.name.split(" ")[0];
-                                    },
-                                    color: "white"
-                                },
-                                data: ann,
-                            };
-            series[0].markLine = {
-                                animation: true,
-                                silent: true,
-                                symbol: "none",
-                                label: { show: false},
-                                data: ml,
-                            };
-            series[0].markArea = {
-                                animation: true,
-                                silent: true,
-                                label: { show: false},
-                                data: area,
-                            };
-            return {
-                height: this.sizeOfGraph,
-                animation: false,
-                responsive: true,
-                maintainAspectRatio: false,
-                clip: true,
-                sampling: "max",
-                series: series,
-                tooltip: {
-                    trigger: "axis",
-                    formatter: (value) => {
-                        return DateTime.fromMillis(value[0].axisValue).toFormat('hh:mm:ss SSS');
-                    }
-                },
-                legend: {
-                    data: legende
-                },
-                xAxis: {
-                    type: "time",
-                    data: this.$store.getters.timestamps,
-                },
-                yAxis: {
-                    type: "value",
-                },
-                grid: {
-                    left: '20',
-                    right: '20',
-                    top: '30',
-                    containLabel: true
-                },
-                dataZoom: [
-                    {
-                        type: "inside",
-                        start: this.dataZoomStart,
-                        end: this.dataZoomEnd,
-                        filterMode: "filter",
-                    },
-                    {
-                        type: "slider",
-                        animation: true,
-                        showDataShadow: true,
-                        filterMode: "filter",
-                        throttle: 100,
-                        dataBackground: {
-                            lineStyle: {
-                                color: "#79bdf2",
-                                width: 1.5,
-                            },
-                            areaStyle: {
-                                color: "#ffffff00",
-                            },
-                        },
-                        height:"100",
-                        bottom: 0,
-                        show: true,
-                        start: this.dataZoomStart,
-                        end: this.dataZoomEnd,
-                        handleSize: "70%",
-                        labelFormatter: (value) => {
-                            return DateTime.fromMillis(value).toFormat('hh:mm:ss SSS');
-                        }
-                    },
-                ],
-            };
-        },
         areasVisible: function() {
             return this.$store.state.areasVisible;
+        },
+        data: function() {
+            return this.$store.state.data[this.$store.state.selectedData];
+        },
+        selectedAxes: function() {
+            return this.$store.getters.selectedAxes;
         }
     },
     watch:{
-        option: function(){
-            this.$refs.charts?.clear();
-            this.dataZoomStart = this.tempDataZoomStart;
-            this.dataZoomEnd = this.tempDataZoomEnd;
-            this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
+        annoData: function() {
+            this.updateGraph();
+        },
+        areaData: function() {
+            this.updateGraph();
+        },
+        areasVisible: function() {
+            this.updateGraph();
+        },
+        sizeOfGraph: function() {
+            this.updateGraph();
+        },
+        data: {
+            handler() {
+                if(this.data != null) {
+                    this.graphData = Object.fromEntries(Object.entries(this.data.axes).filter(key => this.data.selectedAxes.includes(key[1].id)));
+                }
+                else {
+                    this.graphData = null;
+                }
+                this.updateGraph();
+            },
+            deep: true,
+            immediate: true,
         }
     },
-    created: function(){
+    mounted: function(){
         this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
         window.addEventListener("resize", () => {
             this.resizeChart();
             this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
         })
-    }
+    },
+    updated: function(){
+        this.$emit('loading', false);
+    },
 }
 
 </script>

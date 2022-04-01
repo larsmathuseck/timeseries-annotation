@@ -1,38 +1,33 @@
 <template>
     <div class="row justify-content-between">
-        <div id="col-header-title" class="col col-lg-auto col-md-auto col-sm-12 col-12">
+        <div id="col-header-title" class="col col-md-auto col-12">
             <h1>{{ title }}</h1>
         </div>
-        <div id="col-header-buttons" class="col col-lg-auto col-md-auto col-sm-12 col-12">
+        <div id="col-header-buttons" class="col col-md-auto col-12">
             <ul class="nav nav-pills">
                 <li class="nav-item">
-                    <button type="button" class="btn btn-light" @click="changePage">
-                            {{ buttonText }}
-                    </button>
-                </li>
-                <li class="nav-item">
                     <input id="multipleFileUpload" type="file" webkitdirectory directory multiple v-on:change="onFileChange" hidden>
-                    <button type="button" @click="chooseFiles" class="btn btn-light" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-content="All unsaved changes will be lost">
-                        <i class="fa fa-folder"></i>
+                    <button type="button" @click="chooseFiles" class="btn btn-light main-btn" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-content="All unsaved changes will be lost">
+                        <i class="fa-solid fa-folder"></i>
                         Import Folder
                     </button>
                 </li>
                 <li class="nav-item" v-if="!debug">
-                    <button type="button" class="btn btn-light" @click="saveAnnotation">
-                        <i class="fa fa-download"></i>
+                    <button type="button" class="btn btn-light main-btn" @click="saveAnnotation">
+                        <i class="fa-solid fa-download"></i>
                         Save Annotation
                     </button>
                 </li>
                 <li class="nav-item" v-if="!debug">
-                    <button @click="showModelModal = true; toggleModelModalVisibility  = !toggleModelModalVisibility" type="button" class="btn btn-light">
-                        <i class="fa fa-wrench"></i>
+                    <button type="button" @click="toggleModelModalVisibility  = !toggleModelModalVisibility" class="btn btn-light main-btn">
+                        <i class="fa-solid fa-wrench"></i>
                         Model
                     </button>
                     <ImportModelModal v-if="showModelModal" :toggleModelModalVisibility="toggleModelModalVisibility" />
                 </li>
-                <li class="nav-item">
-                    <button type="button" class="btn btn-light" @click="showModal = true; toggleTutorialModalVisibility  = !toggleTutorialModalVisibility">
-                        <i class="fa fa-file"></i>
+                <li class="nav-item" v-if="!debug">
+                    <button type="button" class="btn btn-light main-btn" @click="toggleTutorialModalVisibility  = !toggleTutorialModalVisibility">
+                        <i class="fa-solid fa-file"></i>
                         Tutorial
                     </button>
                     <TutorialModal v-if="showModal" :toggleTutorialModalVisibility="toggleTutorialModalVisibility" />
@@ -50,6 +45,7 @@ import { db } from "/db";
 import { DateTime } from "luxon";
 import { stringify } from "@vanillaes/csv";
 import { Popover } from "bootstrap";
+import { addAnnotationData } from "../util/DatabankManager";
 
 export default {
     name: "Header",
@@ -69,33 +65,11 @@ export default {
             showModelModal: false,
         }
     },
-    computed: {
-        buttonText: function(){
-            if(!this.debug){
-                return "Debbuger";
-            }
-            else{
-                return "Main";
-            }
-        }
-    },
     methods: {
-        changePage() {
-            if(!this.debug){
-                this.$router.push('/debug');
-            }
-            else{
-                this.$router.push('/');
-            }
-        },
         chooseFiles() {
             document.getElementById("multipleFileUpload").click();
         },
         onFileChange(e) {
-            db.annotations.clear();
-            db.annoData.clear();
-            db.labels.clear();
-            db.areas.clear();
             const fileList = e.target.files;
             let filesToUpload = [];
             let fileNames = {};
@@ -109,6 +83,12 @@ export default {
                         fileNames[file.name] += 1;
                     }
                 }
+            }
+            if (filesToUpload.length > 1) {
+                db.annotations.clear();
+                db.annoData.clear();
+                db.labels.clear();
+                db.areas.clear();
             }
             for (let i in filesToUpload) {
                 const file = filesToUpload[i];
@@ -125,10 +105,11 @@ export default {
                         this.$store.commit("addData", {result: reader.result, name: fileName});
                     }
                     else if(file.name.includes("annotation") || file.name.includes("labels")){
-                        this.$store.commit("addAnnotationData", {result: reader.result, name: fileName});
+                        addAnnotationData(reader.result, file.name, this.$store.state.colors);
                     }
                 }
             }
+            document.getElementById("multipleFileUpload").value = "";
         },
         async saveAnnotation() {
             const currAnn = await db.lastSelected.where('id').equals(1).first();
@@ -203,14 +184,5 @@ export default {
 
 li {
     margin: 5px;
-}
-
-button {
-    background-color: #e1e1e5;
-    font-size: 1vw;
-}
-
-h1 {
-    font-size: 2.5vw;
 }
 </style>

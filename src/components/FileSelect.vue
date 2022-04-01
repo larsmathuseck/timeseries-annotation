@@ -6,24 +6,24 @@
     </select>
     <div class="input-group-apend my-auto">
         <input id="fileUpload" type="file" accept=".csv" multiple v-on:change="onFileChange" hidden>
-        <button v-if="type =='annotation'" type="button" class="btn btn-default btn-circle trash-btn me-1" @click="deleteFile()">
-            <i class="fa fa-trash"></i>
+        <button type="button" class="btn btn-default btn-circle me-1" @click="deleteFile()">
+            <i class="fa-solid fa-trash"></i>
         </button>
         <button type="button" class="btn btn-default btn-circle" @click="chooseFile()">
-            <i class="fa fa-plus"></i>
+            <i class="fa-solid fa-plus"></i>
         </button>
-        
     </div>
 </template>
 
 <script>
 import { db } from "/db"
+import { deleteAnnotationFile } from "../util/DatabankManager"
 
 export default {
     name: "FileSelect",
     props: {
         type: String,
-        data: Array,
+        data: Object,
         selected: Number,
     },
     emits: ['annoModal'],
@@ -55,6 +55,7 @@ export default {
                 const file = fileList[i];
                 this.readFile(file);
             }
+            document.getElementById("fileUpload").value = "";
         },
         readFile(file){
             const reader = new FileReader();
@@ -68,16 +69,11 @@ export default {
             }
         },
         async deleteFile() {
-            const anno = await db.lastSelected.where('id').equals(1).first();
-            const annoId = anno.annoId;
-            console.log(annoId);
-            await db.annotations.delete(annoId);
-            db.annoData.where("annoId").equals(annoId).delete();
-            db.labels.where("annoId").equals(annoId).delete();
-            db.areas.where("annoId").equals(annoId).delete();
-            const annotations = await db.annotations.toArray();
-            if (annotations.length != 0) {
-                db.lastSelected.update(1, {annoId: parseInt(annotations[0].id)});
+            if(this.type == "data"){
+                this.$store.commit("deleteData", this.lastSelected);
+            }
+            else if(this.type == "annotation"){
+                await deleteAnnotationFile();
             }
         }
     },
@@ -91,38 +87,6 @@ export default {
 
 <style scoped>
 .form-select {
-    margin-right: 0.7vw;
-}
-
-.btn-circle {
-    height: 2vw;
-    width: 2vw;
-    border-radius: 1vw;
-    text-align: center;
-    font-size: 0.7vw;
-    background-color: #bbb;
-    opacity: 0.7;
-    margin-top: auto;
-    margin-bottom: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0px;
-}
-
-.btn-circle:hover { 
-    opacity: 1;
-}
-
-.trash-btn {
-    font-size: 1vw;
-}
-
-.fa-plus {
-    max-height: fit-content;
-    max-width: fit-content;
-    display:inline-block;
-    text-align: center;
-    vertical-align: bottom;
+    margin-right: 10px;
 }
 </style>

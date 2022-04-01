@@ -6,7 +6,7 @@
                     <h5 class="modal-title">Add Label</h5>
                     <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-0">
                     <AddLabel :key="addLabelKey" :labelToEdit="labelToEdit" @labelCreated="onLabelCreated" @labelEdited="labelEdited" @closeModal="closeModal" />
                 </div>
             </div>
@@ -59,9 +59,3 @@ export default {
     },
 }
 </script>
-
-<style scoped>
-.modal-body {
-    padding: 0px;
-}
-</style>
