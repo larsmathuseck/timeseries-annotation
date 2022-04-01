@@ -1,25 +1,13 @@
 <template>
-    <!-- <div class="col-auto me-auto" :style="{ background: annotation.color }">
-        <label class="annotation-name">
+    <div class="col-auto axis-annotation-col me-auto my-0" :style="{ background: annotation.color }">
+        <label class="axis-annotation-label">
             {{ index }}
             {{ annotation.name }}
             <i @click="deleteAnnotation(annotation)" class="fa-solid fa-xmark"></i>
         </label>
     </div>
-    <col-auto>
-        <label class="annotation-timestamp">
-            {{ annotation.timestamp }}
-        </label>
-    </col-auto> -->
-    <div class="col-auto me-auto my-0" :style="{ background: annotation.color }">
-        <label class="my-0">
-            {{ index }}
-            {{ annotation.name }}
-            <!-- <i @click="deleteAnnotation(annotation)" class="fa-solid fa-xmark"></i> -->
-        </label>
-    </div>
-    <div class="col-auto">
-        <label id="annotation-timestamp">
+    <div class="col-auto m-0 p-0">
+        <label id="annotation-timestamp" class="my-auto">
             {{ annotation.timestamp }}
         </label>
     </div>
@@ -43,30 +31,30 @@ export default {
 </script>
 
 <style scoped>
-.col-auto {
-    border-radius: 10px;
-    margin: 0px;
-    padding: 0px;
-    display: inline-flex;
+@media (max-width: 1200px) {
+    #annotation-timestamp {
+        font-size: 0.75rem;
+    }
 }
 
-label {
-    font-size: 0.8rem;
-    color: white;
-    padding: 4px;
-    margin: 0px;
+@media (min-width: 1201px) {
+    #annotation-timestamp {
+        font-size: 1rem;
+    }
 }
-
 #annotation-timestamp {
     text-align: right;
     display: block;
     color: rgb(128, 128, 128, 0.5);
     margin: 0;
-    margin-bottom: 0.25rem;   
 }
 
 i {
     margin-left: 1px;
 }
 
+button {
+    background-color: rgb(255, 255, 255, 0);
+    border: 0;
+}
 </style>

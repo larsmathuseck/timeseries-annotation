@@ -1,17 +1,19 @@
 <template>
-    <div class="col-auto me-auto" :style="{background: axis.color}">
-        <label>
+    <div class="col-auto axis-annotation-col me-auto my-auto" :style="{background: axis.color}">
+        <label class="axis-annotation-label">
             {{ axis.name }}
         </label>
     </div>
-    <div class="col-auto">
-        <button>
-            <i class="fa-solid fa-pen-to-square" @click="editAxis"></i>
+    <div class="col-auto m-0 p-0">
+        <button class="m-0 py-0 pe-1" >
+            <i class="fa-solid fa-pen-to-square axis-annotation-icon" @click="editAxis"></i>
         </button>
-        <label class="switch my-auto">
-            <input type="checkbox" v-model="selected" @change="toggleAxis" v-show="false">
-            <span class="slider round"></span>
-        </label>
+        <div class="col-auto my-auto">
+            <label class="switch">
+                <input type="checkbox" v-model="selected" @change="toggleAxis" v-show="false">
+                <span class="slider round"></span>
+            </label>
+        </div>
     </div>
 </template>
 
@@ -57,21 +59,14 @@ export default {
 
 <style scoped>
 .col-auto {
-    border-radius: 10px;
-    margin: 0px;
-    padding: 0px;
     display: inline-flex;
 }
-
-label {
-    font-size: 0.9rem;
-    color: white;
-    padding: 4px;
-    margin: 0px;
-}
-
 button {
     background-color: rgb(255, 255, 255, 0);
-    border-color: rgb(255, 255, 255, 0);
+    border: 0;
+}
+
+i {
+    margin-bottom: 0px;
 }
 </style>

@@ -180,8 +180,4 @@ export default {
 li {
     margin: 5px;
 }
-
-h1 {
-    font-size: 2.5vw;
-}
 </style>

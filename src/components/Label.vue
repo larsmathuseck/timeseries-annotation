@@ -1,21 +1,21 @@
 <template>
-    <div class="col-auto"
+    <div class="col-auto axis-annotation-col my-auto"
     :style="{ background: label.color }">
-        <label>
+        <label class="axis-annotation-label my-auto">
             {{ label.name }}
         </label>
     </div>
-    <div id="label-active-container" class="col-auto me-auto">
+    <div id="label-active-container" class="col-auto ms-1 p-0 me-auto my-auto">
         <label class="label-active" v-show="activeLabel != null && label.id === activeLabel.id">
             Active
         </label>
     </div>
-    <div class="col-auto">
+    <div class="col-auto m-0 p-0">
         <button>
-            <i class="fa-solid fa-pen-to-square" @click="editLabel"></i>
+            <i class="fa-solid fa-pen-to-square axis-annotation-icon" @click="editLabel"></i>
         </button>
         <button>
-            <i class="fa-solid fa-xmark" @click="deleteLabel" />
+            <i class="fa-solid fa-xmark axis-annotation-icon" @click="deleteLabel" />
         </button>
     </div>
 </template>
@@ -52,43 +52,16 @@ export default {
 </script>
 
 <style scoped>
-.col-auto {
-    text-align: center;
-    width: fit-content;
-    height: fit-content;
-    border-radius: 10px;
-    margin: 0px;
-    padding: 0px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-label {
-    font-family: Tahoma;
-    font-size: 1vw;
-    color: white;
-    padding: 5px;
-    margin: 0px;
-}
-
 .label-active {
     text-align: right;
     display: block;
     color: rgb(128, 128, 128, 0.5);
-}
-
-#label-active-container {
-    text-align: right;
+    font-size: 0.75rem;
 }
 
 button {
     background-color: rgb(255, 255, 255, 0);
     border: 0px;
     padding: 0 3px 0 3px;
-}
-
-.fa-solid {
-    font-size: 1.25vw;
 }
 </style>

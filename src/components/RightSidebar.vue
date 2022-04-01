@@ -64,9 +64,4 @@ export default {
     width: 0px;
     height: 0px;
 }
-
-.annotation-container:hover {
-    background-color: rgb(128, 128, 128, 0.1);
-}
-
 </style>
