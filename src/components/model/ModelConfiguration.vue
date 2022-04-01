@@ -138,6 +138,7 @@ import { db } from "/db";
 import { createInstances } from "../../util/model/ModelInstances";
 import { checkImportedFiles } from "../../util/model/ImportModelManager";
 import { createNewAnnotationFile, createLabelsForAnnotation, selectAnnotationFile } from "../../util/DatabankManager";
+import { download } from "../../util/inputOutput.js";
 
 export default {
     name: "ModelConfiguration",
@@ -441,35 +442,8 @@ export default {
                 downsamplingMethod: this.selectedDownsamplingMethod,
                 selectedAxes: this.selectedAxes,
             }
-            this.downloadConfig(config);
+            download(JSON.stringify(config), "text/json", {'text/json': ['.json']}, "config.json");
         },
-        downloadConfig: async function(config) {
-            const content = JSON.stringify(config);
-            if (typeof showSaveFilePicker === 'undefined') {
-                var a = document.createElement("a");
-                a.href = window.URL.createObjectURL(new Blob([content], {type: "text/json"}));
-                a.download = "config.json";
-                a.click();
-            }
-            else {
-                try {
-                    const fileHandle = await self.showSaveFilePicker({
-                        suggestedName: "config.json",
-                        types: [{
-                            description: 'JSON files',
-                            accept: {
-                            'text/json': ['.json'],
-                            },
-                        }],
-                    });
-                    const fileStream = await fileHandle.createWritable();
-                    await fileStream.write(new Blob([content], {type: "text/plain;charset=utf-8"}));
-                    await fileStream.close();
-                } catch(error) {
-                    console.log(error);
-                }
-            }
-        }
     },
     computed: {
         axes: function() {

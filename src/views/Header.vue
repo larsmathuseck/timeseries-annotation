@@ -43,6 +43,7 @@ import { DateTime } from "luxon";
 import { stringify } from "@vanillaes/csv";
 import { Popover } from "bootstrap";
 import { addAnnotationData } from "../util/DatabankManager";
+import { download } from "../util/inputOutput.js";
 
 export default {
     name: "Header",
@@ -111,30 +112,8 @@ export default {
                 const content = await this.loadAnnotations(currAnn);
                 const annotationFile = await db.annotations.where('id').equals(currAnn.annoId).first();
                 if(content.length > 1 && annotationFile.name){
-                    if (typeof showSaveFilePicker === 'undefined'){
-                        var a = document.createElement("a");
-                        a.href = window.URL.createObjectURL(new Blob([content], {type: "text/csv"}));
-                        a.download = annotationFile.name;
-                        a.click();
-                    }
-                    else{
-                        try{
-                            const fileHandle = await self.showSaveFilePicker({
-                                suggestedName: annotationFile.name,
-                                types: [{
-                                    description: 'CSV documents',
-                                    accept: {
-                                    'text/csv': ['.csv'],
-                                    },
-                                }],
-                            });
-                            const fileStream = await fileHandle.createWritable();
-                            await fileStream.write(new Blob([content], {type: "text/csv;charset=utf-8;"}));
-                            await fileStream.close();
-                        } catch(error){
-                            console.log(error);
-                        }
-                    }
+                    let type = {'text/csv': ['.csv']};
+                    download(content, "text/csv", type, annotationFile.name);
                 }
             }
         },

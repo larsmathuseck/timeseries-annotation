@@ -121,6 +121,7 @@ import { db } from "/db";
 import { createFeatureInstances } from "../../util/model/ModelInstances";
 import { createLabelsForAnnotation, createNewAnnotationFile, selectAnnotationFile } from "../../util/DatabankManager";
 import { checkImportedFiles } from "../../util/model/ImportModelManager";
+import { download } from "../../util/inputOutput.js";
 
 export default {
     name: "FeatureConfiguration",
@@ -331,35 +332,8 @@ export default {
                 samplingRate: this.samplingRate,
                 features: this.features,
             }
-            this.downloadConfig(config);
+            download(JSON.stringify(config), "text/json", {'text/json': ['.json']}, "config.json");
         },
-        downloadConfig: async function(config) {
-            const content = JSON.stringify(config);
-            if (typeof showSaveFilePicker === 'undefined') {
-                var a = document.createElement("a");
-                a.href = window.URL.createObjectURL(new Blob([content], {type: "text/json"}));
-                a.download = "config";
-                a.click();
-            }
-            else {
-                try {
-                    const fileHandle = await self.showSaveFilePicker({
-                        suggestedName: "config",
-                        types: [{
-                            description: 'JSON files',
-                            accept: {
-                            'text/json': ['.json'],
-                            },
-                        }],
-                    });
-                    const fileStream = await fileHandle.createWritable();
-                    await fileStream.write(new Blob([content], {type: "text/plain;charset=utf-8"}));
-                    await fileStream.close();
-                } catch(error) {
-                    console.log(error);
-                }
-            }
-        }
     },
     watch: {
         toggleConfigDownload: function() {
