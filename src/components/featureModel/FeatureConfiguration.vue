@@ -245,6 +245,7 @@ export default {
         loadDataIntoModel: async function() {
             let result;
             try {
+                // get converted data for feature model
                 result = createFeatureInstances(this.$store.state.data[this.$store.state.selectedData], this.features, this.samplingRate, this.selectedDownsamplingMethod);
             } catch (error) {
                 this.loading = false;
@@ -256,6 +257,7 @@ export default {
             const smallestFeatureWindow = result[2];
             let predictedValues = [];
             try {
+                // make prediction
                 const tensor = tf.tensor(instances);
                 const a = this.model.predict(tensor);
                 predictedValues.push({data: a.arraySync()});               
@@ -273,6 +275,7 @@ export default {
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
             let timestamp = this.$store.state.data[this.$store.state.selectedData].timestamps[0] + 1000*offsetInSeconds;
             let nextTimestamp;
+            // evaluate predictions and add areas to db
             predictedValues[0].data.forEach(prediction => {
                 nextTimestamp = timestamp + 1000*smallestFeatureWindow;
                 let max = Math.max(...prediction);
@@ -298,6 +301,7 @@ export default {
                 }
                 timestamp = nextTimestamp;
             });
+            // select newly created annotaion file
             await selectAnnotationFile(annotationId);
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
