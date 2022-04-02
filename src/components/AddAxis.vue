@@ -92,7 +92,7 @@ export default {
         axisToEdit: Object,
     },
     computed: {
-        axes() {
+        axes: function() {
             if(this.axisToEdit) {
                 return this.$store.getters.getAxes;
             }
@@ -141,7 +141,7 @@ export default {
         }
     },
     watch: {
-        axisToEdit() {
+        axisToEdit: function() {
             if(this.axisToEdit != null) {
                 if(this.axisToEdit.samplingRate == null) {
                     this.samplingRate = null;
@@ -164,19 +164,19 @@ export default {
                 this.samplingRate =  32;
             }
         },
-        axes() {
+        axes: function() {
             if (this.axes != undefined && this.axes.length != 0) {
                 this.selectedAxis = this.axes[0];
                 this.updateAxisName();
             }
         },
-        selectedFeature() {
+        selectedFeature: function() {
             this.updateAxisName();
         },
-        selectedAxis() {
+        selectedAxis: function() {
             this.updateAxisName();
         },
-        samplingRate() {
+        samplingRate: function() {
             this.updateAxisName();
         },
     },

@@ -41,7 +41,7 @@ export default {
         }
     },
     computed: {
-        showGraph() {
+        showGraph: function() {
             return this.$store.getters.showGraph;
         }
     },

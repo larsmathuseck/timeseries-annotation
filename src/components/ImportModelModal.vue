@@ -69,16 +69,16 @@ export default {
         },
     },
     watch: {
-        toggleModelModalVisibility() {
+        toggleModelModalVisibility: function() {
             this.showInvalidFeedback = "";
             this.modal.show();
         },
-        showFeatureConfiguration() {
+        showFeatureConfiguration: function() {
             this.showInvalidFeedback = "";
         }
     },
     computed: {
-        axes() {
+        axes: function() {
             return this.$store.getters.getAxes;
         },
     },

@@ -39,7 +39,7 @@ export default {
         }
     },
     computed: {
-        annotations() {
+        annotations: function() {
             let annoData = this.annoData;
             if(annoData != undefined) {
                 for(let i = 0; i < annoData.length; i++) {

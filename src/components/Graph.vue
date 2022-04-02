@@ -137,27 +137,27 @@ export default {
         },
     },
     computed: {
-        areasVisible() {
+        areasVisible: function() {
             return this.$store.state.areasVisible;
         },
-        data() {
+        data: function() {
             return this.$store.state.data[this.$store.state.selectedData];
         },
-        selectedAxes() {
+        selectedAxes: function() {
             return this.$store.getters.selectedAxes;
         }
     },
     watch:{
-        annoData() {
+        annoData: function() {
             this.updateGraph();
         },
-        areaData() {
+        areaData: function() {
             this.updateGraph();
         },
-        areasVisible() {
+        areasVisible: function() {
             this.updateGraph();
         },
-        sizeOfGraph() {
+        sizeOfGraph: function() {
             this.updateGraph();
         },
         data: {

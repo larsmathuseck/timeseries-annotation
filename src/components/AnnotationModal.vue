@@ -125,7 +125,7 @@ export default {
         },
     },
     watch: {
-        toggleModalVisibility() {
+        toggleModalVisibility: function() {
             this.fileName = ""; 
             this.error = "";
             this.showInvalidFeedback = false;

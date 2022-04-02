@@ -39,7 +39,7 @@ export default {
         },
     },
     watch: {
-        toggleModalVisibility() {
+        toggleModalVisibility: function() {
             this.modal.show();
         },
     },

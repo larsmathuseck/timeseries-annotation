@@ -31,7 +31,7 @@ export default {
         }
     },
     watch: {
-        isSelected() {
+        isSelected: function() {
             this.selected = this.isSelected
         }
     },

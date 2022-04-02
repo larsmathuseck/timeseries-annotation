@@ -62,7 +62,7 @@ export default {
         },
     },
     watch: {
-        toggleTutorialModalVisibility() {
+        toggleTutorialModalVisibility: function() {
             this.modal.show();
         },
     },

@@ -28,7 +28,7 @@ export default {
         label: Object,
     },
     computed: {
-        activeLabel() {
+        activeLabel: function() {
             return this.$store.state.activeLabel;
         }
     },

@@ -90,7 +90,7 @@ export default {
         },
     },
     watch: {
-        labelToEdit() {
+        labelToEdit: function() {
             if (this.labelToEdit !== null) {
                 this.labelName = this.labelToEdit.name;
                 this.labelColor = this.labelToEdit.color;

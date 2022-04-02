@@ -362,7 +362,7 @@ export default {
         }
     },
     watch: {
-        toggleConfigDownload() {
+        toggleConfigDownload: function() {
             this.prepareConfigDownload();
         },
     },

@@ -472,12 +472,12 @@ export default {
         }
     },
     computed: {
-        axes() {
+        axes: function() {
             return this.$store.getters.getAxes;
         },
     },
     watch: {
-        toggleConfigDownload() {
+        toggleConfigDownload: function() {
             this.prepareConfigDownload();
         },
     },

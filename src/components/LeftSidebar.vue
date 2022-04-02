@@ -101,16 +101,16 @@ export default {
         }
     },
     computed: {
-        lastSelectedData() {
+        lastSelectedData: function() {
             return this.$store.state.selectedData;
         },
-        data() {
+        data: function() {
             return this.$store.state.data;
         },
-        axes() {
+        axes: function() {
             return this.$store.getters.getAxes;
         },
-        selectedAxes() {
+        selectedAxes: function() {
             return this.$store.getters.selectedAxes;
         },
         areasVisible: {
@@ -123,7 +123,7 @@ export default {
         },
     },
     watch: {
-        currAnn() {
+        currAnn: function() {
             this.lastSelectedAnnotation = this.currAnn?.annoId;
         },
     },

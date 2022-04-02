@@ -93,12 +93,12 @@ export default {
         }
     },
     computed: {
-        axes() {
+        axes: function() {
             return this.$store.getters.getAxes;
         },
     },
     watch: {
-        axes() {
+        axes: function() {
             if (this.axes != undefined && this.axes.length != 0) {
                 const temp = {
                     name: this.axes[0].name, 
