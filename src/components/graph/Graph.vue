@@ -72,7 +72,7 @@ export default {
             areaData,
         }
     },
-    data: function () {
+    data: function() {
         return {
             dataZoomStart: 0,
             dataZoomEnd: 100,
@@ -91,7 +91,7 @@ export default {
         [THEME_KEY]: "light",
     },
     methods: {
-        chartClicked: function (event) {
+        chartClicked(event) {
             const diffX = Math.abs(event.pageX - this.clickX);
             const diffY = Math.abs(event.pageY - this.clickY);
             if(diffX < 3 && diffY < 3){
@@ -102,7 +102,7 @@ export default {
                 }
             }
         },
-        addAnnotationPoint: function (timestamp) {
+        addAnnotationPoint(timestamp) {
             let time = new Date(timestamp).getTime();
             let label = this.$store.state.activeLabel;
             let currAnn = this.currAnn;
@@ -110,11 +110,11 @@ export default {
                 db.annoData.add({labelId: label.id, annoId: currAnn.annoId, timestamp: time});
             }
         },
-        dragDetection: function (event) {
+        dragDetection(event) {
             this.clickX = event.pageX;
             this.clickY = event.pageY;
         },
-        zoom: function (event) {
+        zoom(event) {
             if (event.start !== undefined && event.end !== undefined) {
                 this.tempDataZoomStart = event.start;
                 this.tempDataZoomEnd = event.end;
@@ -123,7 +123,7 @@ export default {
                 this.tempDataZoomEnd = event.batch[0].end;
             }
         },
-        resizeChart: function () {
+        resizeChart() {
             this.$refs.charts?.resize();
         },
         updateGraph() {
@@ -174,14 +174,14 @@ export default {
             immediate: true,
         }
     },
-    mounted: function(){
+    mounted() {
         this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
         window.addEventListener("resize", () => {
             this.resizeChart();
             this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
         })
     },
-    updated: function(){
+    updated() {
         this.$emit('loading', false);
     },
 }

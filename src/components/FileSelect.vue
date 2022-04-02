@@ -64,7 +64,7 @@ export default {
         }
     },
     watch: {
-        selected: function() {
+        selected() {
             this.lastSelected = this.selected;
         }
     }

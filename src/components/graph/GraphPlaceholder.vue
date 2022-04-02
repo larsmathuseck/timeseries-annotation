@@ -29,14 +29,14 @@ import { loadFolder } from "../../util/inputOutput.js";
 export default {
     name: "ImportGraph",
     methods: {
-        chooseFolder(){
+        chooseFolder() {
             document.getElementById("folderUpload").click();
         },
         onFolderChange(e) {
             loadFolder(e.target.files);
             document.getElementById("folderUpload").value = "";
         },
-        chooseFile(){
+        chooseFile() {
             document.getElementById("fileUpload").click();
         },
         onFileChange(e) {

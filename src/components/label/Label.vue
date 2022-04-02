@@ -22,6 +22,7 @@
 
 <script>
 import { db } from "/db";
+
 export default {
     name: "Label",
     props: {
@@ -33,7 +34,7 @@ export default {
         }
     },
     methods: {
-        deleteLabel: function(event) {
+        deleteLabel(event) {
             event.stopPropagation();
             db.labels.delete(this.label.id);
             db.annoData.where('labelId').equals(this.label.id).delete();
@@ -42,7 +43,7 @@ export default {
                 this.$store.commit("toggleActiveLabel", null);
             }
         },
-        editLabel: function(event) {
+        editLabel(event) {
             event.stopPropagation();
             this.$emit("editLabel", this.label);
         }

@@ -46,7 +46,7 @@ export default {
         }
     },
     methods: {
-        loadingChange: function(loading) {
+        loadingChange(loading) {
             this.loading = loading;
         }
     }

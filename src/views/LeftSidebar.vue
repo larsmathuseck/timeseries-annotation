@@ -157,7 +157,7 @@ export default {
             this.axisToEdit = null;
             this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;
         },
-        keyPressed: function(e) {
+        keyPressed(e) {
             let key = e.key;
             if (this.acceptedKeys.indexOf(key) > -1) {
                 if (key == 0) { // modify key so that by pressing 1 its the first label, which has index 0, and by pressing 0 you reach label 10
@@ -176,10 +176,10 @@ export default {
             }
         }
     },
-    mounted: async function() {
+    async mounted() {
         window.addEventListener("keypress", this.keyPressed);
     },
-    beforeUnmount: function() {
+    beforeUnmount() {
         window.removeEventListener('keypress', this.keyPressed);
     },
 }
