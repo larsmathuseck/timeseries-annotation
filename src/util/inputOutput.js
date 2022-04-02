@@ -81,7 +81,7 @@ export function loadFolder(fileList) {
                 store.commit("addData", {result: reader.result, name: fileName});
             }
             else if(file.name.includes("annotation") || file.name.includes("labels")) {
-                addAnnotationData(reader.result, file.name, store.state.colors);
+                addAnnotationData(reader.result, file.name);
             }
         };
     }

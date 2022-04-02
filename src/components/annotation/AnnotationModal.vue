@@ -23,7 +23,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="row justify-content-md-center" v-show="this.error != ''">
+                        <div class="row justify-content-md-center" v-show="this.error.length > 0">
                             <div class="col-auto">
                                 <div class="alert alert-danger" role="alert">
                                     {{ this.error }}
@@ -97,7 +97,7 @@ export default {
                     reader.readAsText(file);
                     reader.onload = () => {
                         if(file.name.includes("annotation") || file.name.includes("labels")) {
-                            addAnnotationData(reader.result, file.name, this.$store.state.colors);
+                            addAnnotationData(reader.result, file.name);
                             annotationFileImported = true;
                         }
                         if (!annotationFileImported) { // check if file is correct if not show error 

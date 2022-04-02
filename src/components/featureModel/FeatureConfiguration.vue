@@ -110,14 +110,14 @@
 
 <script>
 import features from "../../util/model/ModelFunctions";
-import * as tf from '@tensorflow/tfjs';
-import draggable from "vuedraggable";
-import AddFeature from "./AddFeature.vue";
-import { db } from "/db";
 import { createFeatureInstances } from "../../util/model/ModelInstances";
 import { createLabelsForAnnotation, createNewAnnotationFile, selectAnnotationFile } from "../../util/DatabankManager";
 import { checkImportedFiles } from "../../util/model/ImportModelManager";
 import { download } from "../../util/inputOutput.js";
+import * as tf from '@tensorflow/tfjs';
+import draggable from "vuedraggable";
+import AddFeature from "./AddFeature.vue";
+import { db } from "/db";
 
 export default {
     name: "FeatureConfiguration",
@@ -131,7 +131,6 @@ export default {
             featureModelFileName: "",
             featureConfigName: "",
             annotationFileName: "ModelAnnotation",
-            addFeatureVisible: false,
             samplingRate: null,
             features: [],
             loading: false,
@@ -149,7 +148,7 @@ export default {
         configImportButtonOnClick() {
             document.getElementById("featureConfigFileInput").click()
         },
-        async onFeatureModelFileChange(e) {
+        onFeatureModelFileChange(e) {
             try {
                 checkImportedFiles(e, this.modelLoaded);
             } catch (error) {
@@ -236,7 +235,7 @@ export default {
                 this.loading = false;
                 return;
             }
-            setTimeout(() => this.loadDataIntoModel(), 100);
+            setTimeout(() => this.loadDataIntoModel(), 10);
         },
         async loadDataIntoModel() {
             let result;
@@ -245,7 +244,7 @@ export default {
                 result = createFeatureInstances(this.$store.state.data[this.$store.state.selectedData], this.features, this.samplingRate, this.selectedDownsamplingMethod);
             } catch (error) {
                 this.loading = false;
-                this.$emit("setInvalidFeedback", error.messageback);
+                this.setInvalidFeedback(error.messageback);
                 return;
             }
             const instances = result[0];
@@ -266,7 +265,7 @@ export default {
             const annotationId = await createNewAnnotationFile(this.annotationFileName);
             // create as many labels as needed
             const labelAmount = predictedValues[0].data[0].length;
-            await createLabelsForAnnotation(annotationId, labelAmount, this.$store.state.colors);
+            await createLabelsForAnnotation(annotationId, labelAmount);
             // create all the areas
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
             let timestamp = this.$store.state.data[this.$store.state.selectedData].timestamps[0] + 1000*offsetInSeconds;
@@ -340,6 +339,7 @@ export default {
             this.prepareConfigDownload();
         },
     },
+    emits: ["closeModal", "setInvalidFeedback"],
 }
 </script>
 

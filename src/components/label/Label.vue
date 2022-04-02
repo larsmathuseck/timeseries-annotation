@@ -1,6 +1,5 @@
 <template>
-    <div class="col-auto axis-annotation-col my-auto"
-    :style="{ background: label.color }">
+    <div class="col-auto axis-annotation-col my-auto" :style="{ background: label.color }">
         <label class="axis-annotation-label my-auto">
             {{ label.name }}
         </label>

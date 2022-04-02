@@ -52,7 +52,7 @@
                 <input v-model="axisName" type="text" class="form-control" id="axisNameInput" required>
             </div>
         </div>
-        <div class="row" v-show="this.error != ''">
+        <div class="row" v-show="this.error.length > 0">
             <div id="allert-div" class="col-lg-12">
                 <div class="alert alert-danger" role="alert">
                     {{ this.error }}
@@ -84,7 +84,7 @@ export default {
             axisColor: "blue",
             samplingRate: 32,
             showColorPicker: false,
-            axisName: '',
+            axisName: "",
             error: "",
         }
     },
@@ -117,7 +117,7 @@ export default {
             else {
                 this.$store.commit("addAxis", {name: this.axisName, axis: this.selectedAxis, color: this.axisColor, feature: this.selectedFeature, samplingRate: this.samplingRate});
             }
-            this.$emit('closeModal');
+            this.$emit("closeModal");
         },
         updateAxisName() {
             if(this.axisToEdit == null && this.samplingRate && this.selectedFeature && this.selectedAxis) {
@@ -126,7 +126,7 @@ export default {
         },
         deleteAxis() {
             this.$store.commit("deleteAxis", this.axisToEdit);
-            this.$emit('closeModal');
+            this.$emit("closeModal");
         },
         validateInputs() {
             if (isNaN(this.samplingRate)) {
@@ -180,6 +180,7 @@ export default {
             this.updateAxisName();
         },
     },
+    emits: ["closeModal"],
 }
 
 </script>
