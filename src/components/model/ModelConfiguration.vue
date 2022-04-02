@@ -11,7 +11,7 @@
                     <div class="row justify-content-end">
                         <div class="col-auto">
                             <input id="modelFileInput" type="file" webkitdirectory directory v-on:change="onModelFileChange" hidden>
-                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light main-btn">
+                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light styled-btn">
                                 <i class="fa-solid fa-folder"></i>
                                 Choose Directory
                             </button>
@@ -31,7 +31,7 @@
                     <div class="row justify-content-end">
                         <div class="col-auto">
                             <input id="configFileInput" type="file" v-on:change="onConfigFileChange" hidden>
-                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light main-btn" :class="{disabled: modelFileName.length == 0}">
+                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light styled-btn" :class="{disabled: modelFileName.length == 0}">
                                 <i class="fa-solid fa-folder"></i>
                                 Import Config File
                             </button>
@@ -135,9 +135,10 @@
 <script>
 import * as tf from '@tensorflow/tfjs';
 import { db } from "/db";
-import { createInstances } from "../util/model/ModelInstances";
-import { checkImportedFiles } from "../util/model/ImportModelManager";
-import { createNewAnnotationFile, createLabelsForAnnotation, selectAnnotationFile } from "../util/DatabankManager";
+import { createInstances } from "../../util/model/ModelInstances";
+import { checkImportedFiles } from "../../util/model/ImportModelManager";
+import { createNewAnnotationFile, createLabelsForAnnotation, selectAnnotationFile } from "../../util/DatabankManager";
+import { download } from "../../util/inputOutput.js";
 
 export default {
     name: "ModelConfiguration",
@@ -298,6 +299,7 @@ export default {
             let instances;
             let slotsNumber = 0;
             try {
+                // get converted data for use in model. Every instance includes the next window shift.
                 instances = createInstances(this.$store.state, modelConfiguration);
                 slotsNumber = instances[1] / (modelConfiguration.samplingRate * modelConfiguration.windowShift);
                 instances = instances[0];
@@ -307,6 +309,7 @@ export default {
             }
             let predictedValues = [];
             try {
+                // make predictions
                 instances.forEach(instance => {
                     const tensor = tf.tensor(instance[1]);
                     const a = model.predict(tensor);
@@ -325,10 +328,11 @@ export default {
             // create all the areas
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
             let predIndex = 0;
+            // evaluate predictions and add areas to db
             predictedValues.forEach(prediction => {
                 for (let i = 0; i < prediction.data.length; i++) {
                     const max = Math.max(...prediction.data[i]);
-                    if(max) {
+                    if(max){
                         const index = prediction.data[i].indexOf(max);
                         const label = allLabels[index];
                         db.areas.add({
@@ -344,11 +348,11 @@ export default {
                 }
                 predIndex += 1;
             })
-
-            if(modelConfiguration.windowShift > 0) {
+            // create majority vote overview shown at bottom of the graph
+            if(modelConfiguration.windowShift > 0){
                 await this.addCompleteResultOverview(predictedValues, slotsNumber, allLabels, annotationId, modelConfiguration.windowShift, predIndex);
             }
-
+            // select newly created annotaion file
             await selectAnnotationFile(annotationId);
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
@@ -356,29 +360,32 @@ export default {
             this.loading = false;
             this.$emit("closeModal");
         },
-        addCompleteResultOverview: async function (predictedValues, slotsNumber, allLabels, annotationId, windowShift, predIndex) {
+        async addCompleteResultOverview(predictedValues, slotsNumber, allLabels, annotationId, windowShift, predIndex) {
             let timestamp = predictedValues[0].timestamps[0][0];
+            // two dimensional array that saves the current position for every prediction (windowShift)
             let currentPosition = [];
-            for(let i = 0; i < predictedValues.length; i++) {
+            for(let i = 0; i < predictedValues.length; i++){
                 currentPosition.push(null);
             }
-            for(let i = 0; i < slotsNumber; i++) {
+            for(let i = 0; i < slotsNumber; i++){
                 let position = i%predictedValues.length;
-                if(currentPosition[position] == null) {
+                // update current positions of the prediction arrays
+                if(currentPosition[position] == null){
                     currentPosition[position] = 0;
                 }
                 else{
                     currentPosition[position] += 1;
-                    if(currentPosition[position] >= predictedValues[0].data.length) {
+                    if(currentPosition[position] >= predictedValues[0].data.length){
                         currentPosition[position] = null;
                     }
                 }
                 let indices = {};
-                for(let j = 0; j < predictedValues.length; j++) {
+                // evaluate predicitons for current position
+                for(let j = 0; j < predictedValues.length; j++){
                     let data = predictedValues[j].data[currentPosition[j]];
                     let index = data?.indexOf(Math.max(...data));
                     let label = allLabels[index]?.id;
-                    if(label == null) {
+                    if(label == null){
                         continue;
                     }
                     else {
@@ -389,18 +396,20 @@ export default {
                         }
                     }
                 }
-                let result = Object.keys(indices).reduce(function(a, b) { 
-                    if(indices[a] > indices[b]) {
+                // set result, null when likelyhood for all the predictions for the position the same
+                let result = Object.keys(indices).reduce(function(a, b){ 
+                    if(indices[a] > indices[b]){
                         return a;
                     }
-                    else if(indices[a] < indices[b]) {
+                    else if(indices[a] < indices[b]){
                         return b;
                     }
                     else{
                         return null; 
                     }
                 });
-                if(result != null) {
+                // add areas to db
+                if(result != null){
                     db.areas.add({
                             annoId: annotationId,
                             labelId: parseInt(result),
@@ -441,35 +450,8 @@ export default {
                 downsamplingMethod: this.selectedDownsamplingMethod,
                 selectedAxes: this.selectedAxes,
             }
-            this.downloadConfig(config);
+            download(JSON.stringify(config), "text/json", {'text/json': ['.json']}, "config.json");
         },
-        async downloadConfig(config) {
-            const content = JSON.stringify(config);
-            if (typeof showSaveFilePicker === 'undefined') {
-                var a = document.createElement("a");
-                a.href = window.URL.createObjectURL(new Blob([content], {type: "text/json"}));
-                a.download = "config.json";
-                a.click();
-            }
-            else {
-                try {
-                    const fileHandle = await self.showSaveFilePicker({
-                        suggestedName: "config.json",
-                        types: [{
-                            description: 'JSON files',
-                            accept: {
-                            'text/json': ['.json'],
-                            },
-                        }],
-                    });
-                    const fileStream = await fileHandle.createWritable();
-                    await fileStream.write(new Blob([content], {type: "text/plain;charset=utf-8"}));
-                    await fileStream.close();
-                } catch(error) {
-                    console.log(error);
-                }
-            }
-        }
     },
     computed: {
         axes: function() {
@@ -486,10 +468,6 @@ export default {
 </script>
 
 <style scoped>
-input { 
-    text-align: center; 
-}
-
 .text-left {
     text-align: left;
 }

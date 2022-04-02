@@ -65,7 +65,7 @@
 <script>
 import { Modal } from 'bootstrap';
 import { db } from "/db";
-import { addAnnotationData } from "../util/DatabankManager";
+import { addAnnotationData } from "../../util/DatabankManager";
 
 export default {
     name: "AnnotationModal",
@@ -106,7 +106,7 @@ export default {
                             this.error = "";
                             this.modal.hide();
                         }
-                    }
+                    };
                 }
             }
             document.getElementById("annotationFileUpload").value = ""; // reset file input so when same file chosen again its an "onChange"
@@ -132,7 +132,6 @@ export default {
             this.modal.show();
         },
     },
-
     mounted() {
         this.modal = new Modal(this.$refs.annotationModal)
     },

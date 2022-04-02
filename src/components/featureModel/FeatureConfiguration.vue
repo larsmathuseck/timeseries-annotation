@@ -11,7 +11,7 @@
                     <div class="row justify-content-end">
                         <div class="col-auto">
                             <input id="featureModelFileInput" type="file" webkitdirectory directory v-on:change="onFeatureModelFileChange" hidden>
-                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light main-btn">
+                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light styled-btn">
                                 <i class="fa-solid fa-folder"></i>
                                 Choose Directory
                             </button>
@@ -31,7 +31,7 @@
                     <div class="row justify-content-end">
                         <div class="col-auto">
                             <input id="featureConfigFileInput" type="file" v-on:change="onFeatureConfigFileChange" hidden>
-                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light main-btn" :class="{disabled: featureModelFileName.length == 0}">
+                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light styled-btn" :class="{disabled: featureModelFileName.length == 0}">
                                 <i class="fa-solid fa-folder"></i>
                                 Import Config File
                             </button>
@@ -113,14 +113,15 @@
 </template>
 
 <script>
-import features from "../util/model/ModelFunctions";
+import features from "../../util/model/ModelFunctions";
 import * as tf from '@tensorflow/tfjs';
 import draggable from "vuedraggable";
 import AddFeature from "./AddFeature.vue";
 import { db } from "/db";
-import { createFeatureInstances } from "../util/model/ModelInstances";
-import { createLabelsForAnnotation, createNewAnnotationFile, selectAnnotationFile } from "../util/DatabankManager";
-import { checkImportedFiles } from "../util/model/ImportModelManager";
+import { createFeatureInstances } from "../../util/model/ModelInstances";
+import { createLabelsForAnnotation, createNewAnnotationFile, selectAnnotationFile } from "../../util/DatabankManager";
+import { checkImportedFiles } from "../../util/model/ImportModelManager";
+import { download } from "../../util/inputOutput.js";
 
 export default {
     name: "FeatureConfiguration",
@@ -244,6 +245,7 @@ export default {
         async loadDataIntoModel() {
             let result;
             try {
+                // get converted data for feature model
                 result = createFeatureInstances(this.$store.state.data[this.$store.state.selectedData], this.features, this.samplingRate, this.selectedDownsamplingMethod);
             } catch (error) {
                 this.loading = false;
@@ -255,6 +257,7 @@ export default {
             const smallestFeatureWindow = result[2];
             let predictedValues = [];
             try {
+                // make prediction
                 const tensor = tf.tensor(instances);
                 const a = this.model.predict(tensor);
                 predictedValues.push({data: a.arraySync()});               
@@ -272,10 +275,11 @@ export default {
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
             let timestamp = this.$store.state.data[this.$store.state.selectedData].timestamps[0] + 1000*offsetInSeconds;
             let nextTimestamp;
+            // evaluate predictions and add areas to db
             predictedValues[0].data.forEach(prediction => {
                 nextTimestamp = timestamp + 1000*smallestFeatureWindow;
                 let max = Math.max(...prediction);
-                if(max) {
+                if(max){
                     let index = prediction.indexOf(max);
                     const label = allLabels[index];
                     db.areas.add({
@@ -297,6 +301,7 @@ export default {
                 }
                 timestamp = nextTimestamp;
             });
+            // select newly created annotaion file
             await selectAnnotationFile(annotationId);
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
@@ -331,35 +336,8 @@ export default {
                 samplingRate: this.samplingRate,
                 features: this.features,
             }
-            this.downloadConfig(config);
+            download(JSON.stringify(config), "text/json", {'text/json': ['.json']}, "config.json");
         },
-        async downloadConfig(config) {
-            const content = JSON.stringify(config);
-            if (typeof showSaveFilePicker === 'undefined') {
-                var a = document.createElement("a");
-                a.href = window.URL.createObjectURL(new Blob([content], {type: "text/json"}));
-                a.download = "config";
-                a.click();
-            }
-            else {
-                try {
-                    const fileHandle = await self.showSaveFilePicker({
-                        suggestedName: "config",
-                        types: [{
-                            description: 'JSON files',
-                            accept: {
-                            'text/json': ['.json'],
-                            },
-                        }],
-                    });
-                    const fileStream = await fileHandle.createWritable();
-                    await fileStream.write(new Blob([content], {type: "text/plain;charset=utf-8"}));
-                    await fileStream.close();
-                } catch(error) {
-                    console.log(error);
-                }
-            }
-        }
     },
     watch: {
         toggleConfigDownload: function() {
@@ -370,6 +348,21 @@ export default {
 </script>
 
 <style scoped>
+.styled-btn {
+    background-color: #e1e1e5;
+}
+
+/**needed to hide arrows in number field */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 input { 
     text-align: center; 
 }

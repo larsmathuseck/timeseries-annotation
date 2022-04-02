@@ -22,6 +22,7 @@
 
 <script>
 import { db } from "/db";
+
 export default {
     name: "Label",
     props: {

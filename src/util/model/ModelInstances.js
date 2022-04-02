@@ -1,7 +1,7 @@
 import { DataFrame } from "danfojs/dist/danfojs-base";
 import features from "./ModelFunctions";
 
-
+// function to convert data to correct samplingrate based on a function set in feature
 export function breakDownToSamplingrate(dataPoints, timestamps, samplingRate, feature) {
     if(!Array.isArray(dataPoints)) {
         return [];
@@ -29,21 +29,10 @@ export function breakDownToSamplingrate(dataPoints, timestamps, samplingRate, fe
     return [segments[0], result];
 }
 
-export function breakDownAxisToSamplingrate(data, segments, feature) {
-    let df = new DataFrame(data, {dtypes: ["int32", "float32"]});
-    let oldsegment = 0;
-    let result = [];
-    segments[1].forEach(segment => {
-        segment = oldsegment + segment;
-        let newFrame = df.iloc({rows: [oldsegment.toString() + ":" + segment.toString()]});
-        newFrame = newFrame.asType("1", "float32");
-        const func = features[feature].func;
-        result.push(func(newFrame));
-        oldsegment = segment;
-    });
-    return result;
-}
-
+/* calculates the amount datapoints that belong together based on the given samplingrate
+ * amount of datapoint given as segment with corresponding timestamp
+ * timestamp and segment arrays returned
+ */
 export function calcSegements(timestamps, samplingRate) {
     let segments = [];
     let segmentTimestamps = [];
@@ -67,6 +56,10 @@ export function calcSegements(timestamps, samplingRate) {
     return [segmentTimestamps, segments];
 }
 
+/* function to convert data for use in model
+ * data = data object with all axes
+ * modelConfiguration = configuration object of model
+*/ 
 export function createInstances(state, modelConfiguration) {
     const slidingWindow = modelConfiguration.slidingWindow;
     const samplingrate = modelConfiguration.samplingRate;
@@ -107,7 +100,7 @@ export function createInstances(state, modelConfiguration) {
     return [allInstances, segments.length];
 }
 
-/* function to get feature instances for supplied data
+/* function to convert data for use in feature model
  * data = data object with all axes
  * selectedFeatures = features with axis data
 */ 

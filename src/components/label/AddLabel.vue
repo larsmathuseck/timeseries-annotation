@@ -41,8 +41,8 @@
 </template>
 
 <script>
-import ColorPicker from "./Colorpicker.vue"
-import { db } from "/db"
+import ColorPicker from "../Colorpicker.vue";
+import { db } from "/db";
 
 export default {
     name: "AddLabel",

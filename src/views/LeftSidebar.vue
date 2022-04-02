@@ -54,12 +54,12 @@
 </template>
 
 <script>
-import Axis from "./Axis.vue";
-import Label from "./Label.vue";
-import AnnotationModal from "./AnnotationModal.vue";
-import LabelModal from "./LabelModal.vue";
-import AxesModal from "./AxesModal.vue";
-import FileSelect from "./FileSelect.vue";
+import Axis from "../components/axis/Axis.vue";
+import Label from "../components/label/Label.vue";
+import AnnotationModal from "../components/annotation/AnnotationModal.vue";
+import LabelModal from "../components/label/LabelModal.vue";
+import AxesModal from "../components/axis/AxesModal.vue";
+import FileSelect from "../components/FileSelect.vue";
 import { liveQuery } from "dexie";
 import { db } from "/db";
 import { useObservable } from "@vueuse/rxjs";

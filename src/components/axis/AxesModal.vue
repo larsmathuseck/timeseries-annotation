@@ -43,7 +43,6 @@ export default {
             this.modal.show();
         },
     },
-
     mounted() {
         this.modal = new Modal(this.$refs.axesModal)
     },

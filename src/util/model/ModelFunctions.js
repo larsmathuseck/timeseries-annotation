@@ -1,4 +1,5 @@
 
+// array of all features, add new features here
 const features = [
     {id: 0, name: "Minimum", shortName: "min", func: (df) => min(df)},
     {id: 1, name: "Maximum", shortName: "max", func: (df) => max(df)},
@@ -11,6 +12,7 @@ const features = [
     {id: 8, name: "Last", shortName: "last", func: (df) => last(df)},
 ];
 
+// df = dataframe with 0: timestamp, 1:data
 function min(df) {
     return df.min({ axis: 0 }).values[1];
 }

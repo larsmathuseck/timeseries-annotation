@@ -3,7 +3,7 @@
         <Header title="TF Annotator" />
         <div class="row h-100 mt-2">
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
-                <LeftSidebar/>
+                <LeftSidebar v-if="showSidebars"/>
             </div>
             <div class="col col-lg-8 col-md-8 col-sm-12 col-12">
                 <div class="graphDiv">
@@ -13,18 +13,21 @@
                 </div>
             </div>
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
-                <RightSidebar />
+                <RightSidebar v-if="showSidebars"/>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import Graph from "../components/Graph.vue"
+import Graph from "../components/graph/Graph.vue"
 import Header from "./Header.vue"
-import LeftSidebar from "../components/LeftSidebar.vue"
-import RightSidebar from "../components/RightSidebar.vue"
-import GraphPlaceholder from "../components/GraphPlaceholder.vue";
+import LeftSidebar from "./LeftSidebar.vue"
+import RightSidebar from "./RightSidebar.vue"
+import GraphPlaceholder from "../components/graph/GraphPlaceholder.vue";
+import { liveQuery } from "dexie";
+import { db } from "/db";
+import { useObservable } from "@vueuse/rxjs";
 
 export default {  
     name: "Home",
@@ -35,19 +38,46 @@ export default {
         RightSidebar,
         GraphPlaceholder,
     },
+    setup() {
+        const annotationFiles = useObservable(liveQuery(() => db.annotations.toArray()));
+        return { annotationFiles }
+    },
     data() {
         return {
             loading: false,
+            showSidebars: false,
         }
     },
     computed: {
         showGraph: function() {
             return this.$store.getters.showGraph;
+        },
+        data: function() {
+            return this.$store.state.data;
         }
     },
     methods: {
         loadingChange(loading) {
             this.loading = loading;
+        },
+        updateShowSidebars() {
+            if(Object.keys(this.data)?.length > 0 || this.annotationFiles?.length > 0){
+                this.showSidebars = true;
+            }
+            else {
+                this.showSidebars = false;
+            }
+        }
+    },
+    watch: {
+        data: {
+            handler() {
+                this.updateShowSidebars();
+            },
+            deep: true,
+        },
+        annotationFiles: function() {
+            this.updateShowSidebars();
         }
     }
 };
