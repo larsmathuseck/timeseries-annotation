@@ -44,7 +44,7 @@ export default {
     components: {
         VChart,
     },
-    setup: function() {
+    setup() {
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
         const annoData = useObservable(liveQuery(async () => {
             const curr = await db.lastSelected.where('id').equals(1).first();
@@ -126,7 +126,7 @@ export default {
         resizeChart: function () {
             this.$refs.charts?.resize();
         },
-        updateGraph: function() {
+        updateGraph() {
             this.dataZoomStart = this.tempDataZoomStart;
             this.dataZoomEnd = this.tempDataZoomEnd;
             this.$emit('loading', true);
@@ -137,27 +137,27 @@ export default {
         },
     },
     computed: {
-        areasVisible: function() {
+        areasVisible() {
             return this.$store.state.areasVisible;
         },
-        data: function() {
+        data() {
             return this.$store.state.data[this.$store.state.selectedData];
         },
-        selectedAxes: function() {
+        selectedAxes() {
             return this.$store.getters.selectedAxes;
         }
     },
     watch:{
-        annoData: function() {
+        annoData() {
             this.updateGraph();
         },
-        areaData: function() {
+        areaData() {
             this.updateGraph();
         },
-        areasVisible: function() {
+        areasVisible() {
             this.updateGraph();
         },
-        sizeOfGraph: function() {
+        sizeOfGraph() {
             this.updateGraph();
         },
         data: {
@@ -174,14 +174,14 @@ export default {
             immediate: true,
         }
     },
-    mounted: function() {
+    mounted() {
         this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
         window.addEventListener("resize", () => {
             this.resizeChart();
             this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;
         })
     },
-    updated: function() {
+    updated() {
         this.$emit('loading', false);
     },
 }

@@ -26,10 +26,10 @@
 export default {
     name: "ImportGraph",
     methods: {
-        chooseFolder: function() {
+        chooseFolder() {
             document.getElementById("folderUpload").click();
         },
-        onFolderChange: function(e) {
+        onFolderChange(e) {
             const fileList = e.target.files;
             let filesToUpload = [];
             let fileNames = {};
@@ -59,10 +59,10 @@ export default {
             }
             document.getElementById("folderUpload").value = "";
         },
-        chooseFile: function() {
+        chooseFile() {
             document.getElementById("fileUpload").click();
         },
-        onFileChange: function(e) {
+        onFileChange(e) {
             const fileList = e.target.files;
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
                 const file = fileList[i];
@@ -70,7 +70,7 @@ export default {
             }
             document.getElementById("fileUpload").value = "";
         },
-        readFile: function(file) {
+        readFile(file) {
             const reader = new FileReader();
             if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
                 reader.readAsText(file);

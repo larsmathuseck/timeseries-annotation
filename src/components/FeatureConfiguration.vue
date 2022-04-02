@@ -128,7 +128,7 @@ export default {
         draggable,
         AddFeature,
     },
-    data: function() {
+    data() {
         this.model = null;
         return {
             featureModelFileName: "",
@@ -146,13 +146,13 @@ export default {
         toggleConfigDownload: Boolean,
     },
     methods: {
-        modelImportButtonOnClick: function() {
+        modelImportButtonOnClick() {
             document.getElementById("featureModelFileInput").click()
         },
-        configImportButtonOnClick: function() {
+        configImportButtonOnClick() {
             document.getElementById("featureConfigFileInput").click()
         },
-        onFeatureModelFileChange: async function(e) {
+        async onFeatureModelFileChange(e) {
             try {
                 checkImportedFiles(e, this.modelLoaded);
             } catch (error) {
@@ -160,7 +160,7 @@ export default {
             }
             document.getElementById("featureModelFileInput").value = "";
         },
-        onFeatureConfigFileChange: function(e) {
+        onFeatureConfigFileChange(e) {
             const file = e.target.files[0];
             if ((file.name.toLowerCase().includes("configuration") || file.name.toLowerCase().includes("config")) && file.type.toLowerCase().includes("json")) {
                 this.clearModelConfiguration();
@@ -168,7 +168,7 @@ export default {
             }
             document.getElementById("featureConfigFileInput").value = "";
         },
-        modelLoaded: async function(model, modelFileName, config) {
+        async modelLoaded(model, modelFileName, config) {
             this.featureModelFileName = modelFileName;
             this.model = model;
             this.features = [];
@@ -176,7 +176,7 @@ export default {
                 this.setModelConfiguration(config);
             }
         },
-        setModelConfiguration: function(config) {
+        setModelConfiguration(config) {
             this.featureConfigName = config.name;
             const reader = new FileReader();
             reader.readAsText(config);
@@ -197,12 +197,12 @@ export default {
                 }
             }
         },
-        clearModelConfiguration: function() {
+        clearModelConfiguration() {
             this.samplingRate = null;
             this.features = [];
             this.selectedDownsamplingMethod = "First";
         },
-        featureExists: function(feature) {
+        featureExists(feature) {
             for (let i = 0; i < features.length; i++) {
                 if (features[i].name == feature.feature.name && features[i].id == feature.feature.id) {
                     if(this.axisExists(feature.axis)) {
@@ -213,7 +213,7 @@ export default {
                 }
             }
         },
-        axisExists: function(axis) {
+        axisExists(axis) {
             const selectedData = this.$store.state.data[this.$store.state.selectedData];
             if (!selectedData) {
                 return false;
@@ -226,13 +226,13 @@ export default {
             }
             return false;
         },
-        addFeature: function(featureData) {
+        addFeature(featureData) {
             this.features.push(featureData);
         },
-        setInvalidFeedback: function(invalidFeedback) {
+        setInvalidFeedback(invalidFeedback) {
             this.$emit("setInvalidFeedback", invalidFeedback)
         },
-        onSubmit: async function(e) {
+        async onSubmit(e) {
             this.loading = true;
             e.preventDefault();
             if (!this.validateInputs()) {
@@ -241,7 +241,7 @@ export default {
             }
             setTimeout(() => this.loadDataIntoModel(), 100);
         },
-        loadDataIntoModel: async function() {
+        async loadDataIntoModel() {
             let result;
             try {
                 result = createFeatureInstances(this.$store.state.data[this.$store.state.selectedData], this.features, this.samplingRate, this.selectedDownsamplingMethod);
@@ -304,7 +304,7 @@ export default {
             this.loading = false;
             this.$emit("closeModal");
         },
-        validateInputs: function() {
+        validateInputs() {
             let invalidFeedback = "";
             if (this.model == null) {
                 invalidFeedback = "No Model imported yet!";
@@ -322,18 +322,18 @@ export default {
                 return false;
             }
         },
-        deleteFeature: function(feature) {
+        deleteFeature(feature) {
             const index = this.features.indexOf(feature);
             this.features.splice(index, 1);
         },
-        prepareConfigDownload: function() {
+        prepareConfigDownload() {
             const config = {
                 samplingRate: this.samplingRate,
                 features: this.features,
             }
             this.downloadConfig(config);
         },
-        downloadConfig: async function(config) {
+        async downloadConfig(config) {
             const content = JSON.stringify(config);
             if (typeof showSaveFilePicker === 'undefined') {
                 var a = document.createElement("a");
@@ -362,7 +362,7 @@ export default {
         }
     },
     watch: {
-        toggleConfigDownload: function() {
+        toggleConfigDownload() {
             this.prepareConfigDownload();
         },
     },

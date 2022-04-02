@@ -47,7 +47,7 @@
 import features from "../util/model/ModelFunctions"
 export default {
     name: "AddFeature",
-    data: function() {
+    data() {
         return {
             counter: 0,
             features: features,
@@ -57,7 +57,7 @@ export default {
         }
     },
     methods: {
-        onSubmit: function(e) {
+        onSubmit(e) {
             e.preventDefault();
             if (!this.validateInputs()) {
                 return;
@@ -76,7 +76,7 @@ export default {
             this.counter++;
             this.$emit("addFeature", featureConfiguration);
         },
-        validateInputs: function() {
+        validateInputs() {
             let invalidFeedback = "";
             if (isNaN(this.slidingWindow)) {
                 invalidFeedback ="Sliding Window must be a number!";
@@ -93,12 +93,12 @@ export default {
         }
     },
     computed: {
-        axes: function() {
+        axes() {
             return this.$store.getters.getAxes;
         },
     },
     watch: {
-        axes: function() {
+        axes() {
             if (this.axes != undefined && this.axes.length != 0) {
                 const temp = {
                     name: this.axes[0].name, 

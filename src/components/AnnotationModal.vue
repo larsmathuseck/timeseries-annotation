@@ -72,7 +72,7 @@ export default {
     props: {
         toggleModalVisibility: Boolean,
     },
-    data: function() {
+    data() {
         return {
             modal: null,
             fileName: "",
@@ -81,13 +81,13 @@ export default {
         }
     },
     methods: {
-        closeModal: function() {
+        closeModal() {
             this.modal.hide();
         },
-        chooseAnnotationFile: function() {
+        chooseAnnotationFile() {
             document.getElementById("annotationFileUpload").click()
         },
-        onAnnotationFileChange: function(e) {
+        onAnnotationFileChange(e) {
             const fileList = e.target.files;
             let annotationFileImported = false;
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
@@ -111,7 +111,7 @@ export default {
             }
             document.getElementById("annotationFileUpload").value = ""; // reset file input so when same file chosen again its an "onChange"
         },
-        onSubmit: async function(e) {
+        async onSubmit(e) {
             e.preventDefault();
             if(!this.fileName.toLowerCase().includes("annotation") && !this.fileName.toLowerCase().includes("labels")) {
                 this.showInvalidFeedback = true;
@@ -125,7 +125,7 @@ export default {
         },
     },
     watch: {
-        toggleModalVisibility: function() {
+        toggleModalVisibility() {
             this.fileName = ""; 
             this.error = "";
             this.showInvalidFeedback = false;
@@ -133,7 +133,7 @@ export default {
         },
     },
 
-    mounted: function() {
+    mounted() {
         this.modal = new Modal(this.$refs.annotationModal)
     },
 }

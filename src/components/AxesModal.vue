@@ -28,23 +28,23 @@ export default {
         axisToEdit: Object,
         title: String,
     },
-    data: function() {
+    data() {
         return {
             modal: null,
         }
     },
     methods: {
-        closeModal: function() {
+        closeModal() {
             this.modal.hide();
         },
     },
     watch: {
-        toggleModalVisibility: function() {
+        toggleModalVisibility() {
             this.modal.show();
         },
     },
 
-    mounted: function() {
+    mounted() {
         this.modal = new Modal(this.$refs.axesModal)
     },
 }

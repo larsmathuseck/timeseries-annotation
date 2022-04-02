@@ -27,13 +27,13 @@ export default {
         selected: Number,
     },
     emits: ['annoModal'],
-    data: function() {
+    data() {
         return {
             lastSelected: this.selected,
         }
     },
     methods: {
-        selectFile: function() {
+        selectFile() {
             if(this.type == "data") {
                 this.$store.commit("selectDataFile", this.lastSelected);
             }
@@ -41,7 +41,7 @@ export default {
                 db.lastSelected.update(1, {annoId: parseInt(this.$refs.select.value)});
             }
         },
-        chooseFile: function() {
+        chooseFile() {
             if(this.type == "data") {
                 document.getElementById("fileUpload").click();
             }
@@ -49,7 +49,7 @@ export default {
                 this.$emit("annoModal");
             }
         },
-        onFileChange: function(e) {
+        onFileChange(e) {
             const fileList = e.target.files;
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
                 const file = fileList[i];
@@ -57,7 +57,7 @@ export default {
             }
             document.getElementById("fileUpload").value = "";
         },
-        readFile: function(file) {
+        readFile(file) {
             const reader = new FileReader();
             if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
                 reader.readAsText(file);
@@ -68,7 +68,7 @@ export default {
                 }
             }
         },
-        deleteFile: async function() {
+        async deleteFile() {
             if(this.type == "data") {
                 this.$store.commit("deleteData", this.lastSelected);
             }
@@ -78,7 +78,7 @@ export default {
         }
     },
     watch: {
-        selected: function() {
+        selected() {
             this.lastSelected = this.selected;
         }
     }

@@ -23,7 +23,7 @@ export default {
     components: {
         Annotation,
     },
-    setup: function() {
+    setup() {
         const annoData = useObservable(liveQuery(async () => {
             const curr = await db.lastSelected.where('id').equals(1).first();
             const annotations = await db.annoData.where('annoId').equals(parseInt(curr?.annoId || 1)).sortBy('timestamp');
@@ -39,7 +39,7 @@ export default {
         }
     },
     computed: {
-        annotations: function() {
+        annotations() {
             let annoData = this.annoData;
             if(annoData != undefined) {
                 for(let i = 0; i < annoData.length; i++) {

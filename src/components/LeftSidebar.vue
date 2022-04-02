@@ -74,7 +74,7 @@ export default {
         FileSelect,
         AxesModal,
     },
-    setup: function() {
+    setup() {
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
         const labels = useObservable(liveQuery(async () => {
             const curr = await db.lastSelected.where('id').equals(1).first();
@@ -87,7 +87,7 @@ export default {
             currAnn,
         }
     },
-    data: function() {
+    data() {
         return {
             lastSelectedAnnotation: 1,
             toggleAnnotationModalVisibility: false,
@@ -101,49 +101,49 @@ export default {
         }
     },
     computed: {
-        lastSelectedData: function() {
+        lastSelectedData() {
             return this.$store.state.selectedData;
         },
-        data: function() {
+        data() {
             return this.$store.state.data;
         },
-        axes: function() {
+        axes() {
             return this.$store.getters.getAxes;
         },
-        selectedAxes: function() {
+        selectedAxes() {
             return this.$store.getters.selectedAxes;
         },
         areasVisible: {
-            get: function() {
+            get() {
                 return this.$store.state.areasVisible;
             },
-            set: function() {
+            set() {
                 this.$store.commit("toggleAreasVisibility");
             }
         },
     },
     watch: {
-        currAnn: function() {
+        currAnn() {
             this.lastSelectedAnnotation = this.currAnn?.annoId;
         },
     },
     methods: {
-        labelOnClick: function(label) {
+        labelOnClick(label) {
             this.$store.commit("toggleActiveLabel", label);
         },
-        editLabel: function(label) {
+        editLabel(label) {
             this.labelToEdit = label;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
         },
-        editAxis: function(axis) {
+        editAxis(axis) {
             this.axisModalTitle = "Edit Axis";
             this.axisToEdit = axis;
             this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;
         },
-        showAnnotationModal: function() {
+        showAnnotationModal() {
             this.toggleAnnotationModalVisibility = !this.toggleAnnotationModalVisibility;
         },
-        showLabelModal: function() {
+        showLabelModal() {
             if (this.addLabelKey == 0) {
                 this.addLabelKey = 1;
             } else {
@@ -152,12 +152,12 @@ export default {
             this.labelToEdit = null;
             this.toggleLabelModalVisibility = !this.toggleLabelModalVisibility;
         },
-        showAxesModal: function() {
+        showAxesModal() {
             this.axisModalTitle = "Add Axis";
             this.axisToEdit = null;
             this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;
         },
-        keyPressed: function(e) {
+        keyPressed(e) {
             let key = e.key;
             if (this.acceptedKeys.indexOf(key) > -1) {
                 if (key == 0) { // modify key so that by pressing 1 its the first label, which has index 0, and by pressing 0 you reach label 10
@@ -176,10 +176,10 @@ export default {
             }
         }
     },
-    mounted: async function() {
+    async mounted() {
         window.addEventListener("keypress", this.keyPressed);
     },
-    beforeUnmount: function() {
+    beforeUnmount() {
         window.removeEventListener('keypress', this.keyPressed);
     },
 }

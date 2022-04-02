@@ -141,7 +141,7 @@ import { createNewAnnotationFile, createLabelsForAnnotation, selectAnnotationFil
 
 export default {
     name: "ModelConfiguration",
-    data: function() {
+    data() {
         this.model = null;
         return {
             modelFileName: "",
@@ -161,13 +161,13 @@ export default {
         toggleConfigDownload: Boolean,
     },
     methods: {
-        modelImportButtonOnClick: function() {
+        modelImportButtonOnClick() {
             document.getElementById("modelFileInput").click();
         },
-        configImportButtonOnClick: function() {
+        configImportButtonOnClick() {
             document.getElementById("configFileInput").click();
         },
-        onModelFileChange: function(e) {
+        onModelFileChange(e) {
             try {
                 checkImportedFiles(e, this.modelLoaded);
             } catch (error) {
@@ -175,7 +175,7 @@ export default {
             }
             document.getElementById("modelFileInput").value = "";
         },
-        onConfigFileChange: function(e) {
+        onConfigFileChange(e) {
             const file = e.target.files[0];
             if ((file.name.toLowerCase().includes("configuration") || file.name.toLowerCase().includes("config")) && file.type.toLowerCase().includes("json")) {
                 this.clearModelConfiguration();
@@ -183,7 +183,7 @@ export default {
             }
             document.getElementById("configFileInput").value = "";
         },
-        modelLoaded: async function(model, modelFileName, config) {
+        async modelLoaded(model, modelFileName, config) {
             this.modelFileName = modelFileName;
             this.model = model;
             this.selectedAxes = [];
@@ -191,7 +191,7 @@ export default {
                 this.setModelConfiguration(config);
             }
         },
-        setModelConfiguration: function(config) {
+        setModelConfiguration(config) {
             this.configName = config.name;
             const reader = new FileReader();
             reader.readAsText(config);
@@ -211,14 +211,14 @@ export default {
                 }
             }
         },
-        clearModelConfiguration: function() {
+        clearModelConfiguration() {
             this.slidingWindow = null;
             this.samplingRate = null;
             this.windowShift = null;
             this.selectedDownsamplingMethod = "First";
             this.selectedAxes = [];
         },
-        axisExists: function(axis) {
+        axisExists(axis) {
             const axes = this.axes;
             for (const i in Object.values(axes)) {
                 if (axes[i].name == axis.name && axes[i].id == axis.id) {
@@ -227,13 +227,13 @@ export default {
             }
             return false;
         },
-        resetAxisSelection: function() {
+        resetAxisSelection() {
             this.selectedAxes = [];
         },
-        setInvalidFeedback: function(invalidFeedback) {
+        setInvalidFeedback(invalidFeedback) {
             this.$emit("setInvalidFeedback", invalidFeedback)
         },
-        onSubmit: function(e) {
+        onSubmit(e) {
             this.loading = true;
             e.preventDefault();
             if (!this.validateInputs()) {
@@ -250,7 +250,7 @@ export default {
             }
             setTimeout(() => this.loadDataIntoModel(modelConfiguration), 100);
         },
-        validateInputs: function() {
+        validateInputs() {
             let invalidFeedback = "";
             const data = this.$store.state.data;
             if (this.model == null) {
@@ -293,7 +293,7 @@ export default {
                 return false;
             }
         },
-        loadDataIntoModel: async function(modelConfiguration) {
+        async loadDataIntoModel(modelConfiguration) {
             const model = modelConfiguration.model;
             let instances;
             let slotsNumber = 0;
@@ -414,7 +414,7 @@ export default {
                 timestamp += windowShift*1000;
             }
         },
-        getOrCreateLabel: async function(labelName, annotationId) {
+        async getOrCreateLabel(labelName, annotationId) {
             const amountOfLabels = await db.labels.where("annoId").equals(annotationId).toArray();
             const labelsWithName = await db.labels.where("[annoId+name]").equals([annotationId, labelName]).toArray();
             if (labelsWithName.length == 0) {
@@ -427,13 +427,13 @@ export default {
                 return labelsWithName[0].id;
             }
         },
-        isMultiple: function(a, b) {
+        isMultiple(a, b) {
             // this function is needed, since the normal Javascript modulo seem to not work like expected. With this we only check if the result of division is an float by searching for a comma.
             const temp = (a/b).toString();
             const commaIndex = temp.indexOf(".");
             return commaIndex == -1 ? 0 : commaIndex;
         },
-        prepareConfigDownload: function() {
+        prepareConfigDownload() {
             const config = {
                 slidingWindow: this.slidingWindow,
                 samplingRate: this.samplingRate,
@@ -443,7 +443,7 @@ export default {
             }
             this.downloadConfig(config);
         },
-        downloadConfig: async function(config) {
+        async downloadConfig(config) {
             const content = JSON.stringify(config);
             if (typeof showSaveFilePicker === 'undefined') {
                 var a = document.createElement("a");
@@ -472,12 +472,12 @@ export default {
         }
     },
     computed: {
-        axes: function() {
+        axes() {
             return this.$store.getters.getAxes;
         },
     },
     watch: {
-        toggleConfigDownload: function() {
+        toggleConfigDownload() {
             this.prepareConfigDownload();
         },
     },

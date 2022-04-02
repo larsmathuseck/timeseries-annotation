@@ -56,17 +56,17 @@ export default {
         title: String,
         debug: Boolean,
     },
-    data: function() {
+    data() {
         return {
             toggleTutorialModalVisibility: false,
             toggleModelModalVisibility: false,
         }
     },
     methods: {
-        chooseFiles: function() {
+        chooseFiles() {
             document.getElementById("multipleFileUpload").click();
         },
-        onFileChange: function(e) {
+        onFileChange(e) {
             const fileList = e.target.files;
             let filesToUpload = [];
             let fileNames = {};
@@ -108,7 +108,7 @@ export default {
             }
             document.getElementById("multipleFileUpload").value = "";
         },
-        saveAnnotation: async function() {
+        async saveAnnotation() {
             const currAnn = await db.lastSelected.where('id').equals(1).first();
             if (currAnn) {
                 const content = await this.loadAnnotations(currAnn);
@@ -141,7 +141,7 @@ export default {
                 }
             }
         },
-        loadAnnotations: async function(currAnn) {
+        async loadAnnotations(currAnn) {
             if (currAnn) {
                 const annotations = await db.annoData.where('annoId').equals(parseInt(currAnn.annoId)).sortBy('timestamp');
                 await Promise.all (annotations.map (async anno => {
@@ -158,7 +158,7 @@ export default {
             return [];
         }
     },
-    mounted: function() {
+    mounted() {
         var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
         popoverTriggerList.map(function (popoverTriggerEl) {
             return new Popover(popoverTriggerEl)

@@ -13,13 +13,13 @@ export default {
     props: {
         colorForAxis: Boolean,
     },
-    data: function() {
+    data() {
         return {
             colors: this.$store.state.colors,
         }
     },
     methods: {
-        colorPicked: function(color) {
+        colorPicked(color) {
             if (this.colorForAxis) {
                 this.$emit("axisColorPicked", color)
             } else {

@@ -50,23 +50,23 @@ export default {
     props: {
         toggleTutorialModalVisibility: Boolean
     },
-    data: function() {
+    data() {
         return {
             modal: null,
             carousel: null,
         }
     },
     methods: {
-        closeModal: function() {
+        closeModal() {
             this.modal.hide();
         },
     },
     watch: {
-        toggleTutorialModalVisibility: function() {
+        toggleTutorialModalVisibility() {
             this.modal.show();
         },
     },
-    mounted: function() {
+    mounted() {
         this.modal = new Modal(this.$refs.tutorialModal);
         this.carousel = new Carousel(this.$refs.exampleCarousel);
     },

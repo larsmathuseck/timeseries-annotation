@@ -29,27 +29,27 @@ export default {
         labelToEdit: Object,
         addLabelKey: Number,
     },
-    data: function() {
+    data() {
         return {
             modal: null,
         }
     },
     methods: {
-        closeModal: function() {
+        closeModal() {
             this.modal.hide();
         },
-        onLabelCreated: async function(label) {
+        async onLabelCreated(label) {
             const currAnn = await db.lastSelected.where('id').equals(1).first();
             db.labels.add({name: label.name, color: label.color, annoId: currAnn.annoId});
             this.modal.hide();
         },
-        labelEdited: function(label) {
+        labelEdited(label) {
             db.labels.update(label.id, {name: label.name, color: label.color});
             this.modal.hide();
         }
     },
     watch: {
-        toggleModalVisibility: function() {
+        toggleModalVisibility() {
             this.modal.show();
         },
     },

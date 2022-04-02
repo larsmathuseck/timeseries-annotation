@@ -41,12 +41,12 @@ export default {
         }
     },
     computed: {
-        showGraph: function() {
+        showGraph() {
             return this.$store.getters.showGraph;
         }
     },
     methods: {
-        loadingChange: function(loading) {
+        loadingChange(loading) {
             this.loading = loading;
         }
     }

@@ -41,7 +41,7 @@ export default {
         ModelConfiguration,
         FeatureConfiguration,
     },
-    data: function() {
+    data() {
         return {
             modal: null,
             showFeatureConfiguration: false,
@@ -54,35 +54,35 @@ export default {
         toggleModelModalVisibility: Boolean,
     },
     methods: {
-        setInvalidFeedback: function(invalidFeedback) {
+        setInvalidFeedback(invalidFeedback) {
             this.showInvalidFeedback = invalidFeedback;
         },
-        toggleDownloadConfig: function() {
+        toggleDownloadConfig() {
             if (this.showFeatureConfiguration) {
                 this.toggleFeatureModelConfigDownload = !this.toggleFeatureModelConfigDownload;
             } else {
                 this.toggleModelConfigDownload = !this.toggleModelConfigDownload;
             }
         },
-        closeModal: function() {
+        closeModal() {
             this.modal.hide();
         },
     },
     watch: {
-        toggleModelModalVisibility: function() {
+        toggleModelModalVisibility() {
             this.showInvalidFeedback = "";
             this.modal.show();
         },
-        showFeatureConfiguration: function() {
+        showFeatureConfiguration() {
             this.showInvalidFeedback = "";
         }
     },
     computed: {
-        axes: function() {
+        axes() {
             return this.$store.getters.getAxes;
         },
     },
-    mounted: function() {
+    mounted() {
         this.modal = new Modal(this.$refs.ImportModelModal);
     },
 }

@@ -25,18 +25,18 @@ export default {
         axis: Object,
         isSelected: Boolean,
     },
-    data: function() {
+    data() {
         return {
             selected: this.isSelected,
         }
     },
     watch: {
-        isSelected: function() {
+        isSelected() {
             this.selected = this.isSelected
         }
     },
     methods: {
-        toggleAxis: function() {
+        toggleAxis() {
             if (this.selected) {
                 this.$store.commit("addSelectedAxes", this.axis);
             } else {
@@ -48,7 +48,7 @@ export default {
                 this.$store.commit("deleteSelectedAxis", this.axis);
             }
         },
-        editAxis: function(event) {
+        editAxis(event) {
             event.stopPropagation();
             this.$emit("editAxis", this.axis);
         }

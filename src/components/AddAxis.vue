@@ -76,7 +76,7 @@ export default {
     components: { 
         ColorPicker,
     },
-    data: function() {
+    data() {
         return {
             selectedAxis: {},
             features: features,
@@ -102,11 +102,11 @@ export default {
         },
     },
     methods: {
-        colorPicked: function(color) {
+        colorPicked(color) {
             this.axisColor = color;
             this.showColorPicker = false;
         },
-        onSubmit: function(e) {
+        onSubmit(e) {
             e.preventDefault();
             if (!this.validateInputs()) {
                 return;
@@ -119,16 +119,16 @@ export default {
             }
             this.$emit('closeModal');
         },
-        updateAxisName: function() {
+        updateAxisName() {
             if(this.axisToEdit == null && this.samplingRate && this.selectedFeature && this.selectedAxis) {
                 this.axisName = this.selectedAxis.name + "-" + this.selectedFeature.shortName + "-" + this.samplingRate;
             }
         },
-        deleteAxis: function() {
+        deleteAxis() {
             this.$store.commit("deleteAxis", this.axisToEdit);
             this.$emit('closeModal');
         },
-        validateInputs: function() {
+        validateInputs() {
             if (isNaN(this.samplingRate)) {
                 this.error = "Samplingrate must be a number!";
                 return false;
@@ -141,7 +141,7 @@ export default {
         }
     },
     watch: {
-        axisToEdit: function() {
+        axisToEdit() {
             if(this.axisToEdit != null) {
                 if(this.axisToEdit.samplingRate == null) {
                     this.samplingRate = null;
@@ -164,19 +164,19 @@ export default {
                 this.samplingRate =  32;
             }
         },
-        axes: function() {
+        axes() {
             if (this.axes != undefined && this.axes.length != 0) {
                 this.selectedAxis = this.axes[0];
                 this.updateAxisName();
             }
         },
-        selectedFeature: function() {
+        selectedFeature() {
             this.updateAxisName();
         },
-        selectedAxis: function() {
+        selectedAxis() {
             this.updateAxisName();
         },
-        samplingRate: function() {
+        samplingRate() {
             this.updateAxisName();
         },
     },
