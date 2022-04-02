@@ -21,7 +21,7 @@
     <div class="row">
         <label class="description-text" >Annotation Files</label>
         <div class="input-group">
-            <FileSelect type="annotation" :data="annotationFiles" :selected="lastSelectedAnnotation" @annoModal="showAnnotationModal" />
+            <FileSelect type="annotation" :data="annotationFiles" :selected="lastSelectedAnnotation" @showAnnotationModal="showAnnotationModal" />
         </div>
     </div>
     <div class="row">

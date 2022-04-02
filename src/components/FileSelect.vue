@@ -5,10 +5,10 @@
         </option>
     </select>
     <div class="input-group-apend my-auto">
-        <input id="fileUpload" type="file" accept=".csv" multiple v-on:change="onFileChange" hidden>
         <button type="button" class="btn btn-default btn-circle me-1" @click="deleteFile()">
             <i class="fa-solid fa-trash"></i>
         </button>
+        <input id="fileUpload" type="file" accept=".csv" multiple v-on:change="onFileChange" hidden>
         <button type="button" class="btn btn-default btn-circle" @click="chooseFile()">
             <i class="fa-solid fa-plus"></i>
         </button>
@@ -27,7 +27,6 @@ export default {
         data: Object,
         selected: Number,
     },
-    emits: ['annoModal'],
     data() {
         return {
             lastSelected: this.selected,
@@ -47,7 +46,7 @@ export default {
                 document.getElementById("fileUpload").click();
             }
             else if(this.type == "annotation") {
-                this.$emit("annoModal");
+                this.$emit("showAnnotationModal");
             }
         },
         onFileChange(e) {
@@ -67,7 +66,8 @@ export default {
         selected() {
             this.lastSelected = this.selected;
         }
-    }
+    },
+    emits: ["showAnnotationModal"]
 }
 </script>
 

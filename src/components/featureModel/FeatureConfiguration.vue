@@ -7,44 +7,40 @@
         </div>
         <form @submit="onSubmit">
             <div class="row">
-                <div class="col-6">
-                    <div class="row justify-content-end">
+                <div class="col-xl-2"></div>
+                <div class="col-6 col-xl-4">
+                    <div class="row justify-content-center mb-4">
                         <div class="col-auto">
                             <input id="featureModelFileInput" type="file" webkitdirectory directory v-on:change="onFeatureModelFileChange" hidden>
-                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light styled-btn">
+                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light main-btn">
                                 <i class="fa-solid fa-folder"></i>
                                 Choose Directory
                             </button>
                         </div>
                     </div>
-                </div>
-                <div class="col-6 my-auto">
-                    <div class="row justify-content-start">
+                    <div class="row justify-content-center mb-2">
                         <div class="col-auto my-auto">
                             <p class="m-0"> {{ featureModelFileName.length > 0 ? featureModelFileName : 'No Model imported' }}</p>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-6">
-                    <div class="row justify-content-end">
+                <div class="col-6 col-xl-4">
+                    <div class="row justify-content-center mb-3">
                         <div class="col-auto">
                             <input id="featureConfigFileInput" type="file" v-on:change="onFeatureConfigFileChange" hidden>
-                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light styled-btn" :class="{disabled: featureModelFileName.length == 0}">
+                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light main-btn" :class="{disabled: featureModelFileName.length == 0}">
                                 <i class="fa-solid fa-folder"></i>
                                 Import Config File
                             </button>
                         </div>
                     </div>
-                </div>
-                <div class="col-6 my-auto">
-                    <div class="row justify-content-start">
+                    <div class="row justify-content-center mb-2">
                         <div class="col-auto my-auto">
                             <p class="m-0"> {{ featureConfigName.length > 0 ? featureConfigName : 'No Config imported' }}</p>
                         </div>
                     </div>
                 </div>
+                <div class="col-xl-2"></div>
             </div>
             <div class="row-justify-content-center">
                 <div class="col-12">
@@ -348,21 +344,6 @@ export default {
 </script>
 
 <style scoped>
-.styled-btn {
-    background-color: #e1e1e5;
-}
-
-/**needed to hide arrows in number field */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number] {
-  -moz-appearance: textfield;
-}
-
 input { 
     text-align: center; 
 }

@@ -7,44 +7,40 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-6">
-                    <div class="row justify-content-end">
+                <div class="col-xl-2"></div>
+                <div class="col-6 col-xl-4">
+                    <div class="row justify-content-center mb-4">
                         <div class="col-auto">
                             <input id="modelFileInput" type="file" webkitdirectory directory v-on:change="onModelFileChange" hidden>
-                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light styled-btn">
+                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light main-btn">
                                 <i class="fa-solid fa-folder"></i>
                                 Choose Directory
                             </button>
                         </div>
                     </div>
-                </div>
-                <div class="col-6 my-auto">
-                    <div class="row justify-content-start">
+                    <div class="row justify-content-center mb-2">
                         <div class="col-auto my-auto">
                             <p class="m-0"> {{ modelFileName.length > 0 ? modelFileName : 'No Model imported' }}</p>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-6">
-                    <div class="row justify-content-end">
+                <div class="col-6 col-xl-4">
+                    <div class="row justify-content-center mb-3">
                         <div class="col-auto">
                             <input id="configFileInput" type="file" v-on:change="onConfigFileChange" hidden>
-                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light styled-btn" :class="{disabled: modelFileName.length == 0}">
+                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light main-btn" :class="{disabled: modelFileName.length == 0}">
                                 <i class="fa-solid fa-folder"></i>
                                 Import Config File
                             </button>
                         </div>
                     </div>
-                </div>
-                <div class="col-6 my-auto">
-                    <div class="row justify-content-start">
+                    <div class="row justify-content-center mb-2">
                         <div class="col-auto my-auto">
                             <p class="m-0"> {{ configName.length > 0 ? configName : 'No Config imported' }}</p>
                         </div>
                     </div>
                 </div>
+                <div class="col-xl-2"></div>
             </div>
             <div class="row-justify-content-center">
                 <div class="col-12">
@@ -116,19 +112,19 @@
             </div>
         </div>
         <div class="row justify-content-center my-3">
-                <label for="annotationFileNameInput" class="col-5 col-lg-3 col-form-label">Annotation Filename</label>
-                <div class="col-5 col-lg-3">
-                    <input v-model="annotationFileName" type="text" class="form-control" id="annotationFileNameInput" :disabled="modelFileName.length == 0" required>
-                </div>
+            <label for="annotationFileNameInput" class="col-5 col-lg-3 col-form-label">Annotation Filename</label>
+            <div class="col-5 col-lg-3">
+                <input v-model="annotationFileName" type="text" class="form-control" id="annotationFileNameInput" :disabled="modelFileName.length == 0" required>
             </div>
-            <div class="row justify-content-center">
-                <div class="col">
-                    <button type="submit" class="btn btn-primary" >
-                        <div v-if="loading" class="spinner-border spinner-border-sm"></div>
-                        Load Data in Model
-                    </button>
-                </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col">
+                <button type="submit" class="btn btn-primary" >
+                    <div v-if="loading" class="spinner-border spinner-border-sm"></div>
+                    Load Data in Model
+                </button>
             </div>
+        </div>
     </form>
 </template>
 
@@ -468,6 +464,10 @@ export default {
 </script>
 
 <style scoped>
+input { 
+    text-align: center; 
+}
+
 .text-left {
     text-align: left;
 }
