@@ -73,7 +73,7 @@ export default {
             if (currAnn) {
                 const content = await this.loadAnnotations(currAnn);
                 const annotationFile = await db.annotations.where('id').equals(currAnn.annoId).first();
-                if(content.length > 1 && annotationFile.name){
+                if(content.length > 1 && annotationFile.name) {
                     let type = {'text/csv': ['.csv']};
                     download(content, "text/csv", type, annotationFile.name);
                 }

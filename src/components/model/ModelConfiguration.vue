@@ -332,7 +332,7 @@ export default {
             predictedValues.forEach(prediction => {
                 for (let i = 0; i < prediction.data.length; i++) {
                     const max = Math.max(...prediction.data[i]);
-                    if(max){
+                    if(max) {
                         const index = prediction.data[i].indexOf(max);
                         const label = allLabels[index];
                         db.areas.add({
@@ -349,7 +349,7 @@ export default {
                 predIndex += 1;
             })
             // create majority vote overview shown at bottom of the graph
-            if(modelConfiguration.windowShift > 0){
+            if(modelConfiguration.windowShift > 0) {
                 await this.addCompleteResultOverview(predictedValues, slotsNumber, allLabels, annotationId, modelConfiguration.windowShift, predIndex);
             }
             // select newly created annotaion file
@@ -364,28 +364,28 @@ export default {
             let timestamp = predictedValues[0].timestamps[0][0];
             // two dimensional array that saves the current position for every prediction (windowShift)
             let currentPosition = [];
-            for(let i = 0; i < predictedValues.length; i++){
+            for(let i = 0; i < predictedValues.length; i++) {
                 currentPosition.push(null);
             }
-            for(let i = 0; i < slotsNumber; i++){
+            for(let i = 0; i < slotsNumber; i++) {
                 let position = i%predictedValues.length;
                 // update current positions of the prediction arrays
-                if(currentPosition[position] == null){
+                if(currentPosition[position] == null) {
                     currentPosition[position] = 0;
                 }
                 else{
                     currentPosition[position] += 1;
-                    if(currentPosition[position] >= predictedValues[0].data.length){
+                    if(currentPosition[position] >= predictedValues[0].data.length) {
                         currentPosition[position] = null;
                     }
                 }
                 let indices = {};
                 // evaluate predicitons for current position
-                for(let j = 0; j < predictedValues.length; j++){
+                for(let j = 0; j < predictedValues.length; j++) {
                     let data = predictedValues[j].data[currentPosition[j]];
                     let index = data?.indexOf(Math.max(...data));
                     let label = allLabels[index]?.id;
-                    if(label == null){
+                    if(label == null) {
                         continue;
                     }
                     else {
@@ -397,11 +397,11 @@ export default {
                     }
                 }
                 // set result, null when likelyhood for all the predictions for the position the same
-                let result = Object.keys(indices).reduce(function(a, b){ 
-                    if(indices[a] > indices[b]){
+                let result = Object.keys(indices).reduce(function(a, b) { 
+                    if(indices[a] > indices[b]) {
                         return a;
                     }
-                    else if(indices[a] < indices[b]){
+                    else if(indices[a] < indices[b]) {
                         return b;
                     }
                     else{
@@ -409,7 +409,7 @@ export default {
                     }
                 });
                 // add areas to db
-                if(result != null){
+                if(result != null) {
                     db.areas.add({
                             annoId: annotationId,
                             labelId: parseInt(result),

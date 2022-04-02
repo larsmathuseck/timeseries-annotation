@@ -32,7 +32,7 @@ function readFile(file) {
     if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
         reader.readAsText(file);
         reader.onload = () => {
-            if(file.name.includes("data")){
+            if(file.name.includes("data")) {
                 store.commit("addData", {result: reader.result, name: file.name});
             }
         };
@@ -77,10 +77,10 @@ export function loadFolder(fileList) {
         const reader = new FileReader();
         reader.readAsText(file);
         reader.onload = () => {
-            if(file.name.includes("data")){
+            if(file.name.includes("data")) {
                 store.commit("addData", {result: reader.result, name: fileName});
             }
-            else if(file.name.includes("annotation") || file.name.includes("labels")){
+            else if(file.name.includes("annotation") || file.name.includes("labels")) {
                 addAnnotationData(reader.result, file.name, store.state.colors);
             }
         };
