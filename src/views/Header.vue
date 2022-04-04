@@ -12,24 +12,18 @@
                         Import Folder
                     </button>
                 </li>
-                <li class="nav-item" v-if="!debug">
+                <li class="nav-item">
                     <button type="button" class="btn btn-light main-btn" @click="saveAnnotation">
                         <i class="fa-solid fa-download"></i>
                         Save Annotation
                     </button>
                 </li>
-                <li class="nav-item" v-if="!debug">
+                <li class="nav-item">
                     <button type="button" @click="toggleModelModalVisibility  = !toggleModelModalVisibility" class="btn btn-light main-btn">
                         <i class="fa-solid fa-wrench"></i>
                         Model
                     </button>
                     <ImportModelModal :toggleModelModalVisibility="toggleModelModalVisibility" />
-                </li>
-                <li class="nav-item" v-if="!debug">
-                    <button type="button" class="btn btn-light main-btn" @click="toggleTutorialModalVisibility  = !toggleTutorialModalVisibility">
-                        <i class="fa-solid fa-file"></i>
-                        Tutorial
-                    </button>
                 </li>
             </ul>
         </div>
@@ -38,12 +32,12 @@
 
 <script>
 import ImportModelModal from "../components/ImportModelModal.vue";
+import { loadFolder } from "../util/inputOutput.js";
+import { download } from "../util/inputOutput.js";
 import { db } from "/db";
 import { DateTime } from "luxon";
 import { stringify } from "@vanillaes/csv";
 import { Popover } from "bootstrap";
-import { loadFolder } from "../util/inputOutput.js";
-import { download } from "../util/inputOutput.js";
 
 export default {
     name: "Header",
@@ -52,11 +46,9 @@ export default {
     },
     props: {
         title: String,
-        debug: Boolean,
     },
     data() {
         return {
-            toggleTutorialModalVisibility: false,
             toggleModelModalVisibility: false,
         }
     },
@@ -70,10 +62,10 @@ export default {
         },
         async saveAnnotation() {
             const currAnn = await db.lastSelected.where('id').equals(1).first();
-            if (currAnn){
+            if (currAnn) {
                 const content = await this.loadAnnotations(currAnn);
                 const annotationFile = await db.annotations.where('id').equals(currAnn.annoId).first();
-                if(content.length > 1 && annotationFile.name){
+                if(content.length > 1 && annotationFile.name) {
                     let type = {'text/csv': ['.csv']};
                     download(content, "text/csv", type, annotationFile.name);
                 }

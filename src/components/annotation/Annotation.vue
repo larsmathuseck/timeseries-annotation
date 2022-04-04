@@ -51,5 +51,11 @@ export default {
 
 i {
     margin-left: 1px;
+    opacity: 0.5;
+}
+
+i:hover {
+    opacity: 1;
+    cursor: pointer;
 }
 </style>

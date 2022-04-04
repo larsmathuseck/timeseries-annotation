@@ -13,35 +13,35 @@ const features = [
 ];
 
 // df = dataframe with 0: timestamp, 1:data
-function min(df){
+function min(df) {
     return df.min({ axis: 0 }).values[1];
 }
 
-function max(df){
+function max(df) {
     return df.max({ axis: 0 }).values[1];
 }
 
-function mean(df){
+function mean(df) {
     return df.mean({ axis: 0 }).values[1];
 }
 
-function median(df){
+function median(df) {
     return df.median({ axis: 0 }).values[1];
 }
 
-function std(df){
+function std(df) {
     return df.std({ axis: 0 }).values[1];
 }
 
-function varianz(df){
+function varianz(df) {
     return df.var({ axis: 0 }).values[1];
 }
 
-function first(df){
+function first(df) {
     return parseFloat(df.head(1).values[0][1]);
 }
 
-function last(df){
+function last(df) {
     return parseFloat(df.tail(1).values[0][1]);
 }
 

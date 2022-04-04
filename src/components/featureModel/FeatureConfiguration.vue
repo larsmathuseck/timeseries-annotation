@@ -7,44 +7,40 @@
         </div>
         <form @submit="onSubmit">
             <div class="row">
-                <div class="col-6">
-                    <div class="row justify-content-end">
+                <div class="col-xl-2"></div>
+                <div class="col-6 col-xl-4">
+                    <div class="row justify-content-center mb-4">
                         <div class="col-auto">
                             <input id="featureModelFileInput" type="file" webkitdirectory directory v-on:change="onFeatureModelFileChange" hidden>
-                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light styled-btn">
+                            <button @click="modelImportButtonOnClick" type="button" class="btn btn-light main-btn">
                                 <i class="fa-solid fa-folder"></i>
                                 Choose Directory
                             </button>
                         </div>
                     </div>
-                </div>
-                <div class="col-6 my-auto">
-                    <div class="row justify-content-start">
+                    <div class="row justify-content-center mb-2">
                         <div class="col-auto my-auto">
                             <p class="m-0"> {{ featureModelFileName.length > 0 ? featureModelFileName : 'No Model imported' }}</p>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-6">
-                    <div class="row justify-content-end">
+                <div class="col-6 col-xl-4">
+                    <div class="row justify-content-center mb-3">
                         <div class="col-auto">
                             <input id="featureConfigFileInput" type="file" v-on:change="onFeatureConfigFileChange" hidden>
-                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light styled-btn" :class="{disabled: featureModelFileName.length == 0}">
+                            <button @click="configImportButtonOnClick" type="button" class="btn btn-light main-btn" :class="{disabled: featureModelFileName.length == 0}">
                                 <i class="fa-solid fa-folder"></i>
                                 Import Config File
                             </button>
                         </div>
                     </div>
-                </div>
-                <div class="col-6 my-auto">
-                    <div class="row justify-content-start">
+                    <div class="row justify-content-center mb-2">
                         <div class="col-auto my-auto">
                             <p class="m-0"> {{ featureConfigName.length > 0 ? featureConfigName : 'No Config imported' }}</p>
                         </div>
                     </div>
                 </div>
+                <div class="col-xl-2"></div>
             </div>
             <div class="row-justify-content-center">
                 <div class="col-12">
@@ -114,14 +110,14 @@
 
 <script>
 import features from "../../util/model/ModelFunctions";
-import * as tf from '@tensorflow/tfjs';
-import draggable from "vuedraggable";
-import AddFeature from "./AddFeature.vue";
-import { db } from "/db";
 import { createFeatureInstances } from "../../util/model/ModelInstances";
 import { createLabelsForAnnotation, createNewAnnotationFile, selectAnnotationFile } from "../../util/DatabankManager";
 import { checkImportedFiles } from "../../util/model/ImportModelManager";
 import { download } from "../../util/inputOutput.js";
+import * as tf from '@tensorflow/tfjs';
+import draggable from "vuedraggable";
+import AddFeature from "./AddFeature.vue";
+import { db } from "/db";
 
 export default {
     name: "FeatureConfiguration",
@@ -135,7 +131,6 @@ export default {
             featureModelFileName: "",
             featureConfigName: "",
             annotationFileName: "ModelAnnotation",
-            addFeatureVisible: false,
             samplingRate: null,
             features: [],
             loading: false,
@@ -153,7 +148,7 @@ export default {
         configImportButtonOnClick() {
             document.getElementById("featureConfigFileInput").click()
         },
-        async onFeatureModelFileChange(e) {
+        onFeatureModelFileChange(e) {
             try {
                 checkImportedFiles(e, this.modelLoaded);
             } catch (error) {
@@ -240,7 +235,7 @@ export default {
                 this.loading = false;
                 return;
             }
-            setTimeout(() => this.loadDataIntoModel(), 100);
+            setTimeout(() => this.loadDataIntoModel(), 10);
         },
         async loadDataIntoModel() {
             let result;
@@ -249,7 +244,7 @@ export default {
                 result = createFeatureInstances(this.$store.state.data[this.$store.state.selectedData], this.features, this.samplingRate, this.selectedDownsamplingMethod);
             } catch (error) {
                 this.loading = false;
-                this.$emit("setInvalidFeedback", error.messageback);
+                this.setInvalidFeedback(error.messageback);
                 return;
             }
             const instances = result[0];
@@ -270,7 +265,7 @@ export default {
             const annotationId = await createNewAnnotationFile(this.annotationFileName);
             // create as many labels as needed
             const labelAmount = predictedValues[0].data[0].length;
-            await createLabelsForAnnotation(annotationId, labelAmount, this.$store.state.colors);
+            await createLabelsForAnnotation(annotationId, labelAmount);
             // create all the areas
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
             let timestamp = this.$store.state.data[this.$store.state.selectedData].timestamps[0] + 1000*offsetInSeconds;
@@ -279,7 +274,7 @@ export default {
             predictedValues[0].data.forEach(prediction => {
                 nextTimestamp = timestamp + 1000*smallestFeatureWindow;
                 let max = Math.max(...prediction);
-                if(max){
+                if(max) {
                     let index = prediction.indexOf(max);
                     const label = allLabels[index];
                     db.areas.add({
@@ -344,25 +339,11 @@ export default {
             this.prepareConfigDownload();
         },
     },
+    emits: ["closeModal", "setInvalidFeedback"],
 }
 </script>
 
 <style scoped>
-.styled-btn {
-    background-color: #e1e1e5;
-}
-
-/**needed to hide arrows in number field */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number] {
-  -moz-appearance: textfield;
-}
-
 input { 
     text-align: center; 
 }

@@ -5,10 +5,10 @@
         </option>
     </select>
     <div class="input-group-apend my-auto">
-        <input id="fileUpload" type="file" accept=".csv" multiple v-on:change="onFileChange" hidden>
         <button type="button" class="btn btn-default btn-circle me-1" @click="deleteFile()">
             <i class="fa-solid fa-trash"></i>
         </button>
+        <input id="fileUpload" type="file" accept=".csv" multiple v-on:change="onFileChange" hidden>
         <button type="button" class="btn btn-default btn-circle" @click="chooseFile()">
             <i class="fa-solid fa-plus"></i>
         </button>
@@ -27,27 +27,26 @@ export default {
         data: Object,
         selected: Number,
     },
-    emits: ['annoModal'],
     data() {
         return {
             lastSelected: this.selected,
         }
     },
     methods: {
-        selectFile(){
-            if(this.type == "data"){
+        selectFile() {
+            if(this.type == "data") {
                 this.$store.commit("selectDataFile", this.lastSelected);
             }
-            else if(this.type == "annotation"){
+            else if(this.type == "annotation") {
                 db.lastSelected.update(1, {annoId: parseInt(this.$refs.select.value)});
             }
         },
-        chooseFile(){
-            if(this.type == "data"){
+        chooseFile() {
+            if(this.type == "data") {
                 document.getElementById("fileUpload").click();
             }
-            else if(this.type == "annotation"){
-                this.$emit("annoModal");
+            else if(this.type == "annotation") {
+                this.$emit("showAnnotationModal");
             }
         },
         onFileChange(e) {
@@ -55,10 +54,10 @@ export default {
             document.getElementById("fileUpload").value = "";
         },
         async deleteFile() {
-            if(this.type == "data"){
+            if(this.type == "data") {
                 this.$store.commit("deleteData", this.lastSelected);
             }
-            else if(this.type == "annotation"){
+            else if(this.type == "annotation") {
                 await deleteAnnotationFile();
             }
         }
@@ -67,7 +66,8 @@ export default {
         selected() {
             this.lastSelected = this.selected;
         }
-    }
+    },
+    emits: ["showAnnotationModal"]
 }
 </script>
 

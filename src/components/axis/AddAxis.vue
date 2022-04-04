@@ -2,7 +2,7 @@
     <form class="form-container" @submit="onSubmit">
         <div class="row mb-3 justify-content-center">
             <label for="selectedAxis" class="col-4 col-form-label">Axis</label>
-            <div class="col-4 col-lg-8">
+            <div class="col-8">
                 <select :disabled="axisToEdit != null" v-model="selectedAxis" id="selectedAxis" ref="select" class="form-select" required>
                     <option v-for="axis in axes" :key="axis.id" v-bind:value="axis" >
                         {{ axis.name }}
@@ -12,7 +12,7 @@
         </div>
         <div class="row mb-3 justify-content-center">
             <label for="selectedFeature" class="col-4 col-form-label">Method</label>
-            <div class="col-4 col-lg-8">
+            <div class="col-8">
                 <select :disabled="axisToEdit != null" v-model="selectedFeature" id="selectedFeature" ref="select" class="form-select" required>
                     <option v-for="feature in features" :key="feature.id" v-bind:value="feature" >
                         {{ feature.name }}
@@ -22,7 +22,7 @@
         </div>
         <div class="row mb-3 justify-content-center">
             <label for="samplingRate" class="col-4 col-form-label">Samplingrate</label>
-            <div class="col-lg-8">
+            <div class="col-8">
                 <input :disabled="axisToEdit != null" v-model="samplingRate" type="number" class="form-control" id="samplingRate">
             </div>
         </div>
@@ -30,7 +30,7 @@
             <div class="col-4">
                 <label for="validationLabelColor" class="col-form-label">Axis Color:</label>
             </div>
-            <div class="col-lg-8">
+            <div class="col-8">
                 <div class="row">
                     <div class="col-10" id="colorInputContainer">
                         <input type="text" v-model="axisColor" class="form-control" id="validationLabelColor" required>
@@ -48,11 +48,11 @@
         </div>
         <div class="row">
             <label for="axisNameInput" class="col-4 col-form-label">Axis Name</label>
-            <div class="col-lg-8">
+            <div class="col-8">
                 <input v-model="axisName" type="text" class="form-control" id="axisNameInput" required>
             </div>
         </div>
-        <div class="row" v-show="this.error != ''">
+        <div class="row" v-show="this.error.length > 0">
             <div id="allert-div" class="col-lg-12">
                 <div class="alert alert-danger" role="alert">
                     {{ this.error }}
@@ -84,7 +84,7 @@ export default {
             axisColor: "blue",
             samplingRate: 32,
             showColorPicker: false,
-            axisName: '',
+            axisName: "",
             error: "",
         }
     },
@@ -117,16 +117,16 @@ export default {
             else {
                 this.$store.commit("addAxis", {name: this.axisName, axis: this.selectedAxis, color: this.axisColor, feature: this.selectedFeature, samplingRate: this.samplingRate});
             }
-            this.$emit('closeModal');
+            this.$emit("closeModal");
         },
         updateAxisName() {
-            if(this.axisToEdit == null && this.samplingRate && this.selectedFeature && this.selectedAxis){
+            if(this.axisToEdit == null && this.samplingRate && this.selectedFeature && this.selectedAxis) {
                 this.axisName = this.selectedAxis.name + "-" + this.selectedFeature.shortName + "-" + this.samplingRate;
             }
         },
         deleteAxis() {
             this.$store.commit("deleteAxis", this.axisToEdit);
-            this.$emit('closeModal');
+            this.$emit("closeModal");
         },
         validateInputs() {
             if (isNaN(this.samplingRate)) {
@@ -180,6 +180,7 @@ export default {
             this.updateAxisName();
         },
     },
+    emits: ["closeModal"],
 }
 
 </script>

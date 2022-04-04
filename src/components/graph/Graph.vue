@@ -44,7 +44,7 @@ export default {
     components: {
         VChart,
     },
-    setup: function(){
+    setup() {
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
         const annoData = useObservable(liveQuery(async () => {
             const curr = await db.lastSelected.where('id').equals(1).first();
@@ -72,7 +72,7 @@ export default {
             areaData,
         }
     },
-    data: function() {
+    data() {
         return {
             dataZoomStart: 0,
             dataZoomEnd: 100,
@@ -94,7 +94,7 @@ export default {
         chartClicked(event) {
             const diffX = Math.abs(event.pageX - this.clickX);
             const diffY = Math.abs(event.pageY - this.clickY);
-            if(diffX < 3 && diffY < 3){
+            if(diffX < 3 && diffY < 3) {
                 let pointInPixel = [event.offsetX, event.offsetY];
                 if (this.$refs.charts.containPixel("grid", pointInPixel)) {
                     let pointInGrid = this.$refs.charts.convertFromPixel("grid", pointInPixel);
@@ -106,7 +106,7 @@ export default {
             let time = new Date(timestamp).getTime();
             let label = this.$store.state.activeLabel;
             let currAnn = this.currAnn;
-            if(label != null && currAnn != undefined){
+            if(label != null && currAnn != undefined) {
                 db.annoData.add({labelId: label.id, annoId: currAnn.annoId, timestamp: time});
             }
         },

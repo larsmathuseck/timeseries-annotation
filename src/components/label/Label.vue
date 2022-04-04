@@ -1,6 +1,5 @@
 <template>
-    <div class="col-auto axis-annotation-col my-auto"
-    :style="{ background: label.color }">
+    <div class="col-auto axis-annotation-col my-auto" :style="{ background: label.color }">
         <label class="axis-annotation-label my-auto">
             {{ label.name }}
         </label>
@@ -39,7 +38,7 @@ export default {
             db.labels.delete(this.label.id);
             db.annoData.where('labelId').equals(this.label.id).delete();
             db.areas.where('labelId').equals(this.label.id).delete();
-            if(this.activeLabel === this.label){
+            if(this.activeLabel === this.label) {
                 this.$store.commit("toggleActiveLabel", null);
             }
         },

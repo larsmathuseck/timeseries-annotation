@@ -21,7 +21,7 @@
     <div class="row">
         <label class="description-text" >Annotation Files</label>
         <div class="input-group">
-            <FileSelect type="annotation" :data="annotationFiles" :selected="lastSelectedAnnotation" @annoModal="showAnnotationModal" />
+            <FileSelect type="annotation" :data="annotationFiles" :selected="lastSelectedAnnotation" @showAnnotationModal="showAnnotationModal" />
         </div>
     </div>
     <div class="row">
@@ -74,7 +74,7 @@ export default {
         FileSelect,
         AxesModal,
     },
-    setup: function(){
+    setup() {
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
         const labels = useObservable(liveQuery(async () => {
             const curr = await db.lastSelected.where('id').equals(1).first();
@@ -123,7 +123,7 @@ export default {
         },
     },
     watch: {
-        currAnn: function(){
+        currAnn: function() {
             this.lastSelectedAnnotation = this.currAnn?.annoId;
         },
     },
@@ -210,10 +210,6 @@ export default {
 
 .btn-circle {
     margin-left: 10px;
-}
-
-.btn-circle:hover { 
-    opacity: 1;
 }
 
 #scroll-container-labels {

@@ -111,3 +111,9 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+input { 
+    text-align: center; 
+}
+</style>

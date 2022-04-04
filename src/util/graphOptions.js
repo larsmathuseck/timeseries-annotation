@@ -9,7 +9,7 @@ export function getOption(graphData, timestamps, annotations,  areas, areasVisib
     if (graphData == null) {
         return;
     }
-    if(annotations != undefined){
+    if(annotations != undefined) {
         ann = annotations.map((x, i) => {
             if (x.label) {
                 return {
@@ -76,7 +76,7 @@ export function getOption(graphData, timestamps, annotations,  areas, areasVisib
             });
         }
     }
-    for(let key in graphData){
+    for(let key in graphData) {
         legende.push(graphData[key].name);
         series.push({
             name: graphData[key].name,

@@ -38,7 +38,7 @@ export default {
         RightSidebar,
         GraphPlaceholder,
     },
-    setup: function(){
+    setup() {
         const annotationFiles = useObservable(liveQuery(() => db.annotations.toArray()));
         return { annotationFiles }
     },
@@ -61,7 +61,7 @@ export default {
             this.loading = loading;
         },
         updateShowSidebars() {
-            if(Object.keys(this.data)?.length > 0 || this.annotationFiles?.length > 0){
+            if(Object.keys(this.data)?.length > 0 || this.annotationFiles?.length > 0) {
                 this.showSidebars = true;
             }
             else {
