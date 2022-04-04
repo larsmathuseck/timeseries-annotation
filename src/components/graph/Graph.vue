@@ -83,7 +83,6 @@ export default {
             clickX: 0,
             clickY: 0,
             option: null,
-            graphData: null,
             init: { useDirtyRect: true },
         };
     },
@@ -137,17 +136,17 @@ export default {
         },
     },
     computed: {
+        graphData: function() {
+            return this.$store.getters.getData;
+        },
         areasVisible: function() {
             return this.$store.state.areasVisible;
         },
-        data: function() {
-            return this.$store.state.data[this.$store.state.selectedData];
-        },
-        selectedAxes: function() {
-            return this.$store.getters.selectedAxes;
-        }
     },
     watch:{
+        graphData: function() {
+            this.updateGraph();
+        },
         annoData: function() {
             this.updateGraph();
         },
@@ -160,19 +159,6 @@ export default {
         sizeOfGraph: function() {
             this.updateGraph();
         },
-        data: {
-            handler() {
-                if(this.data != null) {
-                    this.graphData = Object.fromEntries(Object.entries(this.data.axes).filter(key => this.data.selectedAxes.includes(key[1].id)));
-                }
-                else {
-                    this.graphData = null;
-                }
-                this.updateGraph();
-            },
-            deep: true,
-            immediate: true,
-        }
     },
     mounted() {
         this.sizeOfGraph = this.$refs.charts?.getHeight() - 140;

@@ -53,7 +53,7 @@ export default {
             return this.$store.getters.showGraph;
         },
         data: function() {
-            return this.$store.state.data;
+            return this.$store.getters.getData;
         }
     },
     methods: {
