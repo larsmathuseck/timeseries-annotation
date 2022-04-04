@@ -32,8 +32,8 @@
 
 <script>
 import ImportModelModal from "../components/ImportModelModal.vue";
-import { loadFolder } from "../util/inputOutput.js";
-import { download } from "../util/inputOutput.js";
+import { loadFolder } from "../util/InputOutput.js";
+import { download } from "../util/InputOutput.js";
 import { db } from "/db";
 import { DateTime } from "luxon";
 import { stringify } from "@vanillaes/csv";

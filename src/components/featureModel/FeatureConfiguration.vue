@@ -113,7 +113,7 @@ import features from "../../util/model/ModelFunctions";
 import { createFeatureInstances } from "../../util/model/ModelInstances";
 import { createLabelsForAnnotation, createNewAnnotationFile, selectAnnotationFile } from "../../util/DatabankManager";
 import { checkImportedFiles } from "../../util/model/ImportModelManager";
-import { download } from "../../util/inputOutput.js";
+import { download } from "../../util/InputOutput.js";
 import * as tf from '@tensorflow/tfjs';
 import draggable from "vuedraggable";
 import AddFeature from "./AddFeature.vue";
