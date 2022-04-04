@@ -144,8 +144,11 @@ export default {
         },
     },
     watch:{
-        graphData: function() {
-            this.updateGraph();
+        graphData: {
+            handler() {
+                this.updateGraph();
+            },
+            deep: true,
         },
         annoData: function() {
             this.updateGraph();
