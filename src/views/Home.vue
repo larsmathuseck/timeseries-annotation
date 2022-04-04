@@ -3,11 +3,11 @@
         <Header title="TF Annotator" />
         <div class="row h-100 mt-2">
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
-                <LeftSidebar v-if="showSidebars"/>
+                <LeftSidebar v-if="showSidebars" @reloadGraph="reloadGraph"/>
             </div>
             <div class="col col-lg-8 col-md-8 col-sm-12 col-12">
                 <div class="graphDiv">
-                    <Graph class="chart" v-if="showGraph" @loading="loadingChange"/>
+                    <Graph class="chart" ref="graph" v-if="showGraph" @loading="loadingChange"/>
                     <GraphPlaceholder v-if="!showGraph" />
                     <div v-if="loading&&showGraph" id="spinner" class="spinner-border spinner-border-lg"></div>
                 </div>
@@ -67,6 +67,9 @@ export default {
             else {
                 this.showSidebars = false;
             }
+        },
+        reloadGraph(){
+            this.$refs.graph.updateGraph();
         }
     },
     watch: {

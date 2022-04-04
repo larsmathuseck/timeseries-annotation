@@ -118,6 +118,7 @@ export default {
                 this.$store.commit("addAxis", {name: this.axisName, axis: this.selectedAxis, color: this.axisColor, feature: this.selectedFeature, samplingRate: this.samplingRate});
             }
             this.$emit("closeModal");
+            this.$emit("reloadGraph");
         },
         updateAxisName() {
             if(this.axisToEdit == null && this.samplingRate && this.selectedFeature && this.selectedAxis) {
@@ -180,7 +181,7 @@ export default {
             this.updateAxisName();
         },
     },
-    emits: ["closeModal"],
+    emits: ["closeModal", "reloadGraph"],
 }
 
 </script>
