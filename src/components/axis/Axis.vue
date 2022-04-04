@@ -48,7 +48,7 @@ export default {
                 this.$store.commit("deleteSelectedAxis", this.axis);
             }
         },
-        editAxis: function(event) {
+        editAxis(event) {
             event.stopPropagation();
             this.$emit("editAxis", this.axis);
         }

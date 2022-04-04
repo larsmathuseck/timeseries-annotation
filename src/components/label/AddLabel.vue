@@ -41,8 +41,8 @@
 </template>
 
 <script>
-import ColorPicker from "./Colorpicker.vue"
-import { db } from "/db"
+import ColorPicker from "../Colorpicker.vue";
+import { db } from "/db";
 
 export default {
     name: "AddLabel",
@@ -67,7 +67,8 @@ export default {
         async onSubmit(e) {
             e.preventDefault();
             if (this.labelToEdit === null) {
-                const currAnn = await db.lastSelected.where('id').equals(1).first();
+                const lastSelected = await db.lastSelected.where('id').equals(1).first();
+                const currAnn = await db.annotations.where('id').equals(lastSelected.annoId).first();
                 if (currAnn === undefined) { // no or false data uploaded --> no annotation file
                     this.error = "Can't add Label. First add Annotation file!"
                     return;

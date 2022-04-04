@@ -31,9 +31,9 @@
 </template>
 
 <script>
-import { Modal } from 'bootstrap'
-import ModelConfiguration from "./ModelConfiguration.vue";
-import FeatureConfiguration from "./FeatureConfiguration.vue";
+import { Modal } from 'bootstrap';
+import ModelConfiguration from "./model/ModelConfiguration.vue";
+import FeatureConfiguration from "./featureModel/FeatureConfiguration.vue";
 
 export default {
     name: "ImportModelModal",
@@ -54,17 +54,17 @@ export default {
         toggleModelModalVisibility: Boolean,
     },
     methods: {
-        setInvalidFeedback: function(invalidFeedback) {
+        setInvalidFeedback(invalidFeedback) {
             this.showInvalidFeedback = invalidFeedback;
         },
-        toggleDownloadConfig: function() {
+        toggleDownloadConfig() {
             if (this.showFeatureConfiguration) {
                 this.toggleFeatureModelConfigDownload = !this.toggleFeatureModelConfigDownload;
             } else {
                 this.toggleModelConfigDownload = !this.toggleModelConfigDownload;
             }
         },
-        closeModal: function() {
+        closeModal() {
             this.modal.hide();
         },
     },

@@ -44,7 +44,8 @@
 </template>
 
 <script>
-import features from "../util/model/ModelFunctions"
+import features from "../../util/model/ModelFunctions";
+
 export default {
     name: "AddFeature",
     data() {
@@ -57,7 +58,7 @@ export default {
         }
     },
     methods: {
-        onSubmit: function(e) {
+        onSubmit(e) {
             e.preventDefault();
             if (!this.validateInputs()) {
                 return;
@@ -76,7 +77,7 @@ export default {
             this.counter++;
             this.$emit("addFeature", featureConfiguration);
         },
-        validateInputs: function() {
+        validateInputs() {
             let invalidFeedback = "";
             if (isNaN(this.slidingWindow)) {
                 invalidFeedback ="Sliding Window must be a number!";
@@ -110,3 +111,9 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+input { 
+    text-align: center; 
+}
+</style>

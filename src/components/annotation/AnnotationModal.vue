@@ -23,7 +23,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="row justify-content-md-center" v-show="this.error != ''">
+                        <div class="row justify-content-md-center" v-show="this.error.length > 0">
                             <div class="col-auto">
                                 <div class="alert alert-danger" role="alert">
                                     {{ this.error }}
@@ -65,7 +65,7 @@
 <script>
 import { Modal } from 'bootstrap';
 import { db } from "/db";
-import { addAnnotationData } from "../util/DatabankManager";
+import { addAnnotationData } from "../../util/DatabankManager";
 
 export default {
     name: "AnnotationModal",
@@ -81,7 +81,7 @@ export default {
         }
     },
     methods: {
-        closeModal: function() {
+        closeModal() {
             this.modal.hide();
         },
         chooseAnnotationFile() {
@@ -96,8 +96,8 @@ export default {
                 if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
                     reader.readAsText(file);
                     reader.onload = () => {
-                        if(file.name.includes("annotation") || file.name.includes("labels")){
-                            addAnnotationData(reader.result, file.name, this.$store.state.colors);
+                        if(file.name.includes("annotation") || file.name.includes("labels")) {
+                            addAnnotationData(reader.result, file.name);
                             annotationFileImported = true;
                         }
                         if (!annotationFileImported) { // check if file is correct if not show error 
@@ -106,7 +106,7 @@ export default {
                             this.error = "";
                             this.modal.hide();
                         }
-                    }
+                    };
                 }
             }
             document.getElementById("annotationFileUpload").value = ""; // reset file input so when same file chosen again its an "onChange"
@@ -132,7 +132,6 @@ export default {
             this.modal.show();
         },
     },
-
     mounted() {
         this.modal = new Modal(this.$refs.annotationModal)
     },

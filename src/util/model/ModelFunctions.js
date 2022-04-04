@@ -1,4 +1,5 @@
 
+// array of all features, add new features here
 const features = [
     {id: 0, name: "Minimum", shortName: "min", func: (df) => min(df)},
     {id: 1, name: "Maximum", shortName: "max", func: (df) => max(df)},
@@ -11,35 +12,36 @@ const features = [
     {id: 8, name: "Last", shortName: "last", func: (df) => last(df)},
 ];
 
-function min(df){
+// df = dataframe with 0: timestamp, 1:data
+function min(df) {
     return df.min({ axis: 0 }).values[1];
 }
 
-function max(df){
+function max(df) {
     return df.max({ axis: 0 }).values[1];
 }
 
-function mean(df){
+function mean(df) {
     return df.mean({ axis: 0 }).values[1];
 }
 
-function median(df){
+function median(df) {
     return df.median({ axis: 0 }).values[1];
 }
 
-function std(df){
+function std(df) {
     return df.std({ axis: 0 }).values[1];
 }
 
-function varianz(df){
+function varianz(df) {
     return df.var({ axis: 0 }).values[1];
 }
 
-function first(df){
+function first(df) {
     return parseFloat(df.head(1).values[0][1]);
 }
 
-function last(df){
+function last(df) {
     return parseFloat(df.tail(1).values[0][1]);
 }
 

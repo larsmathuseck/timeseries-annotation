@@ -12,8 +12,8 @@
 </template>
 
 <script>
-import Annotation from "./Annotation.vue"
-import { DateTime } from "luxon"
+import Annotation from "../components/annotation/Annotation.vue";
+import { DateTime } from "luxon";
 import { liveQuery } from "dexie";
 import { db } from "/db";
 import { useObservable } from "@vueuse/rxjs";
@@ -23,7 +23,7 @@ export default {
     components: {
         Annotation,
     },
-    setup: function(){
+    setup() {
         const annoData = useObservable(liveQuery(async () => {
             const curr = await db.lastSelected.where('id').equals(1).first();
             const annotations = await db.annoData.where('annoId').equals(parseInt(curr?.annoId || 1)).sortBy('timestamp');
@@ -41,8 +41,8 @@ export default {
     computed: {
         annotations: function() {
             let annoData = this.annoData;
-            if(annoData != undefined){
-                for(let i = 0; i < annoData.length; i++){
+            if(annoData != undefined) {
+                for(let i = 0; i < annoData.length; i++) {
                     const label = annoData[i].label;
                     annoData[i].name = label.name;
                     annoData[i].color = label.color;

@@ -21,7 +21,7 @@
     <div class="row">
         <label class="description-text" >Annotation Files</label>
         <div class="input-group">
-            <FileSelect type="annotation" :data="annotationFiles" :selected="lastSelectedAnnotation" @annoModal="showAnnotationModal" />
+            <FileSelect type="annotation" :data="annotationFiles" :selected="lastSelectedAnnotation" @showAnnotationModal="showAnnotationModal" />
         </div>
     </div>
     <div class="row">
@@ -54,12 +54,12 @@
 </template>
 
 <script>
-import Axis from "./Axis.vue";
-import Label from "./Label.vue";
-import AnnotationModal from "./AnnotationModal.vue";
-import LabelModal from "./LabelModal.vue";
-import AxesModal from "./AxesModal.vue";
-import FileSelect from "./FileSelect.vue";
+import Axis from "../components/axis/Axis.vue";
+import Label from "../components/label/Label.vue";
+import AnnotationModal from "../components/annotation/AnnotationModal.vue";
+import LabelModal from "../components/label/LabelModal.vue";
+import AxesModal from "../components/axis/AxesModal.vue";
+import FileSelect from "../components/FileSelect.vue";
 import { liveQuery } from "dexie";
 import { db } from "/db";
 import { useObservable } from "@vueuse/rxjs";
@@ -74,7 +74,7 @@ export default {
         FileSelect,
         AxesModal,
     },
-    setup: function(){
+    setup() {
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
         const labels = useObservable(liveQuery(async () => {
             const curr = await db.lastSelected.where('id').equals(1).first();
@@ -123,7 +123,7 @@ export default {
         },
     },
     watch: {
-        currAnn: function(){
+        currAnn: function() {
             this.lastSelectedAnnotation = this.currAnn?.annoId;
         },
     },
@@ -157,7 +157,7 @@ export default {
             this.axisToEdit = null;
             this.toggleAxesModalVisibility = !this.toggleAxesModalVisibility;
         },
-        keyPressed: function(e) {
+        keyPressed(e) {
             let key = e.key;
             if (this.acceptedKeys.indexOf(key) > -1) {
                 if (key == 0) { // modify key so that by pressing 1 its the first label, which has index 0, and by pressing 0 you reach label 10
@@ -176,10 +176,10 @@ export default {
             }
         }
     },
-    mounted: async function() {
+    async mounted() {
         window.addEventListener("keypress", this.keyPressed);
     },
-    beforeUnmount: function() {
+    beforeUnmount() {
         window.removeEventListener('keypress', this.keyPressed);
     },
 }

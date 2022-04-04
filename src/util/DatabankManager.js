@@ -1,5 +1,6 @@
 import { db } from "/db";
 import { parse } from "@vanillaes/csv";
+import store from "../store";
 
 export async function createNewAnnotationFile(fileName) {
     const annotations = await db.annotations.toArray();
@@ -19,11 +20,11 @@ export async function createNewAnnotationFile(fileName) {
     });
 }
 
-export async function createLabelsForAnnotation(annotationId, amountOfLabels, colors) {
+export async function createLabelsForAnnotation(annotationId, amountOfLabels) {
     for (let i = 0; i < amountOfLabels; i++) {
         await db.labels.add({
             name: "label_" + i,
-            color: colors[i % colors.length],
+            color:  store.state.colors[i %  store.state.colors.length],
             annoId: annotationId,
         });
     }
@@ -51,7 +52,7 @@ export async function selectAnnotationFile(annoId) {
     }
 }
 
-export async function addAnnotationData(result, name, colors) {
+export async function addAnnotationData(result, name) {
     let data = parse(result);
     let legende = data.shift();
     let lastAnn = {};
@@ -64,21 +65,21 @@ export async function addAnnotationData(result, name, colors) {
     // Get Timestamp and Label location
     let timestampLocation = -1;
     let labelLocation = -1;
-    for(let i = 0; i < legende.length; i++){
-        if(legende[i].toLowerCase() == "timestamp"){
+    for(let i = 0; i < legende.length; i++) {
+        if(legende[i].toLowerCase() == "timestamp") {
             timestampLocation = i;
         }
-        else if(legende[i].toLowerCase() == "label"){
+        else if(legende[i].toLowerCase() == "label") {
             labelLocation = i;
         }
     }
 
-    for(let i = 0; i < data.length; i++){
+    for(let i = 0; i < data.length; i++) {
         let label = await db.labels.where('[annoId+name]').equals([anno, data[i][labelLocation]]).toArray();
-        if(label.length === 0){
+        if(label.length === 0) {
             label = await db.labels.add({
                 name: data[i][labelLocation],
-                color: colors[i % colors.length],
+                color: store.state.colors[i % store.state.colors.length],
                 annoId: anno,
             });
         }

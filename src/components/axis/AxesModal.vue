@@ -34,7 +34,7 @@ export default {
         }
     },
     methods: {
-        closeModal: function() {
+        closeModal() {
             this.modal.hide();
         },
     },
@@ -43,7 +43,6 @@ export default {
             this.modal.show();
         },
     },
-
     mounted() {
         this.modal = new Modal(this.$refs.axesModal)
     },

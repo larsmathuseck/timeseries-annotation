@@ -7,8 +7,9 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-6">
-                    <div class="row justify-content-end">
+                <div class="col-xl-2"></div>
+                <div class="col-6 col-xl-4">
+                    <div class="row justify-content-center mb-4">
                         <div class="col-auto">
                             <input id="modelFileInput" type="file" webkitdirectory directory v-on:change="onModelFileChange" hidden>
                             <button @click="modelImportButtonOnClick" type="button" class="btn btn-light main-btn">
@@ -17,18 +18,14 @@
                             </button>
                         </div>
                     </div>
-                </div>
-                <div class="col-6 my-auto">
-                    <div class="row justify-content-start">
+                    <div class="row justify-content-center mb-2">
                         <div class="col-auto my-auto">
                             <p class="m-0"> {{ modelFileName.length > 0 ? modelFileName : 'No Model imported' }}</p>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-6">
-                    <div class="row justify-content-end">
+                <div class="col-6 col-xl-4">
+                    <div class="row justify-content-center mb-3">
                         <div class="col-auto">
                             <input id="configFileInput" type="file" v-on:change="onConfigFileChange" hidden>
                             <button @click="configImportButtonOnClick" type="button" class="btn btn-light main-btn" :class="{disabled: modelFileName.length == 0}">
@@ -37,14 +34,13 @@
                             </button>
                         </div>
                     </div>
-                </div>
-                <div class="col-6 my-auto">
-                    <div class="row justify-content-start">
+                    <div class="row justify-content-center mb-2">
                         <div class="col-auto my-auto">
                             <p class="m-0"> {{ configName.length > 0 ? configName : 'No Config imported' }}</p>
                         </div>
                     </div>
                 </div>
+                <div class="col-xl-2"></div>
             </div>
             <div class="row-justify-content-center">
                 <div class="col-12">
@@ -68,9 +64,9 @@
                         <label class="col-4 col-lg-3 col-form-label text-left">Hertz</label>
                     </div>
                     <div class="row mb-3 justify-content-center">
-                        <label for="overlapValue" class="col-6 col-form-label">Window Shift</label>
+                        <label for="windowShiftInput" class="col-6 col-form-label">Window Shift</label>
                         <div class="col-2 col-lg-3">
-                            <input v-model="windowShift" type="text" class="form-control" id="overlapValue" placeholder="1" :disabled="modelFileName.length == 0" required>
+                            <input v-model="windowShift" type="text" class="form-control" id="windowShiftInput" placeholder="1" :disabled="modelFileName.length == 0" required>
                         </div>
                         <label class="col-4 col-lg-3 col-form-label text-left">Seconds</label>
                     </div>
@@ -107,7 +103,7 @@
                             </div>
                             <div class="row justify-content-center py-3">
                                 <div class="col-auto">
-                                    <button type="button" class="btn btn-danger" @click="resetAxisSelection" >Clear Axis Selection</button>
+                                    <button type="button" class="btn btn-danger" @click="resetAxisSelection">Clear Axis Selection</button>
                                 </div>
                             </div>
                         </div>
@@ -116,28 +112,29 @@
             </div>
         </div>
         <div class="row justify-content-center my-3">
-                <label for="annotationFileNameInput" class="col-5 col-lg-3 col-form-label">Annotation Filename</label>
-                <div class="col-5 col-lg-3">
-                    <input v-model="annotationFileName" type="text" class="form-control" id="annotationFileNameInput" :disabled="modelFileName.length == 0" required>
-                </div>
+            <label for="annotationFileNameInput" class="col-5 col-lg-3 col-form-label">Annotation Filename</label>
+            <div class="col-5 col-lg-3">
+                <input v-model="annotationFileName" type="text" class="form-control" id="annotationFileNameInput" :disabled="modelFileName.length == 0" required>
             </div>
-            <div class="row justify-content-center">
-                <div class="col">
-                    <button type="submit" class="btn btn-primary" >
-                        <div v-if="loading" class="spinner-border spinner-border-sm"></div>
-                        Load Data in Model
-                    </button>
-                </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col">
+                <button type="submit" class="btn btn-primary" >
+                    <div v-if="loading" class="spinner-border spinner-border-sm"></div>
+                    Load Data in Model
+                </button>
             </div>
+        </div>
     </form>
 </template>
 
 <script>
 import * as tf from '@tensorflow/tfjs';
 import { db } from "/db";
-import { createInstances } from "../util/model/ModelInstances";
-import { checkImportedFiles } from "../util/model/ImportModelManager";
-import { createNewAnnotationFile, createLabelsForAnnotation, selectAnnotationFile } from "../util/DatabankManager";
+import { createInstances } from "../../util/model/ModelInstances";
+import { checkImportedFiles } from "../../util/model/ImportModelManager";
+import { createNewAnnotationFile, createLabelsForAnnotation, selectAnnotationFile } from "../../util/DatabankManager";
+import { download } from "../../util/inputOutput.js";
 
 export default {
     name: "ModelConfiguration",
@@ -150,7 +147,6 @@ export default {
             slidingWindow: null,
             samplingRate: null,
             windowShift: null,
-            inputsFilledOut: false,
             selectedAxes: [],
             downsamplingMethods: ["First", "Last", "Median"],
             selectedDownsamplingMethod: "First",
@@ -161,21 +157,22 @@ export default {
         toggleConfigDownload: Boolean,
     },
     methods: {
-        modelImportButtonOnClick: function() {
+        modelImportButtonOnClick() {
             document.getElementById("modelFileInput").click();
         },
-        configImportButtonOnClick: function() {
+        configImportButtonOnClick() {
             document.getElementById("configFileInput").click();
         },
-        onModelFileChange: function(e) {
+        onModelFileChange(e) {
             try {
                 checkImportedFiles(e, this.modelLoaded);
             } catch (error) {
+                console.error(error.message);
                 this.setInvalidFeedback(error.message);
             }
             document.getElementById("modelFileInput").value = "";
         },
-        onConfigFileChange: function(e) {
+        onConfigFileChange(e) {
             const file = e.target.files[0];
             if ((file.name.toLowerCase().includes("configuration") || file.name.toLowerCase().includes("config")) && file.type.toLowerCase().includes("json")) {
                 this.clearModelConfiguration();
@@ -183,7 +180,7 @@ export default {
             }
             document.getElementById("configFileInput").value = "";
         },
-        modelLoaded: async function(model, modelFileName, config) {
+        async modelLoaded(model, modelFileName, config) {
             this.modelFileName = modelFileName;
             this.model = model;
             this.selectedAxes = [];
@@ -191,7 +188,7 @@ export default {
                 this.setModelConfiguration(config);
             }
         },
-        setModelConfiguration: function(config) {
+        setModelConfiguration(config) {
             this.configName = config.name;
             const reader = new FileReader();
             reader.readAsText(config);
@@ -211,14 +208,14 @@ export default {
                 }
             }
         },
-        clearModelConfiguration: function() {
+        clearModelConfiguration() {
             this.slidingWindow = null;
             this.samplingRate = null;
             this.windowShift = null;
             this.selectedDownsamplingMethod = "First";
             this.selectedAxes = [];
         },
-        axisExists: function(axis) {
+        axisExists(axis) {
             const axes = this.axes;
             for (const i in Object.values(axes)) {
                 if (axes[i].name == axis.name && axes[i].id == axis.id) {
@@ -227,13 +224,13 @@ export default {
             }
             return false;
         },
-        resetAxisSelection: function() {
+        resetAxisSelection() {
             this.selectedAxes = [];
         },
-        setInvalidFeedback: function(invalidFeedback) {
+        setInvalidFeedback(invalidFeedback) {
             this.$emit("setInvalidFeedback", invalidFeedback)
         },
-        onSubmit: function(e) {
+        onSubmit(e) {
             this.loading = true;
             e.preventDefault();
             if (!this.validateInputs()) {
@@ -248,9 +245,9 @@ export default {
                     selectedAxes: this.selectedAxes,
                     downsamplingMethod: this.selectedDownsamplingMethod,
             }
-            setTimeout(() => this.loadDataIntoModel(modelConfiguration), 100);
+            setTimeout(() => this.loadDataIntoModel(modelConfiguration), 10);
         },
-        validateInputs: function() {
+        validateInputs() {
             let invalidFeedback = "";
             const data = this.$store.state.data;
             if (this.model == null) {
@@ -278,7 +275,7 @@ export default {
                 invalidFeedback = "Sliding Window must be a multiple from Window Shift!";
             }
             else if (this.isMultiple(this.samplingRate * this.windowShift, 1) != 0) {
-                invalidFeedback = "Sliding Window * Sampling Rate must be an Integer!";
+                invalidFeedback = "Window Shift * Sampling Rate must be an Integer!";
             }
             else if (data.length == 0) {
                 invalidFeedback = "Please upload data first!"
@@ -293,27 +290,31 @@ export default {
                 return false;
             }
         },
-        loadDataIntoModel: async function(modelConfiguration) {
+        async loadDataIntoModel(modelConfiguration) {
             const model = modelConfiguration.model;
             let instances;
             let slotsNumber = 0;
             try {
+                // get converted data for use in model. Every instance includes the next window shift.
                 instances = createInstances(this.$store.state, modelConfiguration);
                 slotsNumber = instances[1] / (modelConfiguration.samplingRate * modelConfiguration.windowShift);
                 instances = instances[0];
             } catch (error) {
                 this.loading = false
+                console.error(error.message);
                 this.setInvalidFeedback(error.message)
             }
             let predictedValues = [];
             try {
+                // make predictions
                 instances.forEach(instance => {
                     const tensor = tf.tensor(instance[1]);
                     const a = model.predict(tensor);
                     predictedValues.push({data: a.arraySync(), timestamps: instance[0]});
-                });                
+                });            
             } catch (error) {
                 this.loading = false;
+                console.error(error.message);
                 this.setInvalidFeedback(error.message)
                 return;
             }
@@ -325,10 +326,11 @@ export default {
             // create all the areas
             const allLabels = await db.labels.where("annoId").equals(annotationId).toArray();
             let predIndex = 0;
+            // evaluate predictions and add areas to db
             predictedValues.forEach(prediction => {
                 for (let i = 0; i < prediction.data.length; i++) {
                     const max = Math.max(...prediction.data[i]);
-                    if(max){
+                    if(max) {
                         const index = prediction.data[i].indexOf(max);
                         const label = allLabels[index];
                         db.areas.add({
@@ -344,11 +346,11 @@ export default {
                 }
                 predIndex += 1;
             })
-
-            if(modelConfiguration.windowShift > 0){
+            // create majority vote overview shown at bottom of the graph
+            if(modelConfiguration.windowShift > 0) {
                 await this.addCompleteResultOverview(predictedValues, slotsNumber, allLabels, annotationId, modelConfiguration.windowShift, predIndex);
             }
-
+            // select newly created annotaion file
             await selectAnnotationFile(annotationId);
             if (!this.$store.state.areasVisible) {
                 this.$store.commit("toggleAreasVisibility");
@@ -356,29 +358,32 @@ export default {
             this.loading = false;
             this.$emit("closeModal");
         },
-        addCompleteResultOverview: async function (predictedValues, slotsNumber, allLabels, annotationId, windowShift, predIndex){
+        async addCompleteResultOverview(predictedValues, slotsNumber, allLabels, annotationId, windowShift, predIndex) {
             let timestamp = predictedValues[0].timestamps[0][0];
+            // two dimensional array that saves the current position for every prediction (windowShift)
             let currentPosition = [];
-            for(let i = 0; i < predictedValues.length; i++){
+            for(let i = 0; i < predictedValues.length; i++) {
                 currentPosition.push(null);
             }
-            for(let i = 0; i < slotsNumber; i++){
+            for(let i = 0; i < slotsNumber; i++) {
                 let position = i%predictedValues.length;
-                if(currentPosition[position] == null){
+                // update current positions of the prediction arrays
+                if(currentPosition[position] == null) {
                     currentPosition[position] = 0;
                 }
                 else{
                     currentPosition[position] += 1;
-                    if(currentPosition[position] >= predictedValues[0].data.length){
+                    if(currentPosition[position] >= predictedValues[0].data.length) {
                         currentPosition[position] = null;
                     }
                 }
                 let indices = {};
-                for(let j = 0; j < predictedValues.length; j++){
+                // evaluate predicitons for current position
+                for(let j = 0; j < predictedValues.length; j++) {
                     let data = predictedValues[j].data[currentPosition[j]];
                     let index = data?.indexOf(Math.max(...data));
                     let label = allLabels[index]?.id;
-                    if(label == null){
+                    if(label == null) {
                         continue;
                     }
                     else {
@@ -389,18 +394,20 @@ export default {
                         }
                     }
                 }
-                let result = Object.keys(indices).reduce(function(a, b){ 
-                    if(indices[a] > indices[b]){
+                // set result, null when likelyhood for all the predictions for the position the same
+                let result = Object.keys(indices).reduce(function(a, b) { 
+                    if(indices[a] > indices[b]) {
                         return a;
                     }
-                    else if(indices[a] < indices[b]){
+                    else if(indices[a] < indices[b]) {
                         return b;
                     }
                     else{
                         return null; 
                     }
                 });
-                if(result != null){
+                // add areas to db
+                if(result != null) {
                     db.areas.add({
                             annoId: annotationId,
                             labelId: parseInt(result),
@@ -414,26 +421,13 @@ export default {
                 timestamp += windowShift*1000;
             }
         },
-        getOrCreateLabel: async function(labelName, annotationId) {
-            const amountOfLabels = await db.labels.where("annoId").equals(annotationId).toArray();
-            const labelsWithName = await db.labels.where("[annoId+name]").equals([annotationId, labelName]).toArray();
-            if (labelsWithName.length == 0) {
-                return await db.labels.add({
-                    name: labelName,
-                    color: this.$store.state.colors[amountOfLabels.length % this.$store.state.colors.length],
-                    annoId: annotationId,
-                });
-            } else {
-                return labelsWithName[0].id;
-            }
-        },
-        isMultiple: function(a, b) {
+        isMultiple(a, b) {
             // this function is needed, since the normal Javascript modulo seem to not work like expected. With this we only check if the result of division is an float by searching for a comma.
             const temp = (a/b).toString();
             const commaIndex = temp.indexOf(".");
             return commaIndex == -1 ? 0 : commaIndex;
         },
-        prepareConfigDownload: function() {
+        prepareConfigDownload() {
             const config = {
                 slidingWindow: this.slidingWindow,
                 samplingRate: this.samplingRate,
@@ -441,35 +435,8 @@ export default {
                 downsamplingMethod: this.selectedDownsamplingMethod,
                 selectedAxes: this.selectedAxes,
             }
-            this.downloadConfig(config);
+            download(JSON.stringify(config), "text/json", {'text/json': ['.json']}, "config.json");
         },
-        downloadConfig: async function(config) {
-            const content = JSON.stringify(config);
-            if (typeof showSaveFilePicker === 'undefined') {
-                var a = document.createElement("a");
-                a.href = window.URL.createObjectURL(new Blob([content], {type: "text/json"}));
-                a.download = "config.json";
-                a.click();
-            }
-            else {
-                try {
-                    const fileHandle = await self.showSaveFilePicker({
-                        suggestedName: "config.json",
-                        types: [{
-                            description: 'JSON files',
-                            accept: {
-                            'text/json': ['.json'],
-                            },
-                        }],
-                    });
-                    const fileStream = await fileHandle.createWritable();
-                    await fileStream.write(new Blob([content], {type: "text/plain;charset=utf-8"}));
-                    await fileStream.close();
-                } catch(error) {
-                    console.log(error);
-                }
-            }
-        }
     },
     computed: {
         axes: function() {

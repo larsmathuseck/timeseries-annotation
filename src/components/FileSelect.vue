@@ -5,10 +5,10 @@
         </option>
     </select>
     <div class="input-group-apend my-auto">
-        <input id="fileUpload" type="file" accept=".csv" multiple v-on:change="onFileChange" hidden>
         <button type="button" class="btn btn-default btn-circle me-1" @click="deleteFile()">
             <i class="fa-solid fa-trash"></i>
         </button>
+        <input id="fileUpload" type="file" accept=".csv" multiple v-on:change="onFileChange" hidden>
         <button type="button" class="btn btn-default btn-circle" @click="chooseFile()">
             <i class="fa-solid fa-plus"></i>
         </button>
@@ -16,8 +16,9 @@
 </template>
 
 <script>
-import { db } from "/db"
-import { deleteAnnotationFile } from "../util/DatabankManager"
+import { db } from "/db";
+import { deleteAnnotationFile } from "../util/DatabankManager";
+import { readDataFiles } from "../util/inputOutput.js";
 
 export default {
     name: "FileSelect",
@@ -26,62 +27,47 @@ export default {
         data: Object,
         selected: Number,
     },
-    emits: ['annoModal'],
     data() {
         return {
             lastSelected: this.selected,
         }
     },
     methods: {
-        selectFile(){
-            if(this.type == "data"){
+        selectFile() {
+            if(this.type == "data") {
                 this.$store.commit("selectDataFile", this.lastSelected);
             }
-            else if(this.type == "annotation"){
+            else if(this.type == "annotation") {
                 db.lastSelected.update(1, {annoId: parseInt(this.$refs.select.value)});
             }
         },
-        chooseFile(){
-            if(this.type == "data"){
+        chooseFile() {
+            if(this.type == "data") {
                 document.getElementById("fileUpload").click();
             }
-            else if(this.type == "annotation"){
-                this.$emit("annoModal");
+            else if(this.type == "annotation") {
+                this.$emit("showAnnotationModal");
             }
         },
         onFileChange(e) {
-            const fileList = e.target.files;
-            for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
-                const file = fileList[i];
-                this.readFile(file);
-            }
+            readDataFiles(e.target.files);
             document.getElementById("fileUpload").value = "";
         },
-        readFile(file){
-            const reader = new FileReader();
-            if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
-                reader.readAsText(file);
-                reader.onload = () => {
-                    if(file.name.includes("data")){
-                        this.$store.commit("addData", {result: reader.result, name: file.name});
-                    }
-                }
-            }
-        },
         async deleteFile() {
-            if(this.type == "data"){
+            if(this.type == "data") {
                 this.$store.commit("deleteData", this.lastSelected);
             }
-            else if(this.type == "annotation"){
+            else if(this.type == "annotation") {
                 await deleteAnnotationFile();
             }
         }
     },
     watch: {
-        selected: function() {
+        selected() {
             this.lastSelected = this.selected;
         }
-    }
+    },
+    emits: ["showAnnotationModal"]
 }
 </script>
 

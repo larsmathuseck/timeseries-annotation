@@ -15,8 +15,8 @@
 </template>
 
 <script>
-import AddLabel from "./AddLabel.vue"
-import { Modal } from 'bootstrap'
+import AddLabel from "./AddLabel.vue";
+import { Modal } from 'bootstrap';
 import { db } from "/db";
 
 export default {
@@ -35,7 +35,7 @@ export default {
         }
     },
     methods: {
-        closeModal: function() {
+        closeModal() {
             this.modal.hide();
         },
         async onLabelCreated(label) {
@@ -53,7 +53,6 @@ export default {
             this.modal.show();
         },
     },
-
     mounted() {
         this.modal = new Modal(this.$refs.labelModal)
     },
