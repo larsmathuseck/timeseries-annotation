@@ -23,8 +23,8 @@
 </template>
 
 <script>
-import { readDataFiles } from "../../util/inputOutput.js";
-import { loadFolder } from "../../util/inputOutput.js";
+import { readDataFiles } from "../../util/InputOutput.js";
+import { loadFolder } from "../../util/InputOutput.js";
 
 export default {
     name: "ImportGraph",

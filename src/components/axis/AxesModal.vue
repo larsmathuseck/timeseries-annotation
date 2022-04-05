@@ -7,7 +7,7 @@
                     <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <AddAxis :axisToEdit="axisToEdit" @closeModal="closeModal"></AddAxis>
+                    <AddAxis :axisToEdit="axisToEdit" @closeModal="closeModal" @reloadGraph='this.$emit("reloadGraph")'></AddAxis>
                 </div>
             </div>
         </div>
@@ -46,6 +46,7 @@ export default {
     mounted() {
         this.modal = new Modal(this.$refs.axesModal)
     },
+    emits: ["reloadGraph"],
 }
 </script>
 

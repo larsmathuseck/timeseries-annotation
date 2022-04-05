@@ -50,7 +50,7 @@
     </div>
     <AnnotationModal :toggleModalVisibility="toggleAnnotationModalVisibility" />
     <LabelModal :addLabelKey="addLabelKey" :toggleModalVisibility="toggleLabelModalVisibility" :labelToEdit="labelToEdit" />
-    <AxesModal :toggleModalVisibility="toggleAxesModalVisibility" :title="axisModalTitle" :axisToEdit="axisToEdit"/>
+    <AxesModal :toggleModalVisibility="toggleAxesModalVisibility" :title="axisModalTitle" :axisToEdit="axisToEdit" @reloadGraph='this.$emit("reloadGraph")'/>
 </template>
 
 <script>
@@ -182,6 +182,7 @@ export default {
     beforeUnmount() {
         window.removeEventListener('keypress', this.keyPressed);
     },
+    emits: ["reloadGraph"],
 }
 </script>
 

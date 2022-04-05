@@ -29,10 +29,10 @@ export async function download(data, type1, type2, name) {
 
 function readFile(file) {
     const reader = new FileReader();
-    if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
+    if(file.name[0] != '.' && (file.type.toLowerCase().includes("text") || file.type.toLowerCase().includes("excel"))) {
         reader.readAsText(file);
         reader.onload = () => {
-            if(file.name.includes("data")) {
+            if(file.name.toLowerCase().includes("data")) {
                 store.commit("addData", {result: reader.result, name: file.name});
             }
         };
@@ -51,7 +51,7 @@ export function loadFolder(fileList) {
     let fileNames = {};
     for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
         const file = fileList[i];
-        if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
+        if(file.name[0] != '.' && (file.type.toLowerCase().includes("text") || file.type.toLowerCase().includes("excel"))) {
             filesToUpload.push(file);
             if (fileNames[file.name] == undefined) {
                 fileNames[file.name] = 1;
@@ -77,10 +77,10 @@ export function loadFolder(fileList) {
         const reader = new FileReader();
         reader.readAsText(file);
         reader.onload = () => {
-            if(file.name.includes("data")) {
+            if(file.name.toLowerCase().includes("data")) {
                 store.commit("addData", {result: reader.result, name: fileName});
             }
-            else if(file.name.includes("annotation") || file.name.includes("labels")) {
+            else if(file.name.toLowerCase().includes("annotation") || file.name.toLowerCase().includes("labels")) {
                 addAnnotationData(reader.result, file.name);
             }
         };

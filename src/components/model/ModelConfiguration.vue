@@ -134,7 +134,7 @@ import { db } from "/db";
 import { createInstances } from "../../util/model/ModelInstances";
 import { checkImportedFiles } from "../../util/model/ImportModelManager";
 import { createNewAnnotationFile, createLabelsForAnnotation, selectAnnotationFile } from "../../util/DatabankManager";
-import { download } from "../../util/inputOutput.js";
+import { download } from "../../util/InputOutput.js";
 
 export default {
     name: "ModelConfiguration",

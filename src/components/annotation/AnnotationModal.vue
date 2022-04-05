@@ -93,10 +93,10 @@ export default {
             for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
                 const reader = new FileReader();
                 const file = fileList[i];
-                if(file.name[0] != '.' && (file.type.includes("text") || file.type.includes("excel"))) {
+                if(file.name[0] != '.' && (file.type.toLowerCase().includes("text") || file.type.toLowerCase().includes("excel"))) {
                     reader.readAsText(file);
                     reader.onload = () => {
-                        if(file.name.includes("annotation") || file.name.includes("labels")) {
+                        if(file.name.toLowerCase().includes("annotation") || file.name.toLowerCase().includes("labels")) {
                             addAnnotationData(reader.result, file.name);
                             annotationFileImported = true;
                         }
