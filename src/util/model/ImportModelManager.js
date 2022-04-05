@@ -7,7 +7,7 @@ export function checkImportedFiles(e, callback) {
     const weights = [];
     for (let i = 0, numFiles = fileList.length; i < numFiles; i++) {
         const file = fileList[i];
-        if(file.name[0] != '.' && (file.type.includes("json") && file.name.includes("model"))) {
+        if(file.name[0] != '.' && (file.type.toLowerCase().includes("json") && file.name.toLowerCase().includes("model"))) {
             model = file;
         }
         else if ((file.name.toLowerCase().includes("configuration") || file.name.toLowerCase().includes("config")) && file.type.toLowerCase().includes("json")) {
