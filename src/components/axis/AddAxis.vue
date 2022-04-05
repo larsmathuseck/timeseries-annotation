@@ -126,6 +126,10 @@ export default {
             }
         },
         deleteAxis() {
+            if (Object.values(this.$store.getters.getAxes).length == 1) {
+                alert("At least 1 axis must be selected!");
+                return;
+            }
             this.$store.commit("deleteAxis", this.axisToEdit);
             this.$emit("closeModal");
         },

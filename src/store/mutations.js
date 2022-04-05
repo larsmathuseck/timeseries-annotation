@@ -100,7 +100,9 @@ export default {
             const id = Object.keys(axes)[0];
             selectedAxes.push(parseInt(id));
         }
-        selectedAxes.splice(selectedAxes.indexOf(payload.id), 1);
+        if (selectedAxes.indexOf(payload.id) > -1) {
+            selectedAxes.splice(selectedAxes.indexOf(payload.id), 1);
+        }
     },
     addSelectedAxes: (state, axis) => {
         state.data[state.selectedData].selectedAxes.push(axis.id);
