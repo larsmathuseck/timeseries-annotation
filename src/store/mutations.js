@@ -4,21 +4,21 @@ import { breakDownToSamplingrate } from '../util/model/ModelInstances';
 export default {
     addData: (state, payload) => {
         let data = parse(payload.result);
-        let legende = data.shift();
+        let legend = data.shift();
         let timestamps = [];
         let axes = {};
 
         // Get Timestamps and create axes object
         let timestampLocation = -1;
         let axesId = 0;
-        for(let i = 0; i < legende.length; i++) {
-            if(legende[i].toLowerCase() == "timestamp") {
+        for(let i = 0; i < legend.length; i++) {
+            if(legend[i].toLowerCase() === "timestamp") {
                 timestampLocation = i;
             }
             else {
                 Object.assign(axes, {[axesId]: {
                     id: axesId,
-                    name: legende[i],
+                    name: legend[i],
                     dataPoints: [],
                     color: state.colors[i % state.colors.length],
                 }});
@@ -30,7 +30,7 @@ export default {
                 timestamps.push(new Date(row[timestampLocation]).getTime());
                 row.splice(timestampLocation, 1);
             });
-            
+
             // Delete last not full second
             const lastTimestamp = (timestamps[timestamps.length-1] - (timestamps[timestamps.length-1] - timestamps[0])%1000);
             let time = timestamps[timestamps.length-1];
@@ -43,7 +43,7 @@ export default {
             // Get dimensions in own arrays
             for(let row = 0; row < timestamps.length; row++) {
                 for(let column = 0; column < data[row].length; column++) {
-                    axes[column].dataPoints.push([new Date(timestamps[row]).getTime(), data[row][column]]);   
+                    axes[column].dataPoints.push([new Date(timestamps[row]).getTime(), data[row][column]]);
                 }
             }
             let id = 0;
@@ -83,7 +83,7 @@ export default {
             dataPoints: data,
             color: payload.color,
             samplingRate: payload.samplingRate,
-            feature: payload.feature, 
+            feature: payload.feature,
         };
         Object.assign(axes, {[id]: axis});
         state.data[state.selectedData].selectedAxes.push(axis.id);

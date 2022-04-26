@@ -72,7 +72,7 @@ export function getOption(graphData, timestamps, annotations,  areas, areasVisib
                         }
                     ];
                 }
-                
+
             });
         }
     }
@@ -130,7 +130,7 @@ export function getOption(graphData, timestamps, annotations,  areas, areasVisib
         tooltip: {
             trigger: "axis",
             formatter: (value) => {
-                return DateTime.fromMillis(value[0].axisValue).toFormat('hh:mm:ss SSS');
+                return DateTime.fromMillis(value[0].axisValue).toFormat('HH:mm:ss SSS');
             }
         },
         legend: {
@@ -178,7 +178,7 @@ export function getOption(graphData, timestamps, annotations,  areas, areasVisib
                 end: dataZoomEnd,
                 handleSize: "70%",
                 labelFormatter: (value) => {
-                    return DateTime.fromMillis(value).toFormat('hh:mm:ss SSS');
+                    return DateTime.fromMillis(value).toFormat('HH:mm:ss SSS');
                 }
             },
         ],

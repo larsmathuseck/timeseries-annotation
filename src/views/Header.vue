@@ -81,7 +81,7 @@ export default {
                 }));
                 let data = [["Timestamp", "Label"]];
                 annotations.forEach(anno => {
-                    data.push([DateTime.fromMillis(anno.timestamp).toFormat('yyyy-MM-dd hh:mm:ss.SSS'), anno.label.name]);
+                    data.push([DateTime.fromMillis(anno.timestamp).toFormat('yyyy-MM-dd HH:mm:ss.SSS'), anno.label.name]);
                 });
                 return stringify(data);
             }

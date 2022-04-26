@@ -46,7 +46,7 @@ export default {
                     const label = annoData[i].label;
                     annoData[i].name = label.name;
                     annoData[i].color = label.color;
-                    annoData[i].timestamp = DateTime.fromMillis(annoData[i].timestamp).toFormat('hh:mm:ss SSS');
+                    annoData[i].timestamp = DateTime.fromMillis(annoData[i].timestamp).toFormat('HH:mm:ss SSS');
                 }
             }
             return annoData;
