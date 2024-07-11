@@ -3,20 +3,24 @@ FROM node:20.15.0-alpine AS BUILD_IMAGE
 # Create app directory
 WORKDIR /usr/src/app
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-COPY package*.json ./
+RUN corepack enable
 
-RUN npm ci
+# Install app dependencies
+COPY pnpm-lock.yaml ./
+
+RUN pnpm fetch
 
 # Bundle app source
 COPY . .
 
-RUN npm run build
+RUN pnpm install --offline
+
+ENV NODE_ENV=production
+
+RUN pnpm run build
 
 # remove development dependencies
-RUN npm prune --production
+RUN pnpm install --offline --prod
 
 FROM node:20.15.0-alpine
 
