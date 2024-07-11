@@ -23,7 +23,7 @@
         </div>
         <div class="row">
             <div class="col">
-                <ColorPicker @labelColorPicked="colorPicked" :colorForAxis="false" v-show="showColorPicker"/> 
+                <TfaColorPicker @labelColorPicked="colorPicked" :colorForAxis="false" v-show="showColorPicker"/>
             </div>
         </div>
         <div class="row" v-show="this.error != ''">
@@ -41,13 +41,13 @@
 </template>
 
 <script>
-import ColorPicker from "../Colorpicker.vue";
+import TfaColorPicker from "../TfaColorPicker.vue";
 import { db } from "/db";
 
 export default {
-    name: "AddLabel",
-    components: { 
-        ColorPicker,
+    name: "TfaAddLabel",
+    components: {
+        TfaColorPicker,
     },
     props: {
         labelToEdit: Object,

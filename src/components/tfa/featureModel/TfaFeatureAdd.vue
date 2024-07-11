@@ -44,10 +44,10 @@
 </template>
 
 <script>
-import features from "../../util/model/ModelFunctions";
+import features from "../../../util/model/ModelFunctions";
 
 export default {
-    name: "AddFeature",
+    name: "TfaFeatureAdd",
     data() {
         return {
             counter: 0,
@@ -102,7 +102,7 @@ export default {
         axes: function() {
             if (this.axes != undefined && this.axes.length != 0) {
                 const temp = {
-                    name: this.axes[0].name, 
+                    name: this.axes[0].name,
                     id: this.axes[0].id
                 }
                 this.selectedAxis = temp;
@@ -113,7 +113,7 @@ export default {
 </script>
 
 <style scoped>
-input { 
-    text-align: center; 
+input {
+    text-align: center;
 }
 </style>

@@ -20,7 +20,7 @@
 <script>
 
 export default {
-    name: "Axis",
+    name: "TfaAxis",
     props: {
         axis: Object,
         isSelected: Boolean,

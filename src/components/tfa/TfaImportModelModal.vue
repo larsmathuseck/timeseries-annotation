@@ -11,8 +11,8 @@
                     <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <ModelConfiguration v-show="!showFeatureConfiguration" :toggleConfigDownload="toggleModelConfigDownload" @setInvalidFeedback="setInvalidFeedback" @closeModal="closeModal"/>
-                    <FeatureConfiguration v-show="showFeatureConfiguration" :toggleConfigDownload="toggleFeatureModelConfigDownload" @setInvalidFeedback="setInvalidFeedback" @closeModal="closeModal"/>
+                    <TfaModelConfiguration v-show="!showFeatureConfiguration" :toggleConfigDownload="toggleModelConfigDownload" @setInvalidFeedback="setInvalidFeedback" @closeModal="closeModal"/>
+                    <TfaFeatureConfiguration v-show="showFeatureConfiguration" :toggleConfigDownload="toggleFeatureModelConfigDownload" @setInvalidFeedback="setInvalidFeedback" @closeModal="closeModal"/>
                     <div class="row justify-content-center" v-show="showInvalidFeedback.length > 0">
                         <div class="col-12">
                             <div class="alert alert-danger p-1 m-3" role="alert">
@@ -32,14 +32,14 @@
 
 <script>
 import { Modal } from 'bootstrap';
-import ModelConfiguration from "./model/ModelConfiguration.vue";
-import FeatureConfiguration from "./featureModel/FeatureConfiguration.vue";
+import TfaModelConfiguration from "./model/TfaModelConfiguration.vue";
+import TfaFeatureConfiguration from "./featureModel/TfaFeatureConfiguration.vue";
 
 export default {
-    name: "ImportModelModal",
+    name: "TfaImportModelModal",
     components: {
-        ModelConfiguration,
-        FeatureConfiguration,
+        TfaModelConfiguration,
+        TfaFeatureConfiguration,
     },
     data() {
         return {

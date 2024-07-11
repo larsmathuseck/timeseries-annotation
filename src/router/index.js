@@ -1,11 +1,11 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import Home from '../views/Home.vue';
+import TfaHome from '../views/TfaHome.vue';
 
 const routes = [
     {
         path: '/',
         name: 'Home',
-        component: Home
+        component: TfaHome
     },
 ];
 

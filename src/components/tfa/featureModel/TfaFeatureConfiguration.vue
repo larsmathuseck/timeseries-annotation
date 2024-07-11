@@ -49,7 +49,7 @@
             </div>
             <div class="row">
                 <div class="col-12 col-lg-6">
-                    <AddFeature @addFeature="addFeature" @setInvalidFeedback="setInvalidFeedback"/>
+                    <TfaFeatureAdd @addFeature="addFeature" @setInvalidFeedback="setInvalidFeedback"/>
                     <div class="row mb-3 justify-content-center">
                         <div class="col-2"></div>
                         <label for="samplingRateInput" class="col-4 col-form-label">Sampling Rate</label>
@@ -79,7 +79,7 @@
                     <div class="row mb-3 justify-content-center">
                         <draggable :disbaled="false " :list="features" item-key="id" class="list-group p-0" ghost-class="ghost" >
                             <template #item="{ element  }">
-                                <div class="list-group-item"> 
+                                <div class="list-group-item">
                                     {{ element.axis.name + "-" + element.feature.name + "-" + (element.slidingWindow*this.samplingRate)}}
                                     <button type="button" class="btn btn-default btn-circle me-1" @click="deleteFeature(element)">
                                         <i class="fa-solid fa-trash"></i>
@@ -89,7 +89,7 @@
                         </draggable>
                     </div>
                 </div>
-            </div> 
+            </div>
             <div class="row justify-content-center my-3">
                 <label for="annotationFileNameInput" class="col-5 col-lg-3 col-form-label">Annotation Filename</label>
                 <div class="col-5 col-lg-3">
@@ -109,21 +109,21 @@
 </template>
 
 <script>
-import features from "../../util/model/ModelFunctions";
-import { createFeatureInstances } from "../../util/model/ModelInstances";
-import { createLabelsForAnnotation, createNewAnnotationFile, selectAnnotationFile } from "../../util/DatabankManager";
-import { checkImportedFiles } from "../../util/model/ImportModelManager";
-import { download } from "../../util/InputOutput.js";
+import features from "../../../util/model/ModelFunctions.js";
+import { createFeatureInstances } from "../../../util/model/ModelInstances.js";
+import { createLabelsForAnnotation, createNewAnnotationFile, selectAnnotationFile } from "../../../util/DatabankManager.js";
+import { checkImportedFiles } from "../../../util/model/ImportModelManager.js";
+import { download } from "../../../util/InputOutput.js";
 import * as tf from '@tensorflow/tfjs';
 import draggable from "vuedraggable";
-import AddFeature from "./AddFeature.vue";
+import TfaFeatureAdd from "./TfaFeatureAdd.vue";
 import { db } from "/db";
 
 export default {
-    name: "FeatureConfiguration",
+    name: "TfaFeatureConfiguration",
     components: {
         draggable,
-        AddFeature,
+        TfaFeatureAdd,
     },
     data() {
         this.model = null;
@@ -176,7 +176,7 @@ export default {
             this.featureConfigName = config.name;
             const reader = new FileReader();
             reader.readAsText(config);
-            reader.onload = async () => { 
+            reader.onload = async () => {
                 const json = JSON.parse(reader.result);
                 this.samplingRate = json.samplingRate;
                 const features = json.features;
@@ -255,7 +255,7 @@ export default {
                 // make prediction
                 const tensor = tf.tensor(instances);
                 const a = this.model.predict(tensor);
-                predictedValues.push({data: a.arraySync()});               
+                predictedValues.push({data: a.arraySync()});
             } catch (error) {
                 this.loading = false;
                 this.setInvalidFeedback(error.message);
@@ -344,8 +344,8 @@ export default {
 </script>
 
 <style scoped>
-input { 
-    text-align: center; 
+input {
+    text-align: center;
 }
 
 .list-group-item {

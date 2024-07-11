@@ -9,7 +9,7 @@
 <script>
 
 export default {
-    name: "Colorpicker",
+    name: "TfaColorPicker",
     props: {
         colorForAxis: Boolean,
     },
@@ -43,7 +43,7 @@ export default {
     transition: all .2s ease-in-out;
 }
 
-.dot:hover { 
+.dot:hover {
     transform: scale(1.25);
 }
 

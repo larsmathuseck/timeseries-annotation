@@ -23,7 +23,7 @@
 import { db } from "/db";
 
 export default {
-    name: "Label",
+    name: "TfaLabel",
     props: {
         label: Object,
     },

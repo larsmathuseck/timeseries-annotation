@@ -5,23 +5,23 @@
         </label>
         <div id="scroll-container-annotations">
             <div class="row axis-annotation-container ps-0" v-for="(annotation, index) in annotations" :key="annotation.id">
-                <Annotation :annotation="annotation" :index="index+1"/>
+                <TfaAnnotation :annotation="annotation" :index="index+1"/>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import Annotation from "../components/annotation/Annotation.vue";
+import TfaAnnotation from "../components/tfa/annotation/TfaAnnotation.vue";
 import { DateTime } from "luxon";
 import { liveQuery } from "dexie";
 import { db } from "/db";
 import { useObservable } from "@vueuse/rxjs";
 
 export default {
-    name: "RightSidebar",
+    name: "TfaRightSidebar",
     components: {
-        Annotation,
+        TfaAnnotation,
     },
     setup() {
         const annoData = useObservable(liveQuery(async () => {

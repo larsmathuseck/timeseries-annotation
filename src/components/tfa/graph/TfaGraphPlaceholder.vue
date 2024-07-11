@@ -23,11 +23,11 @@
 </template>
 
 <script>
-import { readDataFiles } from "../../util/InputOutput.js";
-import { loadFolder } from "../../util/InputOutput.js";
+import { readDataFiles } from "../../../util/InputOutput.js";
+import { loadFolder } from "../../../util/InputOutput.js";
 
 export default {
-    name: "ImportGraph",
+    name: "TfaImportGraph",
     methods: {
         chooseFolder() {
             document.getElementById("folderUpload").click();

@@ -2,7 +2,7 @@
     <div class="row">
         <label class="description-text" >Data Files</label>
         <div class="input-group">
-            <FileSelect type="data" :data="data" :selected="lastSelectedData" />
+            <TfaFileSelect type="data" :data="data" :selected="lastSelectedData" />
         </div>
     </div>
     <div class="row">
@@ -14,14 +14,14 @@
         </span>
         <div id="scroll-container-axes">
             <div class="row axis-annotation-container" v-for="axis in this.axes" :key="axis.id" >
-                <Axis :axis="axis" @editAxis="editAxis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
+                <TfaAxis :axis="axis" @editAxis="editAxis" :isSelected="(selectedAxes.indexOf(axis.id) > -1)" />
             </div>
         </div>
     </div>
     <div class="row">
         <label class="description-text" >Annotation Files</label>
         <div class="input-group">
-            <FileSelect type="annotation" :data="annotationFiles" :selected="lastSelectedAnnotation" @showAnnotationModal="showAnnotationModal" />
+            <TfaFileSelect type="annotation" :data="annotationFiles" :selected="lastSelectedAnnotation" @showAnnotationModal="showAnnotationModal" />
         </div>
     </div>
     <div class="row">
@@ -44,35 +44,35 @@
         </div>
         <div id="scroll-container-labels">
             <div class="row axis-annotation-container" v-for="label in this.labels" :key="label.id" @click="labelOnClick(label)" >
-                <Label :label="label" @editLabel="editLabel" />
+                <TfaLabel :label="label" @editLabel="editLabel" />
             </div>
         </div>
     </div>
-    <AnnotationModal :toggleModalVisibility="toggleAnnotationModalVisibility" />
-    <LabelModal :addLabelKey="addLabelKey" :toggleModalVisibility="toggleLabelModalVisibility" :labelToEdit="labelToEdit" />
-    <AxesModal :toggleModalVisibility="toggleAxesModalVisibility" :title="axisModalTitle" :axisToEdit="axisToEdit" @reloadGraph='this.$emit("reloadGraph")'/>
+    <TfaAnnotationModal :toggleModalVisibility="toggleAnnotationModalVisibility" />
+    <TfaLabelModal :addLabelKey="addLabelKey" :toggleModalVisibility="toggleLabelModalVisibility" :labelToEdit="labelToEdit" />
+    <TfaAxesModal :toggleModalVisibility="toggleAxesModalVisibility" :title="axisModalTitle" :axisToEdit="axisToEdit" @reloadGraph='this.$emit("reloadGraph")'/>
 </template>
 
 <script>
-import Axis from "../components/axis/Axis.vue";
-import Label from "../components/label/Label.vue";
-import AnnotationModal from "../components/annotation/AnnotationModal.vue";
-import LabelModal from "../components/label/LabelModal.vue";
-import AxesModal from "../components/axis/AxesModal.vue";
-import FileSelect from "../components/FileSelect.vue";
+import TfaAxis from "../components/tfa/axis/TfaAxis.vue";
+import TfaLabel from "../components/tfa/label/TfaLabel.vue";
+import TfaAnnotationModal from "../components/tfa/annotation/TfaAnnotationModal.vue";
+import TfaLabelModal from "../components/tfa/label/TfaLabelModal.vue";
+import TfaAxesModal from "../components/tfa/axis/TfaAxisModal.vue";
+import TfaFileSelect from "../components/tfa/TfaFileSelect.vue";
 import { liveQuery } from "dexie";
 import { db } from "/db";
 import { useObservable } from "@vueuse/rxjs";
 
 export default {
-    name: "LeftSidebar",
+    name: "TfaLeftSidebar",
     components: {
-        Axis,
-        Label,
-        AnnotationModal,
-        LabelModal,
-        FileSelect,
-        AxesModal,
+        TfaAxis,
+        TfaLabel,
+        TfaAnnotationModal,
+        TfaLabelModal,
+        TfaFileSelect,
+        TfaAxesModal,
     },
     setup() {
         const currAnn = useObservable(liveQuery(() => db.lastSelected.where('id').equals(1).first()));
@@ -219,7 +219,7 @@ export default {
     scrollbar-width: none;
     max-height: 25vh;
 }
-#scroll-container-labels::-webkit-scrollbar { 
+#scroll-container-labels::-webkit-scrollbar {
     width: 0;
     height: 0;
 }

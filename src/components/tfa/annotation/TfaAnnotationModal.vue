@@ -65,10 +65,10 @@
 <script>
 import { Modal } from 'bootstrap';
 import { db } from "/db";
-import { addAnnotationData } from "../../util/DatabankManager";
+import { addAnnotationData } from "../../../util/DatabankManager";
 
 export default {
-    name: "AnnotationModal",
+    name: "TfaAnnotationModal",
     props: {
         toggleModalVisibility: Boolean,
     },
@@ -100,7 +100,7 @@ export default {
                             addAnnotationData(reader.result, file.name);
                             annotationFileImported = true;
                         }
-                        if (!annotationFileImported) { // check if file is correct if not show error 
+                        if (!annotationFileImported) { // check if file is correct if not show error
                             this.error = "The chosen file has to contain \"annotation\" or \"labels\" in its name!";
                         } else {
                             this.error = "";
@@ -126,7 +126,7 @@ export default {
     },
     watch: {
         toggleModalVisibility: function() {
-            this.fileName = ""; 
+            this.fileName = "";
             this.error = "";
             this.showInvalidFeedback = false;
             this.modal.show();

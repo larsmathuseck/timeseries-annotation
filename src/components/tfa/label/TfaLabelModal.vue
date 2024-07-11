@@ -7,7 +7,7 @@
                     <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-0">
-                    <AddLabel :key="addLabelKey" :labelToEdit="labelToEdit" @labelCreated="onLabelCreated" @labelEdited="labelEdited" @closeModal="closeModal" />
+                    <TfaLabelAdd :key="addLabelKey" :labelToEdit="labelToEdit" @labelCreated="onLabelCreated" @labelEdited="labelEdited" @closeModal="closeModal" />
                 </div>
             </div>
         </div>
@@ -15,14 +15,14 @@
 </template>
 
 <script>
-import AddLabel from "./AddLabel.vue";
+import TfaLabelAdd from "./TfaLabelAdd.vue";
 import { Modal } from 'bootstrap';
 import { db } from "/db";
 
 export default {
-    name: "LabelModal",
+    name: "TfaLabelModal",
     components: {
-        AddLabel,
+        TfaLabelAdd,
     },
     props: {
         toggleModalVisibility: Boolean,

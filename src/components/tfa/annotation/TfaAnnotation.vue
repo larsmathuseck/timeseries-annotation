@@ -17,7 +17,7 @@
 import { db } from "/db";
 
 export default {
-    name: "Annotation",
+    name: "TfaAnnotation",
     props: {
         annotation: Object,
         index: Number,

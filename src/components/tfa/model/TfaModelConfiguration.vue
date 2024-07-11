@@ -131,13 +131,13 @@
 <script>
 import * as tf from '@tensorflow/tfjs';
 import { db } from "/db";
-import { createInstances } from "../../util/model/ModelInstances";
-import { checkImportedFiles } from "../../util/model/ImportModelManager";
-import { createNewAnnotationFile, createLabelsForAnnotation, selectAnnotationFile } from "../../util/DatabankManager";
-import { download } from "../../util/InputOutput.js";
+import { createInstances } from "../../../util/model/ModelInstances.js";
+import { checkImportedFiles } from "../../../util/model/ImportModelManager.js";
+import { createNewAnnotationFile, createLabelsForAnnotation, selectAnnotationFile } from "../../../util/DatabankManager.js";
+import { download } from "../../../util/InputOutput.js";
 
 export default {
-    name: "ModelConfiguration",
+    name: "TfaModelConfiguration",
     data() {
         this.model = null;
         return {
@@ -311,7 +311,7 @@ export default {
                     const tensor = tf.tensor(instance[1]);
                     const a = model.predict(tensor);
                     predictedValues.push({data: a.arraySync(), timestamps: instance[0]});
-                });            
+                });
             } catch (error) {
                 this.loading = false;
                 console.error(error.message);
@@ -395,7 +395,7 @@ export default {
                     }
                 }
                 // set result, null when likelyhood for all the predictions for the position the same
-                let result = Object.keys(indices).reduce(function(a, b) { 
+                let result = Object.keys(indices).reduce(function(a, b) {
                     if(indices[a] > indices[b]) {
                         return a;
                     }
@@ -403,7 +403,7 @@ export default {
                         return b;
                     }
                     else{
-                        return null; 
+                        return null;
                     }
                 });
                 // add areas to db
@@ -453,8 +453,8 @@ export default {
 </script>
 
 <style scoped>
-input { 
-    text-align: center; 
+input {
+    text-align: center;
 }
 
 .text-left {

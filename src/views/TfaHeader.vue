@@ -23,7 +23,7 @@
                         <i class="fa-solid fa-wrench"></i>
                         Model
                     </button>
-                    <ImportModelModal :toggleModelModalVisibility="toggleModelModalVisibility" />
+                    <TfaImportModelModal :toggleModelModalVisibility="toggleModelModalVisibility" />
                 </li>
             </ul>
         </div>
@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import ImportModelModal from "../components/ImportModelModal.vue";
+import TfaImportModelModal from "../components/tfa/TfaImportModelModal.vue";
 import { loadFolder } from "../util/InputOutput.js";
 import { download } from "../util/InputOutput.js";
 import { db } from "/db";
@@ -40,9 +40,9 @@ import { stringify } from "@vanillaes/csv";
 import { Popover } from "bootstrap";
 
 export default {
-    name: "Header",
+    name: "TfaHeader",
     components: {
-        ImportModelModal,
+        TfaImportModelModal,
     },
     props: {
         title: String,

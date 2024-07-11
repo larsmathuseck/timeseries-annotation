@@ -17,11 +17,11 @@
 
 <script>
 import { db } from "/db";
-import { deleteAnnotationFile } from "../util/DatabankManager";
-import { readDataFiles } from "../util/InputOutput.js";
+import { deleteAnnotationFile } from "../../util/DatabankManager.js";
+import { readDataFiles } from "../../util/InputOutput.js";
 
 export default {
-    name: "FileSelect",
+    name: "TfaFileSelect",
     props: {
         type: String,
         data: Object,

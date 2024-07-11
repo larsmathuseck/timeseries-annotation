@@ -41,7 +41,7 @@
                         </button>
                     </div>
                     <div class="col-12">
-                        <ColorPicker @labelColorPicked="colorPicked" :colorForAxis="false" v-show="showColorPicker"/> 
+                        <TfaColorPicker @labelColorPicked="colorPicked" :colorForAxis="false" v-show="showColorPicker"/>
                     </div>
                 </div>
             </div>
@@ -68,13 +68,13 @@
 </template>
 
 <script>
-import ColorPicker from "../Colorpicker.vue";
-import features from "../../util/model/ModelFunctions";
+import TfaColorPicker from "../TfaColorPicker.vue";
+import features from "../../../util/model/ModelFunctions";
 
 export default {
-    name: "AddAxis",
-    components: { 
-        ColorPicker,
+    name: "TfaAxisAdd",
+    components: {
+        TfaColorPicker,
     },
     data() {
         return {

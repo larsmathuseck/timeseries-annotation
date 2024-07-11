@@ -1,42 +1,42 @@
 <template>
     <div class="container-fluid d-flex h-100 flex-column">
-        <Header title="TF Annotator" />
+        <TfaHeader title="TF Annotator" />
         <div class="row h-100 mt-2">
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
-                <LeftSidebar v-if="showSidebars" @reloadGraph="reloadGraph"/>
+                <TfaLeftSidebar v-if="showSidebars" @reloadGraph="reloadGraph"/>
             </div>
             <div class="col col-lg-8 col-md-8 col-sm-12 col-12">
                 <div class="graphDiv">
-                    <Graph class="chart" ref="graph" v-if="showGraph" @loading="loadingChange"/>
-                    <GraphPlaceholder v-if="!showGraph" />
+                    <TfaGraph class="chart" ref="graph" v-if="showGraph" @loading="loadingChange"/>
+                    <TfaGraphPlaceholder v-if="!showGraph" />
                     <div v-if="loading&&showGraph" id="spinner" class="spinner-border spinner-border-lg"></div>
                 </div>
             </div>
             <div class="col col-lg-2 col-md-2 col-sm-12 col-12">
-                <RightSidebar v-if="showSidebars"/>
+                <TfaRightSidebar v-if="showSidebars"/>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import Graph from "../components/graph/Graph.vue"
-import Header from "./Header.vue"
-import LeftSidebar from "./LeftSidebar.vue"
-import RightSidebar from "./RightSidebar.vue"
-import GraphPlaceholder from "../components/graph/GraphPlaceholder.vue";
+import TfaGraph from "../components/tfa/graph/TfaGraph.vue"
+import TfaHeader from "./TfaHeader.vue"
+import TfaLeftSidebar from "./TfaLeftSidebar.vue"
+import TfaRightSidebar from "./TfaRightSidebar.vue"
+import TfaGraphPlaceholder from "../components/tfa/graph/TfaGraphPlaceholder.vue";
 import { liveQuery } from "dexie";
 import { db } from "/db";
 import { useObservable } from "@vueuse/rxjs";
 
-export default {  
-    name: "Home",
+export default {
+    name: "TfaHome",
     components: {
-        Graph,
-        Header,
-        LeftSidebar,
-        RightSidebar,
-        GraphPlaceholder,
+        TfaGraph,
+        TfaHeader,
+        TfaLeftSidebar,
+        TfaRightSidebar,
+        TfaGraphPlaceholder,
     },
     setup() {
         const annotationFiles = useObservable(liveQuery(() => db.annotations.toArray()));

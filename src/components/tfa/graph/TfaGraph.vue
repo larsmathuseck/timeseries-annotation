@@ -23,7 +23,7 @@ import VChart, { THEME_KEY } from "vue-echarts";
 import { liveQuery } from "dexie";
 import { db } from "/db";
 import { useObservable } from "@vueuse/rxjs";
-import { getOption } from "../../util/GraphOptions.js";
+import { getOption } from "../../../util/GraphOptions.js";
 
 use([
     CanvasRenderer,
@@ -40,7 +40,7 @@ use([
 ]);
 
 export default {
-    name: "Graph",
+    name: "TfaGraph",
     components: {
         VChart,
     },

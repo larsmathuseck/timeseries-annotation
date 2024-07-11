@@ -7,7 +7,7 @@
                     <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <AddAxis :axisToEdit="axisToEdit" @closeModal="closeModal" @reloadGraph='this.$emit("reloadGraph")'></AddAxis>
+                    <TfaAxisAdd :axisToEdit="axisToEdit" @closeModal="closeModal" @reloadGraph='this.$emit("reloadGraph")'></TfaAxisAdd>
                 </div>
             </div>
         </div>
@@ -16,12 +16,12 @@
 
 <script>
 import { Modal } from 'bootstrap'
-import AddAxis from "./AddAxis.vue"
+import TfaAxisAdd from "./TfaAxisAdd.vue"
 
 export default {
-    name: "AxesModal",
+    name: "TfaAxisModal",
     components: {
-        AddAxis,
+        TfaAxisAdd,
     },
     props: {
         toggleModalVisibility: Boolean,
