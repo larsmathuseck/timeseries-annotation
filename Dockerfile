@@ -1,4 +1,4 @@
-FROM node:20.15.0-alpine AS BUILD_IMAGE
+FROM node:20.15.0-alpine AS build_image
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -27,8 +27,8 @@ FROM node:20.15.0-alpine
 WORKDIR /usr/src/app
 
 # copy from build image
-COPY --from=BUILD_IMAGE /usr/src/app/dist ./dist
-COPY --from=BUILD_IMAGE /usr/src/app/node_modules ./node_modules
+COPY --from=build_image /usr/src/app/dist ./dist
+COPY --from=build_image /usr/src/app/node_modules ./node_modules
 
 EXPOSE 3000
 CMD ["npx", "serve", "dist"]
