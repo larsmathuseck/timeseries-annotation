@@ -1,4 +1,4 @@
-FROM node:16-alpine AS BUILD_IMAGE
+FROM node:20.15.0-alpine AS BUILD_IMAGE
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -18,7 +18,7 @@ RUN npm run build
 # remove development dependencies
 RUN npm prune --production
 
-FROM node:16-alpine
+FROM node:20.15.0-alpine
 
 WORKDIR /usr/src/app
 
