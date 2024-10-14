@@ -1,6 +1,6 @@
 <template>
     <div ref="chartDiv" @mouseup="chartClicked" @mousedown="dragDetection">
-        <v-chart
+        <VChart
             ref="chartsRef"
             class="chart"
             :init-options="init"
@@ -13,22 +13,6 @@
 <script setup lang="ts">
 import { useObservable, from } from '@vueuse/rxjs'
 import { liveQuery } from 'dexie'
-import { use } from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
-import { LineChart } from 'echarts/charts'
-import {
-    TitleComponent,
-    TooltipComponent,
-    LegendComponent,
-    ToolboxComponent,
-    GridComponent,
-    DataZoomComponent,
-    MarkLineComponent,
-    MarkPointComponent,
-    MarkAreaComponent,
-} from 'echarts/components'
-import type { ECBasicOption } from 'echarts/types/dist/shared'
-import VChart, { THEME_KEY } from 'vue-echarts'
 
 import { db } from '../../../db'
 import { getOption } from '../../../util/graph.js'
@@ -40,19 +24,6 @@ const emit = defineEmits<{
 provide(THEME_KEY, 'light!')
 
 const store = useTfAnnotatorStore()
-use([
-    CanvasRenderer,
-    LineChart,
-    TitleComponent,
-    TooltipComponent,
-    LegendComponent,
-    ToolboxComponent,
-    DataZoomComponent,
-    GridComponent,
-    MarkLineComponent,
-    MarkPointComponent,
-    MarkAreaComponent,
-])
 
 // refs
 const chartsRef = ref()
@@ -123,7 +94,7 @@ const tempDataZoomEnd = ref(100)
 const sizeOfGraph = ref(0)
 const clickX = ref(0)
 const clickY = ref(0)
-const option = ref<ECBasicOption>()
+const option = ref<ECOption>()
 const init = ref({ useDirtyRect: true })
 
 // // computations
