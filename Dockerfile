@@ -1,7 +1,7 @@
 #############
 # Create base image.
 
-FROM node:20.15.0-alpine AS base-image
+FROM node:22.11.0-alpine AS base-image
 
 # The `CI` environment variable must be set for pnpm to run in headless mode
 ENV CI=true
@@ -26,9 +26,9 @@ RUN pnpm install --offline
 
 
 ########################
-# Build for static deployment.
+# Build for node deployment.
 
-FROM prepare AS build-static
+FROM prepare AS build
 
 ENV NODE_ENV=production
 RUN pnpm run build \
@@ -48,16 +48,16 @@ RUN pnpm run lint
 
 FROM base-image AS collect
 
-COPY --from=build-static /usr/src/app/dist ./dist
-COPY --from=build-static /usr/src/app/node_modules ./node_modules
-COPY --from=build-static /usr/src/app/package.json ./package.json
+COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/node_modules ./node_modules
+COPY --from=build /usr/src/app/package.json ./package.json
 COPY --from=lint /usr/src/app/package.json /tmp/package.json
 
 
 #######################
 # Serve for production.
 
-FROM node:20.15.0-alpine AS production
+FROM node:22.11.0-alpine AS production
 
 # The `CI` environment variable must be set for pnpm to run in headless mode
 ENV CI=true
