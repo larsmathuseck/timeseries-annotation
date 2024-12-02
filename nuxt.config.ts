@@ -5,20 +5,27 @@ const currentDir = dirname(fileURLToPath(import.meta.url))
 
 export default defineNuxtConfig({
     compatibilityDate: '2024-04-03',
-    css: [
-        '@fortawesome/fontawesome-free/css/all.css',
-        'bootstrap/dist/css/bootstrap.min.css',
-        join(currentDir, './css/main.css'),
+    modules: [
+        '@nuxt/eslint',
+        '@nuxt/image',
+        '@nuxtjs/color-mode',
+        '@nuxtjs/tailwindcss',
+        '@pinia/nuxt',
+        'nuxt-echarts',
+        'shadcn-nuxt',
     ],
-    devtools: { enabled: true },
-    modules: ['@pinia/nuxt', 'nuxt-echarts'],
     vite: {
         optimizeDeps: {
+            exclude: ['vee-validate'],
             include: [
                 '@tensorflow/tfjs-core/dist/types',
                 '@tensorflow/tfjs',
                 '@vanillaes/csv',
+                '@vee-validate/zod',
+                '@vueuse/core',
                 '@vueuse/rxjs',
+                'class-variance-authority',
+                'clsx',
                 'danfojs/dist/danfojs-base',
                 'dexie',
                 'echarts/charts',
@@ -26,13 +33,20 @@ export default defineNuxtConfig({
                 'echarts/core',
                 'echarts/features',
                 'echarts/renderers',
+                'lucide-vue-next',
                 'luxon',
+                'radix-vue',
+                'tailwind-merge',
                 'vuedraggable',
+                'zod',
             ],
         },
     },
 
     // modules
+    colorMode: {
+        classSuffix: '',
+    },
     echarts: {
         charts: ['LineChart'],
         components: [
@@ -47,5 +61,9 @@ export default defineNuxtConfig({
             'MarkAreaComponent',
         ],
         // ssr: true,
+    },
+    shadcn: {
+        prefix: '',
+        componentDir: './components/ui',
     },
 })
