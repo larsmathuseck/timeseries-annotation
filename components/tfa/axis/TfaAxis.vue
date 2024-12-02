@@ -1,67 +1,48 @@
 <template>
-    <div>
-        <div
-            class="col-auto axis-annotation-col me-auto my-auto"
-            :style="{ background: axis.color }"
-        >
-            <label class="axis-annotation-label">
+    <div class="flex justify-between items-center">
+        <div class="flex gap-2 items-center">
+            <span
+                class="rounded-lg px-2"
+                :style="{ backgroundColor: axis.color }"
+            >
                 {{ axis.name }}
-            </label>
+            </span>
+            <Button size="icon" type="button" variant="ghost" @click="editAxis">
+                <IHeroiconsPencil />
+            </Button>
         </div>
-        <div class="col-auto m-0 p-0">
-            <button class="m-0 py-0 pe-1">
-                <i
-                    class="fa-solid fa-pen-to-square axis-annotation-icon"
-                    @click="editAxis"
-                ></i>
-            </button>
-            <div class="col-auto my-auto">
-                <label class="switch">
-                    <input
-                        v-show="false"
-                        v-model="selected"
-                        type="checkbox"
-                        @change="toggleAxis"
-                    />
-                    <span class="slider round"></span>
-                </label>
-            </div>
-        </div>
+        <Switch :checked="isSelectedLocal" @update:checked="toggleAxis" />
     </div>
 </template>
 
 <script setup lang="ts">
 interface Props {
-    axis: {
-        color: string
-        id: number
-        name: string
-    }
-    isSelected: boolean
+    axis: Axis
+    isSelected?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {})
 
 const emit = defineEmits<{
-    editAxis: [axis: {}]
+    editAxis: [axis: Axis]
 }>()
 
-const store = useTfAnnotatorStore()
+const store = useTfaStore()
 
 // data
-const selected = ref(props.isSelected)
+const isSelectedLocal = ref(props.isSelected)
 
 // methods
-const toggleAxis = () => {
-    if (selected.value) {
-        store.addSelectedAxis(props.axis)
-    } else {
-        if (Object.entries(store.axesSelected).length <= 1) {
-            selected.value = true
-            alert('At least 1 axis must be selected!')
-            return
-        }
-        store.removeSelectedAxis(props.axis)
+const toggleAxis = (isChecked: boolean) => {
+    if (!store.dataFileSelectedId) return
+
+    if (Object.entries(store.dataFileSelectedAxes).length <= 1) {
+        isSelectedLocal.value = true
+        alert('At least 1 axis must be selected!')
+        return
     }
+
+    store.dataFiles[store.dataFileSelectedId].axes[props.axis.id].isSelected =
+        isChecked
 }
 const editAxis = (event: Event) => {
     event.stopPropagation()
@@ -71,22 +52,8 @@ const editAxis = (event: Event) => {
 // lifecycle
 watch(
     () => props.isSelected,
-    (value) => {
-        selected.value = value
+    (newValue) => {
+        isSelectedLocal.value = newValue
     },
 )
 </script>
-
-<style scoped>
-.col-auto {
-    display: inline-flex;
-}
-button {
-    background-color: rgb(255, 255, 255, 0);
-    border: 0;
-}
-
-i {
-    margin-bottom: 0px;
-}
-</style>

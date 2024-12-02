@@ -1,4 +1,9 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <template>
-    <TfaViewHome />
+    <TfaView />
 </template>
+
+<script setup lang="ts">
+// const store = useTfaStore()
+
+// if (!Object.keys(store.data).length) await navigateTo('/setup')
+</script>

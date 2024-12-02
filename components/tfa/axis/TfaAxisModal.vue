@@ -1,80 +1,68 @@
 <template>
-    <div
-        ref="axesModalRef"
-        class="modal fade"
-        tabindex="-1"
-        aria-hidden="false"
-    >
-        <div class="modal-dialog modal-dialog-centered modal-m">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{ title }}</h5>
-                    <button
-                        type="button"
-                        class="btn-close"
-                        aria-label="Close"
-                        @click="closeModal"
-                    ></button>
+    <Dialog v-model="isOpen">
+        <DialogTrigger as-child>
+            <Button size="icon" type="button" variant="ghost">
+                <!-- @click="toggleModal('axes')" -->
+                <IHeroiconsPlus />
+            </Button>
+        </DialogTrigger>
+        <DialogContent>
+            <DialogHeader>
+                <div class="flex gap-4 items-center">
+                    <DialogTitle>{{ title }}</DialogTitle>
                 </div>
-                <div class="modal-body">
-                    <TfaAxisAdd
-                        :axis-to-edit="axisToEdit"
-                        @closeModal="closeModal"
-                        @reloadGraph="emit('reloadGraph')"
-                    ></TfaAxisAdd>
-                </div>
-            </div>
-        </div>
-    </div>
+                <DialogDescription>Add axis.</DialogDescription>
+            </DialogHeader>
+            <TfaAxisAdd
+                :axis-to-edit="axisToEdit"
+                @close-modal="closeModal"
+                @reload-graph="emitReloadGraph"
+            />
+        </DialogContent>
+    </Dialog>
 </template>
 
 <script setup lang="ts">
-import type { Feature } from '~/util/model/statistics'
+interface Axis {
+    color: string
+    feature: Feature
+    id: number
+    name: string
+    samplingRate?: number
+}
 
 interface Props {
-    axisToEdit: {
-        color: string
-        feature: Feature
-        id: number
-        name: string
-        samplingRate?: number
-    }
+    axisToEdit?: Axis
     title: string
     toggleModalVisibility: boolean
 }
-const props = withDefaults(defineProps<Props>(), {})
+const props = withDefaults(defineProps<Props>(), {
+    axisToEdit: undefined,
+})
 
 const emit = defineEmits<{
     reloadGraph: []
 }>()
 
-const { $bootstrap } = useNuxtApp()
-
-// refs
-const axesModalRef = ref()
-
-// data
-const modal = ref()
+const isOpen = ref(false)
 
 // methods
 const closeModal = () => {
-    modal.value?.hide()
+    isOpen.value = false
+}
+const emitReloadGraph = () => {
+    emit('reloadGraph')
 }
 
 // lifecycle
-onMounted(() => {
-    modal.value = new $bootstrap.Modal(axesModalRef.value)
-})
 watch(
     () => props.toggleModalVisibility,
-    () => {
-        modal.value?.show()
+    (newVal) => {
+        if (newVal) {
+            isOpen.value = true
+        } else {
+            closeModal()
+        }
     },
 )
 </script>
-
-<style scoped>
-.modal-body {
-    padding: 0px;
-}
-</style>

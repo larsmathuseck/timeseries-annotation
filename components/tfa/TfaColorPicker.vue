@@ -1,58 +1,20 @@
 <template>
-    <div class="row absolute">
-        <div class="col">
-            <span
-                v-for="color in store.colors"
-                :key="color"
-                class="dot"
-                :style="{ background: color }"
-                @click="colorPicked(color)"
-            />
-        </div>
+    <div>
+        <span
+            v-for="color in COLORS"
+            :key="color"
+            :style="{ backgroundColor: color }"
+            :aria-label="'Pick color ' + color"
+            role="button"
+            tabindex="0"
+            @click="emit('colorPicked', color)"
+            @keydown.enter="emit('colorPicked', color)"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
-interface Props {
-    colorForAxis: boolean
-}
-const props = withDefaults(defineProps<Props>(), {})
-
 const emit = defineEmits<{
-    axisColorPicked: [color: string]
-    labelColorPicked: [color: string]
+    colorPicked: [color: string]
 }>()
-
-const store = useTfAnnotatorStore()
-
-// methods
-const colorPicked = (color: string) => {
-    if (props.colorForAxis) {
-        emit('axisColorPicked', color)
-    } else {
-        emit('labelColorPicked', color)
-    }
-}
 </script>
-
-<style scoped>
-.dot {
-    height: 35px;
-    width: 35px;
-    background-color: #bbb;
-    border-radius: 50%;
-    display: inline-block;
-    margin: 3px;
-    transition: all 0.2s ease-in-out;
-}
-
-.dot:hover {
-    transform: scale(1.25);
-}
-
-.col {
-    background-color: #f5f5f5;
-    background-clip: content-box;
-    z-index: 10;
-}
-</style>

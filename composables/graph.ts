@@ -1,20 +1,23 @@
-import TfaGraph from '../components/tfa/graph/TfaGraph.vue'
+import type TfaGraph from '../components/tfa/TfaGraph.vue'
 
 export const useGraph = () => {
-    const store = useTfAnnotatorStore()
-    const graphRef = ref<typeof TfaGraph>()
-    const reload = () => {
+    const store = useTfaStore()
+    const { isDataFileAvailable } = storeToRefs(store)
+
+    const graphRef: Ref<typeof TfaGraph | null> = ref(null)
+    const reloadGraph = () => {
         graphRef.value?.updateGraph()
     }
-    const isLoading = ref(false)
-    const onLoadingStateChange = (loadingState: boolean) => {
-        isLoading.value = loadingState
+    const isGraphLoading = ref(false)
+    const onGraphLoadingStateChange = (loadingState: boolean) => {
+        isGraphLoading.value = loadingState
     }
 
     return {
-        isGraphLoading: isLoading,
-        isGraphVisible: store.isGraphVisible,
-        onGraphLoadingStateChange: onLoadingStateChange,
-        reloadGraph: reload,
+        isGraphLoading,
+        isGraphVisible: isDataFileAvailable,
+        onGraphLoadingStateChange,
+        reloadGraph,
+        graphRef,
     }
 }

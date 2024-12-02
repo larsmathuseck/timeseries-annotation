@@ -1,7 +1,6 @@
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-const currentDir = dirname(fileURLToPath(import.meta.url))
+import IconsResolver from 'unplugin-icons/resolver'
+import Icons from 'unplugin-icons/vite'
+import Components from 'unplugin-vue-components/vite'
 
 export default defineNuxtConfig({
     compatibilityDate: '2024-04-03',
@@ -14,10 +13,31 @@ export default defineNuxtConfig({
         'nuxt-echarts',
         'shadcn-nuxt',
     ],
+    nitro: {
+        database: {
+            default: {
+                connector: 'sqlite',
+                options: { name: ':memory:' },
+            },
+        },
+        experimental: {
+            database: true,
+        },
+    },
+    runtimeConfig: {
+        public: {
+            tfa: {
+                annotationColumnNames: 'annotation,annotations,label,labels',
+                dataHeaderTimestampName: 'timestamp',
+                hashAlgorithm: 'SHA-1',
+            },
+        },
+    },
     vite: {
         optimizeDeps: {
             exclude: ['vee-validate'],
             include: [
+                '@iconify/vue',
                 '@tensorflow/tfjs-core/dist/types',
                 '@tensorflow/tfjs',
                 '@vanillaes/csv',
@@ -27,6 +47,7 @@ export default defineNuxtConfig({
                 'class-variance-authority',
                 'clsx',
                 'danfojs/dist/danfojs-base',
+                'debounce',
                 'dexie',
                 'echarts/charts',
                 'echarts/components',
@@ -41,6 +62,18 @@ export default defineNuxtConfig({
                 'zod',
             ],
         },
+        plugins: [
+            Components({
+                dts: '.nuxt/components-icons.d.ts',
+                resolvers: [IconsResolver()],
+            }),
+            Icons({
+                scale: 1.5,
+            }),
+        ],
+    },
+    $development: {
+        devtools: { enabled: true },
     },
 
     // modules
@@ -61,6 +94,11 @@ export default defineNuxtConfig({
             'MarkAreaComponent',
         ],
         // ssr: true,
+    },
+    eslint: {
+        config: {
+            typescript: true,
+        },
     },
     shadcn: {
         prefix: '',

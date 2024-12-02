@@ -1,23 +1,24 @@
 import { useObservable, from } from '@vueuse/rxjs'
 import { liveQuery } from 'dexie'
 
-import { db } from '../db'
-
 export const useSidebar = () => {
-    const store = useTfAnnotatorStore()
+    const store = useTfaStore()
     const isSidebarVisible = ref(false)
     const annotationFiles = useObservable(
-        from(liveQuery(async () => await db.annotations.toArray())),
+        from(liveQuery(async () => await database.annotationFile.toArray())),
     )
     const updateShowSidebars = () => {
-        if (Object.keys(store.data).length || annotationFiles.value?.length) {
+        if (
+            Object.keys(store.dataFiles).length ||
+            annotationFiles.value?.length
+        ) {
             isSidebarVisible.value = true
         } else {
             isSidebarVisible.value = false
         }
     }
-    watch(annotationFiles, () => updateShowSidebars())
-    watch(store.data, () => updateShowSidebars(), { deep: true })
+    watch(annotationFiles, updateShowSidebars)
+    watch(store.dataFiles, updateShowSidebars, { deep: true })
 
     return {
         isSidebarVisible,
