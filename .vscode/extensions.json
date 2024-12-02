@@ -1,7 +1,10 @@
 {
-  "recommendations": [
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "vue.volar"
-  ]
+    "recommendations": [
+        "bradlc.vscode-tailwindcss",
+        "dbaeumer.vscode-eslint",
+        "editorconfig.editorconfig",
+        "esbenp.prettier-vscode",
+        "timonwong.shellcheck",
+        "vue.volar"
+    ]
 }
