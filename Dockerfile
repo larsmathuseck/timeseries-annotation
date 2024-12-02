@@ -6,7 +6,7 @@ FROM node:22.11.0-alpine AS base-image
 # The `CI` environment variable must be set for pnpm to run in headless mode
 ENV CI=true
 
-WORKDIR /usr/src/app
+WORKDIR /srv/app
 
 RUN corepack enable
 
@@ -26,13 +26,12 @@ RUN pnpm install --offline
 
 
 ########################
-# Build for node deployment.
+# Build for static deployment.
 
 FROM prepare AS build
 
 ENV NODE_ENV=production
-RUN pnpm run build \
-    && pnpm install --offline --prod
+RUN pnpm run build
 
 
 ########################
@@ -48,29 +47,44 @@ RUN pnpm run lint
 
 FROM base-image AS collect
 
-COPY --from=build /usr/src/app/dist ./dist
-COPY --from=build /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/package.json ./package.json
-COPY --from=lint /usr/src/app/package.json /tmp/package.json
+COPY --from=build /srv/app/.output/public ./.output/public
+# COPY --from=build /srv/app/dist ./dist
+# COPY --from=build /srv/app/node_modules ./node_modules
+# COPY --from=build /srv/app/package.json ./package.json
+COPY --from=lint /srv/app/package.json /tmp/package.json
 
 
 #######################
-# Serve for production.
+# Serve node for production.
 
-FROM node:22.11.0-alpine AS production
+FROM nginx:1.27.3-alpine AS production
 
-# The `CI` environment variable must be set for pnpm to run in headless mode
-ENV CI=true
-ENV NODE_ENV=production
+WORKDIR /usr/share/nginx/html
 
-WORKDIR /usr/src/app
+COPY --from=collect /srv/app/.output/public/ ./
 
-RUN corepack enable
+HEALTHCHECK CMD wget -O /dev/null http://localhost/ || exit 1
+EXPOSE 80
 
-COPY --from=collect /usr/src/app/dist ./dist
-COPY --from=collect /usr/src/app/node_modules ./node_modules
-COPY --from=collect /usr/src/app/package.json ./package.json
 
-HEALTHCHECK CMD wget -O /dev/null http://localhost:3000/ || exit 1
-EXPOSE 3000
-CMD ["pnpm", "exec", "serve", "dist"]
+
+# #######################
+# # Serve node for production.
+
+# FROM node:22.11.0-alpine AS production
+
+# # The `CI` environment variable must be set for pnpm to run in headless mode
+# ENV CI=true
+# ENV NODE_ENV=production
+
+# WORKDIR /srv/app
+
+# RUN corepack enable
+
+# COPY --from=collect /srv/app/dist ./dist
+# COPY --from=collect /srv/app/node_modules ./node_modules
+# COPY --from=collect /srv/app/package.json ./package.json
+
+# HEALTHCHECK CMD wget -O /dev/null http://localhost:3000/ || exit 1
+# EXPOSE 3000
+# CMD ["pnpm", "exec", "serve", "dist"]
