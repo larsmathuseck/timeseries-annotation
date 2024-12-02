@@ -1,1 +1,8 @@
-node_modules
+/.git
+/.data
+/.nuxt
+/.output
+/.env
+/.eslintcache
+/dist
+/node_modules
