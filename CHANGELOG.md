@@ -1,3 +1,9 @@
+## [1.0.2](https://github.com/larsmathuseck/timeseries-annotation/compare/1.0.1...1.0.2) (2024-12-27)
+
+### Bug Fixes
+
+* schedule release ([8a4f348](https://github.com/larsmathuseck/timeseries-annotation/commit/8a4f348a1d2df52e37f00a3c7a753928d9185cfa))
+
 ## [1.0.1](https://github.com/larsmathuseck/timeseries-annotation/compare/1.0.0...1.0.1) (2024-12-13)
 
 ### Bug Fixes
