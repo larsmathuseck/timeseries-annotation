@@ -40,14 +40,14 @@
                     :disabled="!modelFileName"
                     unit="second"
                     :value="slidingWindow"
-                    @input="(slidingWindow = $event)"
+                    @input="slidingWindow = $event"
                 />
                 <TfaModelConfigurationFormInput
                     label="Sampling Rate (Hz)"
                     :placeholder="8"
                     :disabled="!modelFileName"
                     :value="samplingRate"
-                    @input="(samplingRate = $event)"
+                    @input="samplingRate = $event"
                 />
                 <!-- unit="frequency-hertz" -->
                 <TfaModelConfigurationFormInput
@@ -56,7 +56,7 @@
                     :disabled="!modelFileName"
                     unit="second"
                     :value="windowShift"
-                    @input="(windowShift = $event)"
+                    @input="windowShift = $event"
                 />
                 <FormField
                     v-slot="{ componentField }"

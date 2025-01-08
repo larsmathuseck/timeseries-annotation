@@ -25,13 +25,13 @@
                     v-if="!showFeatureConfiguration"
                     :toggle-config-download="toggleModelConfigDownload"
                     @set-invalid-feedback="setInvalidFeedback"
-                    @close-modal="(isOpen = false)"
+                    @close-modal="isOpen = false"
                 />
                 <TfaModelFeatureConfiguration
                     v-if="showFeatureConfiguration"
                     :toggle-config-download="toggleModelFeatureConfigDownload"
                     @set-invalid-feedback="setInvalidFeedback"
-                    @close-modal="(isOpen = false)"
+                    @close-modal="isOpen = false"
                 />
                 <!-- <div
                     v-if="showInvalidFeedback"

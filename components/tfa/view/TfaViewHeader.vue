@@ -24,7 +24,7 @@
                             Quit
                         </MenubarItem>
                     </MenubarContent>
-                    <TfaAnnotationModal @close="(isDialogOpen = false)" />
+                    <TfaAnnotationModal @close="isDialogOpen = false" />
                 </Dialog>
             </MenubarMenu>
             <MenubarMenu>
