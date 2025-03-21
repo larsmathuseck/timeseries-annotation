@@ -1,7 +1,7 @@
 #############
 # Create base image.
 
-FROM node:22.11.0-alpine AS base-image
+FROM node:22.14.0-alpine AS base-image
 
 # The `CI` environment variable must be set for pnpm to run in headless mode
 ENV CI=true
@@ -16,7 +16,7 @@ RUN corepack enable
 
 FROM base-image AS prepare
 
-COPY ./pnpm-lock.yaml ./
+COPY ./pnpm-lock.yaml package.json ./
 
 RUN pnpm fetch
 
@@ -71,7 +71,7 @@ EXPOSE 80
 # #######################
 # # Serve node for production.
 
-# FROM node:22.11.0-alpine AS production
+# FROM node:22.14.0-alpine AS production
 
 # # The `CI` environment variable must be set for pnpm to run in headless mode
 # ENV CI=true
